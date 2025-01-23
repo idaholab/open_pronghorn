@@ -1,6 +1,44 @@
 Applications:
     open_pronghorn:
         app_types:
-            - OpenPronghornApp
+            - OpenPronghorn
         content_directory: ${ROOT_DIR}/doc/content
-        log_default: WARNING
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_default: ERROR
+        show_warning: false
+
+Documents:
+    software_quality_plan: sqa/inl_records.md#software_quality_plan
+    enterprise_architecture_entry: sqa/inl_records.md#enterprise_architecture_entry
+    safety_software_determination: sqa/inl_records.md#safety_software_determination
+    quality_level_determination: sqa/inl_records.md#quality_level_determination
+    configuration_management_plan: sqa/inl_records.md#configuration_management_plan
+    asset_management_plan: sqa/inl_records.md#asset_management_plan
+    verification_validation_plan: sqa/inl_records.md#verification_and_validation_plan
+    software_requirements_specification: sqa/open_pronghorn_srs.md
+    software_design_description: sqa/open_pronghorn_sdd.md
+    software_test_plan: sqa/open_pronghorn_stp.md
+    requirements_traceability_matrix: sqa/open_pronghorn_rtm.md
+    verification_validation_report: sqa/open_pronghorn_vvr.md
+    failure_analysis_report: sqa/open_pronghorn_far.md
+    software_library_list: sqa/open_pronghorn_sll.md
+    communication_and_contact_information: sqa/open_pronghorn_cci.md
+    software_coding_standards: sqa/open_pronghorn_scs.md
+    user_manual: sqa/user_manual.md
+    theory_manual: sqa/theory_manual.md
+    log_default: ERROR
+    show_warning: false
+    working_dirs:
+        - ${ROOT_DIR}/doc/content
+        - ${MOOSE_DIR}/framework/doc/content
+
+Requirements:
+    open_pronghorn:
+        working_dirs:
+            - ${ROOT_DIR}/doc/content
+            - ${MOOSE_DIR}/framework/doc/content
+        directories:
+            - ${ROOT_DIR}/test
+        log_default: ERROR
+        show_warning: false

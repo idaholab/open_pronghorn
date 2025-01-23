@@ -1,0 +1,9 @@
+directories:
+    - ${ROOT_DIR}/test/tests
+specs:
+    - tests
+dependencies:
+    - framework
+repos:
+    default: https://github.inl.gov/idaholab/open_pronghorn
+reports: !include ${ROOT_DIR}/doc/sqa_reports.yml
