@@ -12,6 +12,17 @@ Content:
             - application_development/performance_benchmarking.md
             - application_usage/restart_recover.md
             - application_usage/command_line_usage.md
+    navier_stokes:
+        root_dir: ${MOOSE_DIR}/modules/navier_stokes/doc/content
+    fluid_properties:
+        root_dir: ${MOOSE_DIR}/modules/fluid_properties/doc/content
+    heat_transfer:
+        root_dir: ${MOOSE_DIR}/modules/heat_transfer/doc/content
+    ray_tracing:
+        root_dir: ${MOOSE_DIR}/modules/ray_tracing/doc/content
+    rdg:
+        root_dir: ${MOOSE_DIR}/modules/rdg/doc/content
+
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
 Extensions:
