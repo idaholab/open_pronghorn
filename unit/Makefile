@@ -28,11 +28,11 @@ include $(FRAMEWORK_DIR)/moose.mk
 # set desired physics modules equal to 'yes' to enable them
 CHEMICAL_REACTIONS        := no
 CONTACT                   := no
-FLUID_PROPERTIES          := no
+FLUID_PROPERTIES          := yes
 FSI                       := no
-HEAT_TRANSFER             := no
+HEAT_TRANSFER             := yes
 MISC                      := no
-NAVIER_STOKES             := no
+NAVIER_STOKES             := yes
 PHASE_FIELD               := no
 RDG                       := no
 RICHARDS                  := no
