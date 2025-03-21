@@ -4,6 +4,11 @@ specs:
     - tests
 dependencies:
     - framework
+    - heat_transfer
+    - navier_stokes
+    - ray_tracing
+    - rdg
+    - fluid_properties
 repos:
     default: https://github.inl.gov/idaholab/open_pronghorn
 reports: !include ${ROOT_DIR}/doc/sqa_reports.yml
