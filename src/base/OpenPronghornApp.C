@@ -34,6 +34,7 @@ void
 OpenPronghornApp::registerApps()
 {
   registerApp(OpenPronghornApp);
+  ModulesApp::registerApps();
 }
 
 /***************************************************************************************************
