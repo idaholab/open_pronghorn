@@ -23,6 +23,7 @@
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    pressure_projection_method = consistent
   []
 []
 
@@ -30,20 +31,14 @@
   [vel_x]
     type = MooseLinearVariableFVReal
     solver_sys = u_system
-    initial_from_file_var = vel_x
-    initial_from_file_timestep = LATEST
   []
   [vel_y]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
-    initial_from_file_var = vel_y
-    initial_from_file_timestep = LATEST
   []
   [pressure]
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
-    initial_from_file_var = pressure
-    initial_from_file_timestep = LATEST
   []
 []
 
@@ -151,6 +146,12 @@
     variable = pressure
     functor = 0
   []
+  [pressure-extrapolation]
+    type = LinearFVExtrapolatedPressureBC
+    boundary = 'circle top_boundary bottom_boundary'
+    variable = pressure
+    use_two_term_expansion = true
+  []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = vel_x
@@ -215,8 +216,8 @@
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
-  momentum_equation_relaxation = 0.8
-  pressure_variable_relaxation = 0.6
+  momentum_equation_relaxation = 0.9
+  pressure_variable_relaxation = 1.0
   num_iterations = 100
   pressure_absolute_tolerance = 5e-6
   momentum_absolute_tolerance = 5e-6
@@ -226,11 +227,13 @@
   pressure_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  dt = 0.0005
-  num_steps = 4000
+  dt = 0.001
+  num_steps = 7000
 []
 
 [Outputs]
-  csv = true
-  console = true
+  [csv]
+    type = CSV
+    start_step = 5000
+  []
 []

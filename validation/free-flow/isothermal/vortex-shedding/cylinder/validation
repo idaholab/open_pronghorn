@@ -1,0 +1,11 @@
+[Tests]
+  [strouhal]
+    type = PythonUnitTest
+    input = 'test.py'
+    test_case = 'TestCylinder'
+    required_python_packages = 'pandas numpy'
+    method = '!dbg'
+    installation_type = in_tree # see #26480
+    max_time = 1000
+  []
+[]
