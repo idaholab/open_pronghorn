@@ -1,9 +1,14 @@
+#!/usr/bin/env python3
+
 import numpy as np
 import pandas as pd
+import mooseutils
+import os
 
-def compute_strouhal(filename):
+# Function responsible for doing the validation cehck on the Strouhal number
+def run_validation_check():
 
-  df = pd.read_csv(filename)
+  df = pd.read_csv("flow_csv.csv")
   t = df['time']
   signal = df['lift_coeff']
 
@@ -20,6 +25,12 @@ def compute_strouhal(filename):
 
   St = d_cylinder * vortex_shedding_frequency / u_bulk
 
-  print(St)
+  df = pd.DataFrame([St], columns=['Strouhal'])
+  df.to_csv('strouhal.csv', index=False)
 
-  return St
+  st_in_bounds = (St > 0.295 and St < 0.305)
+
+  if not st_in_bounds:
+    raise RuntimeError("St number out of bounds!")
+
+  return 0
