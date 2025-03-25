@@ -4,6 +4,8 @@
 #include "ModulesApp.h"
 #include "MooseSyntax.h"
 
+#include "OpenPronghornRevision.h"
+
 InputParameters
 OpenPronghornApp::validParams()
 {
@@ -34,6 +36,13 @@ void
 OpenPronghornApp::registerApps()
 {
   registerApp(OpenPronghornApp);
+  ModulesApp::registerApps();
+}
+
+std::string
+OpenPronghornApp::getInstallableInputs() const
+{
+  return OPENPRONGHORN_INSTALLABLE_DIRS;
 }
 
 /***************************************************************************************************
