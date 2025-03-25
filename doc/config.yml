@@ -25,6 +25,8 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+    extra-css:
+        - css/open_pronghorn.css
 Extensions:
     MooseDocs.extensions.navigation:
         name: OpenPronghorn
