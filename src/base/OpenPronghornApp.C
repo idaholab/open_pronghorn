@@ -37,6 +37,12 @@ OpenPronghornApp::registerApps()
   ModulesApp::registerApps();
 }
 
+std::string
+OpenPronghornApp::getInstallableInputs() const
+{
+  return OPEN_PRONGHORN_INSTALLABLE_DIRS;
+}
+
 /***************************************************************************************************
  *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
  **************************************************************************************************/

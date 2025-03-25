@@ -59,6 +59,7 @@ APPLICATION_DIR    := $(CURDIR)
 APPLICATION_NAME   := open_pronghorn
 BUILD_EXEC         := yes
 GEN_REVISION       := no
+INSTALLABLE_DIRS   := test/tests->tests validation
 include            $(FRAMEWORK_DIR)/app.mk
 
 ###############################################################################
