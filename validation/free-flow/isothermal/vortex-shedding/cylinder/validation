@@ -1,7 +1,7 @@
 [Tests]
   [strouhal]
     type = RunApp
-    requirement = 'The system should be able to accurately simulate vortex shedding behind a cicrcle.'
+    requirement = 'The system should be able to accurately simulate vortex shedding behind a circle.'
     method = opt
     min_parallel = 16
     max_time = 1200
