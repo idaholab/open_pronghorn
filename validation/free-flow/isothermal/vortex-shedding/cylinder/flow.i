@@ -236,4 +236,8 @@
     type = CSV
     start_step = 5000
   []
+  [exodus]
+    type = Exodus
+    execute_on = final
+  []
 []
