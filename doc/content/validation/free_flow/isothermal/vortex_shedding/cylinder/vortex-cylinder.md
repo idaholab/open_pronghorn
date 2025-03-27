@@ -1,7 +1,7 @@
 # Vortex Shedding Over Circle (2D)
 
 !tag name=Vortex Shedding Over Circle
-     image=../../media/validation/free-flow/isothermal/vortex-shedding/cylinder/icon.png
+     image=../../media/validation/free_flow/isothermal/vortex_shedding/cylinder/icon.png
      description=Vortex shedding behind a cylinder
      pairs=flow_type:free-flow
                        compressibility:incompressible
@@ -21,7 +21,7 @@ The problem is slightly asymmetric in the vertical direction to facilitate vorte
 shedding. The geometry of the problem is depicted below.
 
 !style halign=center
-!media media/validation/free-flow/isothermal/vortex-shedding/cylinder/geometry.png style=width:100% id=fig:geom caption=The geometry of the problem (dimensions in m). The diameter of the cylinder is 0.1 m.
+!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/geometry.png style=width:100% id=fig:geom caption=The geometry of the problem (dimensions in m). The diameter of the cylinder is 0.1 m.
 
 A no-slip boundary condition is used for the top, bottom
 and cylinder boundaries. The fluid enters the domain through
@@ -48,19 +48,19 @@ Dynamic viscosity |  $10^{-3}~Pa\cdot s$ |
 The main input parameters for the runs are summarized in a header file
 which is presented below:
 
-!listing /validation/free-flow/isothermal/vortex-shedding/cylinder/header.i
+!listing /validation/free_flow/isothermal/vortex_shedding/cylinder/header.i
 
 The mesh is generated using the native mesh generation capabilities in MOOSE.
 The input file is presented below. The mesh contains 21,092 quadriliteral cells altogether and is depicted in Figure REF.
 
-!listing /validation/free-flow/isothermal/vortex-shedding/cylinder/mesh.i
+!listing /validation/free_flow/isothermal/vortex_shedding/cylinder/mesh.i
 
 !style halign=center
-!media media/validation/free-flow/isothermal/vortex-shedding/cylinder/mesh.png style=width:100% id=fig:mesh caption=The mesh used in this problem.
+!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/mesh.png style=width:100% id=fig:mesh caption=The mesh used in this problem.
 
 The input file for the solve is depiccted below.
 
-!listing /validation/free-flow/isothermal/vortex-shedding/cylinder/flow.i
+!listing /validation/free_flow/isothermal/vortex_shedding/cylinder/flow.i
 
 As shown, we compute the lift and drag coefficients of the cylinder.
 These time series are then analyzed to determine the vortex shedding frequency.
@@ -78,5 +78,10 @@ characteristic speed. The benchmark in [!cite](schafer1996benchmark)
 prescribes an acceptable $St$ range of $[0.295, 0.305]$ for this Reynolds number.
 
 
+!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/strouhal_plot.py
+       image_name=strouhal.png
+       id=fig:st
+       caption=The Strouhal number supplied by OpenPronghorn with respect to the acceptable range.
+       style=width:50%;margin-left:auto;margin-right:auto;text-align:center
 
-## Performance Chart (might not be presented here)
+## Performance Chart (not available yet)
