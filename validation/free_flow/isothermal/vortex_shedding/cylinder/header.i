@@ -4,7 +4,7 @@
 circle_radius = 0.05
 pitch = 0.2
 x_min = -0.2
-x_max = 1.5
+x_max = 2.0
 y_min = -0.2
 y_max = 0.21
 rundoff = 1e-4
