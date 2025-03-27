@@ -25,11 +25,14 @@ Content:
 
 Renderer:
     type: MooseDocs.base.MaterializeRenderer
+    extra-css:
+        - css/open_pronghorn.css
 Extensions:
     MooseDocs.extensions.navigation:
         name: OpenPronghorn
         repo: https://github.inl.gov/idaholab/open_pronghorn
         menu:
+            Validation: resources/filter/index.html
             Documentation:
                 OpenPronghorn-only Syntax: syntax/open_pronghorn_only.md
                 Complete Code Syntax: syntax/index.md
@@ -57,5 +60,16 @@ Extensions:
             rdg: !include ${MOOSE_DIR}/modules/rdg/doc/sqa_rdg.yml
             ray_tracing: !include ${MOOSE_DIR}/modules/ray_tracing/doc/sqa_ray_tracing.yml
         reports: !include ${ROOT_DIR}/doc/sqa_reports.yml
-    MooseDocs.extensions.template:
-        active: true
+    MooseDocs.extensions.tagging:
+        active: True
+        js_file: index-6fae072b.js
+        allowed_keys:
+            - flow_type
+            - compressibility
+            - heattransfer
+            - convection_type
+            - transient
+            - flow_regime
+            - fluid
+            - flow_configuration
+            - number_of_phases
