@@ -1,4 +1,4 @@
-from TestHarness import ValidationCase
+from TestHarness.validation import ValidationCase
 import numpy as np
 import pandas as pd
 import os
