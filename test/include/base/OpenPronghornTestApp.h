@@ -16,7 +16,7 @@ class OpenPronghornTestApp : public MooseApp
 public:
   static InputParameters validParams();
 
-  OpenPronghornTestApp(InputParameters parameters);
+  OpenPronghornTestApp(const InputParameters & parameters);
   virtual ~OpenPronghornTestApp();
 
   static void registerApps();

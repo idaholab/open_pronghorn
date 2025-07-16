@@ -15,7 +15,7 @@ OpenPronghornApp::validParams()
   return params;
 }
 
-OpenPronghornApp::OpenPronghornApp(InputParameters parameters) : MooseApp(parameters)
+OpenPronghornApp::OpenPronghornApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   OpenPronghornApp::registerAll(_factory, _action_factory, _syntax);
 }

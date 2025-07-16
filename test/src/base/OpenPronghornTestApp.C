@@ -21,7 +21,7 @@ OpenPronghornTestApp::validParams()
   return params;
 }
 
-OpenPronghornTestApp::OpenPronghornTestApp(InputParameters parameters) : MooseApp(parameters)
+OpenPronghornTestApp::OpenPronghornTestApp(const InputParameters & parameters) : MooseApp(parameters)
 {
   OpenPronghornTestApp::registerAll(
       _factory, _action_factory, _syntax, getParam<bool>("allow_test_objects"));
