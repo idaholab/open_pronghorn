@@ -43,10 +43,10 @@ class TestCase(ValidationCase):
         return params
 
     def testValidation(self):
-        self.addFloatData("strouhal", self.value, None, "Strouhal number",
+        self.addScalarData("strouhal", self.value, None, "Strouhal number",
                            bounds=(self.lower_bound,self.upper_bound))
 
     def testVerification(self):
-        self.addFloatData('strouhal_regression', self.value, None, 'Strouhal number',
+        self.addScalarData('strouhal_regression', self.value, None, 'Strouhal number',
                            validation=False,
                            bounds=(self.gold*(1.0-self.regression_rel_err),self.gold*(1.0+self.regression_rel_err)))
