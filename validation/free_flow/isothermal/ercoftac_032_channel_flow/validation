@@ -1,0 +1,23 @@
+[Tests]
+  [channel_395]
+    type = RunApp
+    input = '1_input/Ret395_linear_SIMPLE_k-epsilon.i'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a pipe at a Reynolds number of 395 using the linear finite volume discretization and a K-Epsilon turbulence model.'
+    min_parallel = 10
+    max_time = 1000
+    validation_test = '3_vel_RMSE_vnv_395.py'
+    validation_lower_bound = 0.0 # Based on literature benchmark values; 0.0 means data fits perfectly
+    validation_upper_bound = 0.25 # Based on literature benchmark values
+  []
+
+  [channel_590]
+    type = RunApp
+    input = '1_input/Ret590_linear_SIMPLE_k-epsilon.i'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a pipe at a Reynolds number of 395 using the linear finite volume discretization and a K-Epsilon turbulence model.'
+    min_parallel = 10
+    max_time = 1000
+    validation_test = '4_vel_RMSE_vnv_590.py'
+    validation_lower_bound = 0.0 # Based on literature benchmark values
+    validation_upper_bound = 0.25 # Based on literature benchmark values
+  []
+[]
