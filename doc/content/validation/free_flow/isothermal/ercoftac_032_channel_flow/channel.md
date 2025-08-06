@@ -85,11 +85,15 @@ U_{norm} = \frac{U_x}{u_\tau}
 
 where $Re_{bulk}$ is the bulk Reynolds number, and $\Delta y$ is the centroid distance from the wall. The normalized velocities were plotted against the varying heights of the channel and the $y^{+}$ values to compare the `OpenPronghorn` simulation results against the benchmark results.
 
-!media media/validation/free_flow/isothermal/vortex_shedding/2d_turbulent_channel/channel_plot.py
-       image_name=7_Ret395_dual_plots.png id=fig:mesh395-2 style=width:80%;margin-left:auto;margin-right:auto;text-align:center caption=Axial velocity radial profiles (left) and Law of the wall (right) for $Re_t = 395$. 
+!media media/validation/free_flow/isothermal/2d_turbulent_channel/channel_plot.py
+       image_name=7_Ret395_dual_plots.png
+       id=fig:mesh395-2 style=width:80%;margin-left:auto;margin-right:auto;text-align:center
+       caption=Axial velocity radial profiles (left) and Law of the wall (right) for $Re_t = 395$. 
 
-!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/strouhal_plot.py/channel_plot.py
-       image_name=8_Ret590_dual_plots.png id=fig:mesh590-2 style=width:80%;margin-left:auto;margin-right:auto;text-align:center caption=Axial velocity radial profiles (left) and Law of the wall (right) for $Re_t = 590$.
+!media media/validation/free_flow/isothermal/2d_turbulent_channel/channel_plot.py
+       image_name=8_Ret590_dual_plots.png id=fig:mesh590-2
+       style=width:80%;margin-left:auto;margin-right:auto;text-align:center
+       caption=Axial velocity radial profiles (left) and Law of the wall (right) for $Re_t = 590$.
 
 ## Validation
 
