@@ -1,8 +1,8 @@
 ##########################################################
 # ERCOFTAC test case for turbulent channel flow
 # Case Number: 032
-# Author: Dr. Mauricio Tano
-# Last Update: November, 2023
+# Author: Dr. Mauricio Tano & Hailey Tran Kieu
+# Last Update: November, 2023 & 2025
 # Turbulent model using:
 # k-epsilon
 # Equilibrium + Newton wall treatment
