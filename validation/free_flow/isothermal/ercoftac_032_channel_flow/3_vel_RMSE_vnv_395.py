@@ -27,8 +27,8 @@ class TestCase(ValidationCase):
 
 
         ### Compute friction velocity u_tau (rho = 1)
-        nu = 2. / 14000
-        yd = 0.125
+        nu = 2. / 14000 # Bulk Reynolds number
+        yd = 0.125 # Centroid distance to wall
         u_tau_moose = (moose_yplus * nu) / yd
 
 
