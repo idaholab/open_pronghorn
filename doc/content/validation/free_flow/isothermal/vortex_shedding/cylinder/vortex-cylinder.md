@@ -58,7 +58,7 @@ The input file is presented below. The mesh contains 21,092 quadriliteral cells 
 !style halign=center
 !media media/validation/free_flow/isothermal/vortex_shedding/cylinder/mesh.png style=width:100% id=fig:mesh caption=The mesh used in this problem.
 
-The input file for the solve is depiccted below.
+The input file for the solve is depicted below.
 
 !listing /validation/free_flow/isothermal/vortex_shedding/cylinder/flow.i
 
