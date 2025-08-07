@@ -3,6 +3,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+import sys, os
+sys.path.append(os.path.join(os.environ.get("MOOSE_DIR"), 'python'))
+
 from TestHarness.resultsreader.reader import TestHarnessResultsReader
 
 # We load the results
