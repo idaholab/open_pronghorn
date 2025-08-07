@@ -8,11 +8,14 @@ import sys, os
 sys.path.append(os.path.join(os.environ.get("MOOSE_DIR"), 'python'))
 
 from TestHarness.resultsreader.reader import TestHarnessResultsReader
+import sys, os
+
+sys.path.append(os.path.join(os.environ.get("MOOSE_DIR"), 'python'))
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # We load the results
 reader = TestHarnessResultsReader("civet_tests_open_pronghorn_validation")
 results = reader.getTestResults("free_flow/isothermal/vortex_shedding/cylinder","strouhal")
-
 
 df = pd.DataFrame({
     'Date': [v.results.time for v in results],
@@ -21,7 +24,6 @@ df = pd.DataFrame({
 
 df = df.sort_values(by='Date')
 df['DateStr'] = df['Date'].dt.strftime('%Y-%m-%d')
-df['3pt Avg'] = df['Runtime'].rolling(window=3, min_periods=1).mean()
 df['5pt Avg'] = df['Runtime'].rolling(window=5, min_periods=1).mean()
 x_pos = np.arange(len(df))
 
@@ -37,9 +39,8 @@ plt.rcParams.update({
 })
 
 # Plot
-fig, ax = plt.subplots(figsize=(15, 6))
+fig, ax = plt.subplots(figsize=(10, 6))
 ax.plot(x_pos, df['Runtime'], marker='o', color='#1f1f1f', label='Runtime')                # black
-ax.plot(x_pos, df['3pt Avg'], marker='s', linestyle='--', color='#0072B2', label='3-point Avg')  # blue
 ax.plot(x_pos, df['5pt Avg'], marker='^', linestyle='-.', color='#D55E00', label='5-point Avg')  # reddish-orange
 
 # X-axis
@@ -52,7 +53,7 @@ ax.set_ylabel("Runtime (seconds)")
 ax.legend()
 ax.grid(True, color='gray', linestyle='--', linewidth=0.5, alpha=0.4)
 
-fig.subplots_adjust(left=0.3, right=0.7, top=0.7, bottom=0.3)
+fig.subplots_adjust(top=0.9, bottom=0.25, left=0.10)
 
 # Export to PNG
 output_file = "strouhal_performance.png"

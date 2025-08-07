@@ -95,6 +95,6 @@ simulations so runtimes might vary depending on which physical resource the job 
        image_name=strouhal_performance.png
        id=fig:st_performance
        caption=Runtime over the latest commtits.
-       style=width:50%;margin-left:auto;margin-right:auto;text-align:center
+       style=width:75%;margin-left:auto;margin-right:auto;text-align:center
 
 
