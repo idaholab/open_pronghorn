@@ -10,16 +10,9 @@ reader = TestHarnessResultsReader("civet_tests_open_pronghorn_validation")
 results = reader.getTestResults("free_flow/isothermal/vortex_shedding/cylinder","strouhal")
 
 
-# We populate the dataframe
-dates = []
-runtimes = []
-for c in results:
-  dates.append(c.results.time)
-  runtimes.append(c.run_time)
-
 df = pd.DataFrame({
-    'Date': dates,
-    'Runtime': runtimes
+    'Date': [v.results.time for v in results],
+    'Runtime': [v.run_time for v in results]
 })
 
 df = df.sort_values(by='Date')
