@@ -84,4 +84,17 @@ prescribes an acceptable $St$ range of $[0.295, 0.305]$ for this Reynolds number
        caption=The Strouhal number supplied by OpenPronghorn with respect to the acceptable range.
        style=width:50%;margin-left:auto;margin-right:auto;text-align:center
 
-## Performance Chart (not available yet)
+## Performance Chart
+
+!alert note
+The following figure showcases the measured total runtime of the problem over the different
+commit history. We utilized INL's High-Performance Computational resources to run these
+simulations so runtimes might vary depending on which physical resource the job got allocated.
+
+!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/strouhal_performance.py
+       image_name=strouhal_performance.png
+       id=fig:st_performance
+       caption=Runtime over the latest commtits.
+       style=width:75%;margin-left:auto;margin-right:auto;text-align:center
+
+
