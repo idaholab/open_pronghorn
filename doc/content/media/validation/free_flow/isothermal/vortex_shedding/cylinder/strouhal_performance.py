@@ -5,9 +5,8 @@ import numpy as np
 import pandas as pd
 
 from TestHarness.resultsreader.reader import TestHarnessResultsReader
-import sys, os
+import os
 
-sys.path.append(os.path.join(os.environ.get("MOOSE_DIR"), 'python'))
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # We load the results
