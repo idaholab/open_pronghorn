@@ -1,0 +1,32 @@
+[Tests]
+  [bfs_pressure_coefficient]
+    type = RunApp
+    input = 'bfs_input.i'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the [insert solver here] and a K-Epsilon turbulence model.'
+    min_parallel = 10
+    max_time = 2400
+    validation_test = 'bfs_vnv_script_cp.py'
+    validation_lower_bound = 1.0 # Please refer to bfs_vnv_script.py
+    validation_upper_bound = 3.0 # Please refer to bfs_vnv_script.py
+  []
+  [bfs_skin_friction_coefficient]
+    type = RunApp
+    input = 'bfs_input.i'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the [insert solver here] and a K-Epsilon turbulence model.'
+    min_parallel = 10
+    max_time = 2400
+    validation_test = 'bfs_vnv_script_cf.py'
+    validation_lower_bound = 1.0 # Please refer to bfs_vnv_script.py
+    validation_upper_bound = 3.0 # Please refer to bfs_vnv_script.py
+  []
+  [bfs_skin_velocity]
+    type = RunApp
+    input = 'bfs_input.i'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the [insert solver here] and a K-Epsilon turbulence model.'
+    min_parallel = 10
+    max_time = 2400
+    validation_test = 'bfs_vnv_script_vel.py'
+    validation_lower_bound = 1.0 # Please refer to the validation script
+    validation_upper_bound = 3.0 # Please refer to the validation script
+  []
+[]
