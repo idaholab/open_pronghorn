@@ -6,7 +6,7 @@ import pandas as pd
 from TestHarness.resultsreader.reader import TestHarnessResultsReader
 
 reader = TestHarnessResultsReader("civet_tests_open_pronghorn_validation")
-results = reader.getTestResults("free_flow/isothermal/ercoftac_030_bfs_copy","bfs_pressure_coefficient")
+results = reader.getTestResults("free_flow/isothermal/ercoftac_030_bfs_copy","bfs_030")
 
 # We populate the dataframe
 dates = []
@@ -56,6 +56,6 @@ ax.grid(True, color='gray', linestyle='--', linewidth=0.5, alpha=0.4)
 fig.subplots_adjust(left=0.3, right=0.7, top=0.7, bottom=0.3)
 
 # Export to PNG
-output_file = "strouhal_performance.png"
+output_file = "bfs_performance.png"
 plt.savefig(output_file, dpi=300)
 plt.show()
