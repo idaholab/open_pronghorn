@@ -33,7 +33,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5)) # 1, 1, figsize=(4, 4)
 
 # Plotting
 # The velocities are normalized by u_tau
-ax1.plot(df_395_MOOSE_linear['y'][::2], 
+ax1.plot(df_395_MOOSE_linear['y'][::2],
          df_395_MOOSE_linear['vel_x'][::2] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: LSFV k-eps')
 ax1.plot(1.0 - df_395_ercoftac['y'], df_395_ercoftac['Umean'], 'k-', label = 'DNS')
 
@@ -49,7 +49,7 @@ ax1.set_title(r'Axial Velocity Profiles for $\mathrm{Re_{\tau}~395}$')
 ### Ret 395: Comparison of the law of the wall against DNS ###
 
 # Plotting
-ax2.semilogx((1.0 - df_395_MOOSE_linear['y'][::2][10:]) * u_tau_MOOSE_linear / nu, 
+ax2.semilogx((1.0 - df_395_MOOSE_linear['y'][::2][10:]) * u_tau_MOOSE_linear / nu,
              df_395_MOOSE_linear['vel_x'][::2][10:] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: LSFV k-eps')
 ax2.semilogx(df_395_ercoftac['y+'], df_395_ercoftac['Umean'], 'k-', label = 'DNS')
 
@@ -100,7 +100,7 @@ tau_w_dns = u_tau_dns * u_tau_dns
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 
 # Plotting
-ax1.plot(df_590_MOOSE_linear['y'][::2], 
+ax1.plot(df_590_MOOSE_linear['y'][::2],
          df_590_MOOSE_linear['vel_x'][::2] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: LSFV k-eps')
 ax1.plot(1.0 - df_590_ercoftac['y'], df_590_ercoftac['Umean'], 'k-', label = 'DNS')
 
@@ -116,7 +116,7 @@ ax1.set_title(r'Axial Velocity Profile for $\mathrm{Re_{\tau}~590}$')
 ### Ret 590: Comparison of the law of the wall against DNS ###
 
 # Plotting
-ax2.semilogx((1.0 - df_590_MOOSE_linear['y'][1::2][10:]) * u_tau_MOOSE_linear / nu, 
+ax2.semilogx((1.0 - df_590_MOOSE_linear['y'][1::2][10:]) * u_tau_MOOSE_linear / nu,
              df_590_MOOSE_linear['vel_x'][1::2][10:]/u_tau_MOOSE_linear, 'rx', markersize = 6,  label = 'MOOSE: LSFV k-eps')
 ax2.semilogx(df_590_ercoftac['y+'], df_590_ercoftac['Umean'], 'k-', label = 'DNS')
 

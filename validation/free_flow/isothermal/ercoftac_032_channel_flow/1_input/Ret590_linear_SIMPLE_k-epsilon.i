@@ -42,7 +42,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = CartesianMeshGenerator
     dim = 2
     dx = '${L}'
-    dy = '0.84 0.16' # '0.75 0.25' 
+    dy = '0.84 0.16' # '0.75 0.25'
     ix = '50'
     iy = '35 1'
   []
@@ -372,7 +372,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     v = vel_y
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR' 
+    execute_on = 'NONLINEAR'
   []
   # [compute_mu_eff]
   #   type = ParsedAux
@@ -386,14 +386,14 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [test_csv]
     type = PointValueSampler
     variable = 'mu_eff mu_t pressure TKE TKED vel_x vel_y yplus'
-    points = '119.95 0.012 0   119.95 0.036 0   119.95 0.06 0   119.95 0.084 0   119.95 0.108 0   
-              119.95 0.132 0   119.95 0.156 0   119.95 0.18 0   119.95 0.204 0   119.95 0.228 0   
-              119.95 0.252 0   119.95 0.276 0   119.95 0.3 0   119.95 0.324 0   119.95 0.348 0   
-              119.95 0.372 0   119.95 0.396 0   119.95 0.42 0   119.95 0.444 0   119.95 0.468 0   
-              119.95 0.492 0   119.95 0.516 0   119.95 0.54 0   119.95 0.564 0   119.95 0.588 0   
-              119.95 0.612 0   119.95 0.636 0   119.95 0.66 0   119.95 0.684 0   119.95 0.708 0   
-              119.95 0.732 0   119.95 0.756 0   119.95 0.78 0   119.95 0.804 0   119.95 0.828 0   
-              119.95 0.92 0   
+    points = '119.95 0.012 0   119.95 0.036 0   119.95 0.06 0   119.95 0.084 0   119.95 0.108 0
+              119.95 0.132 0   119.95 0.156 0   119.95 0.18 0   119.95 0.204 0   119.95 0.228 0
+              119.95 0.252 0   119.95 0.276 0   119.95 0.3 0   119.95 0.324 0   119.95 0.348 0
+              119.95 0.372 0   119.95 0.396 0   119.95 0.42 0   119.95 0.444 0   119.95 0.468 0
+              119.95 0.492 0   119.95 0.516 0   119.95 0.54 0   119.95 0.564 0   119.95 0.588 0
+              119.95 0.612 0   119.95 0.636 0   119.95 0.66 0   119.95 0.684 0   119.95 0.708 0
+              119.95 0.732 0   119.95 0.756 0   119.95 0.78 0   119.95 0.804 0   119.95 0.828 0
+              119.95 0.92 0
               '
     sort_by = y
   []
@@ -433,7 +433,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   momentum_l_max_its = 300
   pressure_l_max_its = 300
   turbulence_l_max_its = 30
-  
+
   print_fields = false
   continue_on_max_its = true
 []

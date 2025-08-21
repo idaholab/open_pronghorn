@@ -55,14 +55,14 @@ class TestCase(ValidationCase):
         params.addRequiredParam('validation_lower_bound', 'The lower bound for the RMS on the velocity profile')
         params.addRequiredParam('validation_upper_bound', 'The upper bound for the RMS on the velocity profile')
         return params
-    
+
 
     def testValidation(self):
         self.addScalarData(key="number", value=self.value, description="Root Mean Square Error", units='-',
                            bounds=(self.lower_bound,self.upper_bound))
 
 # if __name__ == "__main__":
-    
+
 #     print("here")
 
 #     a = TestCase()
