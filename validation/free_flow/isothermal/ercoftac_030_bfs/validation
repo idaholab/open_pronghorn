@@ -2,7 +2,7 @@
   [bfs_030]
     type = RunApp
     input = 'bfs_input.i'
-    requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the [insert solver here] and a K-Epsilon turbulence model.'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a K-Epsilon turbulence model.'
     min_parallel = 10
     max_time = 10000
     validation_test = 'bfs_vnv_script_vector.py'
