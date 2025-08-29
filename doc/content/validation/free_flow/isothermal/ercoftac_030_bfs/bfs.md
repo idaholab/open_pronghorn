@@ -1,7 +1,7 @@
 # Backward-Facing Step with Inclined Opposite Wall (2D)
 
 !tag name=BFS with Inclined Opposite Wall
-    image=media/validation/free_flow/isothermal/vel_streamlines.png
+    image=media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png
     description=Backward-Facing Wall with Inclined Opposite Wall
     pairs=flow_type:free-flow
                        compressibility:incompressible
@@ -45,7 +45,7 @@ Initial turbulence kinetic energy, $k_{init}$             | $\frac{3}{2}(I \cdot
 Initial turbulence dissipation rate, $\varepsilon_{init}$ | $\frac{C_{\mu}^\frac{3}{4} \cdot k_{init}^\frac{3}{2}}{D}$ | $\frac{J}{kg \cdot s}$ |
 
 
-A no-slip boundary condition is used for all walls. The fluid enters the domain through the left boundary (inlet) and exits out the right boundary (outlet). 
+A no-slip boundary condition is used for all walls. The fluid enters the domain through the left boundary (inlet) and exits out the right boundary (outlet).
 
 ## `OpenPronghorn` Model
 
@@ -60,18 +60,18 @@ The simulations were executed using a +nonlinear SIMPLE finite volume solver+ wi
 !table id=tab:numparameters caption=Modeling and discretization parameters.
 | Parameter  | Inlet              | Outlet          | Walls           | Bulk Face Interpolation             |
 | ---        | ---                | ---             | ---             | ---                                 |
-| +Velocity+ | Dirichlet          | Fully-developed | No-slip         | Rhie-Chow velocity, Upwind momentum | 
+| +Velocity+ | Dirichlet          | Fully-developed | No-slip         | Rhie-Chow velocity, Upwind momentum |
 | +Pressure+ | Two-term expansion | Dirichlet       | -               | Average                             |
 | +TKE+      | Dirichlet          | Fully-developed | Non-equilibrium | Upwind                              |
 | +TKED+.    | Dirichlet          | Fully-developed | Non-equilibrium | Upwind                              |
 
 The input file for the solve is embedded below.
 
-!listing validation/free_flow/isothermal/ercoftac_030_bfs_copy/bfs_input.i
+!listing validation/free_flow/isothermal/ercoftac_030_bfs/bfs_input.i
 
 ## Results
 
-The main quantities of interest are pressure coefficient $c_{p}$, wall-skin friction coefficient $c_{f}$, and the x-velocity profiles up the height of the channel. 
+The main quantities of interest are pressure coefficient $c_{p}$, wall-skin friction coefficient $c_{f}$, and the x-velocity profiles up the height of the channel.
 Further manipulation in post was required to derive $c_{p}$ and $c_{f}$.
 
 To derive the pressure coefficient $c_{p}$, the pressure variable was recorded by `OpenPronghorn` and divided by the dynamic pressure $q$, as follows:
@@ -92,7 +92,7 @@ c_p = \frac{p_{s}}{q}
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/plots_cp_main.png style=width:50%;margin-left:auto;margin-right:auto;text-align:center; id=fig:plot1 caption=Graph of the pressure coefficient across the length of the channel.
 
-To derive the wall-skin friction coefficient $c_{f}$, the following variables were recorded in `OpenPronghorn` and manipulated as follows: turbulent dynamic viscosity $\mu_{t}$, wall distance $d_{wall}$, and horizontal velocity $u_x$. 
+To derive the wall-skin friction coefficient $c_{f}$, the following variables were recorded in `OpenPronghorn` and manipulated as follows: turbulent dynamic viscosity $\mu_{t}$, wall distance $d_{wall}$, and horizontal velocity $u_x$.
 
 \begin{equation}
 q = \frac{\rho u^2}{2}
