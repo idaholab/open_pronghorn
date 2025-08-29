@@ -20,12 +20,12 @@ sim_out = pd.read_csv('bfs_input_csv_outlet_sampler_0002.csv')
 
 ### Read reference MOOSE .csv files
 # Modify if changing reference parameters
-df_in = pd.read_csv('csv/reference_bfs_input_csv_inlet_sampler_0002.csv')
-df_out = pd.read_csv('csv/reference_bfs_input_csv_outlet_sampler_0002.csv')
+df_in = pd.read_csv('reference_csv/reference_bfs_input_csv_inlet_sampler_0002.csv')
+df_out = pd.read_csv('reference_csv/reference_bfs_input_csv_outlet_sampler_0002.csv')
 
 ### Read ERCOFTAC benchmark .csv files
-cp_exp = pd.read_csv('csv/cp.csv')
-cf_exp = pd.read_csv('csv/cf.csv')
+cp_exp = pd.read_csv('reference_csv/cp.csv')
+cf_exp = pd.read_csv('reference_csv/cf.csv')
 
 
 
@@ -108,7 +108,7 @@ plt.savefig('plots_cf_main.png')
 ############################ Vertical X-Velocity Profiles Analysis ############################
 
 # Read the y_grid values
-y_grid = pd.read_csv('csv/u+1.csv')['y/h'].to_numpy()
+y_grid = pd.read_csv('reference_csv/u+1.csv')['y/h'].to_numpy()
 
 # MOOSE Reference: Function to interpolate vel_x to y_grid
 def interpolate_vel_x(y_values, vel_x_values, y_grid):
@@ -116,10 +116,10 @@ def interpolate_vel_x(y_values, vel_x_values, y_grid):
 
 # Read and process each linear CSV
 linear_files = [
-    'csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
-    'csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
-    'csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
-    'csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
+    'reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
+    'reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
+    'reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
+    'reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
 ]
 
 interpolated_results = {}
@@ -156,7 +156,7 @@ for file in sim_linear_files:
 
 
 # Read u profiles
-u_exp = pd.read_csv('csv/u_profiles_exp.csv')
+u_exp = pd.read_csv('reference_csv/u_profiles_exp.csv')
 
 
 # Create subplots
@@ -164,7 +164,7 @@ fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 15), constrained
 fig.suptitle("Vertical X-Velocity Profiles", fontsize="14")
 
 ax1.plot(u_exp['x+1'], u_exp['y/h'], 'k.', label='ERCOFTAC')
-# ax1.plot(interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'g', label='MOOSE-NS: Reference')
+# ax1.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'g', label='MOOSE-NS: Reference')
 ax1.plot(sim_interpolated_results['bfs_input_csv_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'b', label='MOOSE-NS: Current')
 ax1.set_title('Vertical x-Velocity Profile for x/h = 1', fontsize=14)
 ax1.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
@@ -174,7 +174,7 @@ ax1.legend(fontsize="10")
 ax1.grid(True)
 
 ax2.plot(u_exp['x+4'], u_exp['y/h'], 'k.', label='ERCOFTAC')
-# ax2.plot(interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'g', label='MOOSE-NS: Reference')
+# ax2.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'g', label='MOOSE-NS: Reference')
 ax2.plot(sim_interpolated_results['bfs_input_csv_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'b', label='MOOSE-NS: Current')
 ax2.set_title('Vertical x-Velocity Profile for x/h = 4', fontsize=14)
 ax2.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
@@ -184,7 +184,7 @@ ax2.legend(fontsize="10")
 ax2.grid(True)
 
 ax3.plot(u_exp['x+6'], u_exp['y/h'], 'k.', label='ERCOFTAC')
-# ax3.plot(interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'g', label='MOOSE-NS: Reference')
+# ax3.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'g', label='MOOSE-NS: Reference')
 ax3.plot(sim_interpolated_results['bfs_input_csv_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'b', label='MOOSE-NS: Current')
 ax3.set_title('Vertical x-Velocity Profile for x/h = 6', fontsize=14)
 ax3.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
@@ -194,7 +194,7 @@ ax3.legend(fontsize="10")
 ax3.grid(True)
 
 ax4.plot(u_exp['x+10'], u_exp['y/h'], 'k.', label='ERCOFTAC')
-# ax4.plot(interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'g', label='MOOSE-NS: Reference')
+# ax4.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'g', label='MOOSE-NS: Reference')
 ax4.plot(sim_interpolated_results['bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'b', label='MOOSE-NS: Current')
 ax4.set_title('Vertical x-Velocity Profile for x/h = 10', fontsize=14)
 ax4.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
@@ -279,10 +279,10 @@ u_exp_6_cleaned = u_exp_6[~np.isnan(u_exp_6)]
 u_exp_10 = u_exp['x+10']
 u_exp_10_cleaned = u_exp_10[~np.isnan(u_exp_10)]
 
-u_moose_1 = interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
-u_moose_4 = interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
-u_moose_6 = interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
-u_moose_10 = interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
+u_moose_1 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
+u_moose_4 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
+u_moose_6 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
+u_moose_10 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
 
 sim_u_moose_1 = sim_interpolated_results['bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
 sim_u_moose_4 = sim_interpolated_results['bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']

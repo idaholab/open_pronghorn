@@ -12,11 +12,11 @@ class TestCase(ValidationCase):
 
         ### REFERENCE FILES: Please do not modify, unless updating reference data
         ### Load .csv files for MOOSE and ERCOFTAC, respectively
-        moose_inlet_csv = pd.read_csv('csv/reference_bfs_input_csv_inlet_sampler_0002.csv')
-        moose_outlet_csv = pd.read_csv('csv/reference_bfs_input_csv_outlet_sampler_0002.csv')
+        moose_inlet_csv = pd.read_csv('reference_csv/reference_bfs_input_csv_inlet_sampler_0002.csv')
+        moose_outlet_csv = pd.read_csv('reference_csv/reference_bfs_input_csv_outlet_sampler_0002.csv')
 
-        ercoftac_csv = pd.read_csv('csv/cp.csv')
-        cf_exp = pd.read_csv('csv/cf.csv')
+        ercoftac_csv = pd.read_csv('reference_csv/cp.csv')
+        cf_exp = pd.read_csv('reference_csv/cf.csv')
 
 
 
@@ -102,8 +102,8 @@ class TestCase(ValidationCase):
         ############################ Vertical x-Velocity Profiles ############################
 
         # Read the y_grid values
-        y_grid = pd.read_csv('csv/u+1.csv')['y/h'].to_numpy()
-        self.y_grid = pd.read_csv('csv/u+1.csv')['y/h'].to_numpy()
+        y_grid = pd.read_csv('reference_csv/u+1.csv')['y/h'].to_numpy()
+        self.y_grid = pd.read_csv('reference_csv/u+1.csv')['y/h'].to_numpy()
 
         # MOOSE Reference: Function to interpolate vel_x to y_grid
         def interpolate_vel_x(y_values, vel_x_values, y_grid):
@@ -111,10 +111,10 @@ class TestCase(ValidationCase):
 
         # MOOSE Reference: Read and process each linear CSV
         linear_files = [
-            'csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
-            'csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
-            'csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
-            'csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
+            'reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
+            'reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
+            'reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
+            'reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
         ]
 
         interpolated_results = {}
@@ -149,7 +149,7 @@ class TestCase(ValidationCase):
 
 
         # Read u profiles
-        u_exp = pd.read_csv('csv/u_profiles_exp.csv')
+        u_exp = pd.read_csv('reference_csv/u_profiles_exp.csv')
 
         # Extract necessary data
 
@@ -164,10 +164,10 @@ class TestCase(ValidationCase):
         u_exp_10_cleaned = u_exp_10[~np.isnan(u_exp_10)]
 
         # MOOSE Reference Data
-        u_moose_1 = interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
-        u_moose_4 = interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
-        u_moose_6 = interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
-        u_moose_10 = interpolated_results['csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
+        u_moose_1 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
+        u_moose_4 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
+        u_moose_6 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
+        u_moose_10 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
 
         # MOOSE Current Data
         self.sim_u_moose_1 = sim_interpolated_results['bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
