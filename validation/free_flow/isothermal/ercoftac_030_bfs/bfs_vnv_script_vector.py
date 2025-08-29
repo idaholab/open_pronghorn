@@ -40,12 +40,12 @@ class TestCase(ValidationCase):
         moose_cp_interp = np.interp(ercoftac_csv['x/h'], moose_cp_x, moose_cp)
         self.moose_cp = moose_cp_interp
 
-        error_magnitude = abs(1.02 * (ercoftac_cp - moose_cp_interp)) 
+        error_magnitude = abs(1.02 * (ercoftac_cp - moose_cp_interp))
 
         self.min_error = ercoftac_cp - error_magnitude
         self.max_error = ercoftac_cp + error_magnitude
 
-        ### Setting Up Simulation Data 
+        ### Setting Up Simulation Data
         ### Modify with respective .csv files from OpenPronghorn simulations
 
         sim_inlet_csv = pd.read_csv('bfs_input_csv_inlet_sampler_0002.csv')
@@ -122,7 +122,7 @@ class TestCase(ValidationCase):
         for file in linear_files:
             df_linear = pd.read_csv(file)
             y_linear = (df_linear['y'].to_numpy() + 0.0127) / 0.0127 # Normalize y-values to y/H
-            vel_x_linear = df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities 
+            vel_x_linear = df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities
             interpolated_vel_x = interpolate_vel_x(y_linear, vel_x_linear, y_grid) # Interpolate MOOSE data to y/H
             interpolated_results[file] = interpolated_vel_x
 
@@ -143,7 +143,7 @@ class TestCase(ValidationCase):
         for file in sim_linear_files:
             sim_df_linear = pd.read_csv(file)
             sim_y_linear = (sim_df_linear['y'].to_numpy() + 0.0127) / 0.0127 # Normalize y-values to y/H
-            sim_vel_x_linear = sim_df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities 
+            sim_vel_x_linear = sim_df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities
             sim_interpolated_vel_x = interpolate_vel_x(sim_y_linear, sim_vel_x_linear, y_grid) # Interpolate MOOSE data to y/H
             sim_interpolated_results[file] = sim_interpolated_vel_x
 
@@ -177,10 +177,10 @@ class TestCase(ValidationCase):
 
 
         ### Error calculations based on (ERCOFTAC - MOOSE: Reference)
-        error_magnitude_1 = abs(1.02 * (u_exp_1_cleaned - u_moose_1)) 
-        error_magnitude_4 = abs(1.02 * (u_exp_4_cleaned - u_moose_4)) 
-        error_magnitude_6 = abs(1.02 * (u_exp_6_cleaned - u_moose_6)) 
-        error_magnitude_10 = abs(1.02 * (u_exp_10_cleaned - u_moose_10)) 
+        error_magnitude_1 = abs(1.02 * (u_exp_1_cleaned - u_moose_1))
+        error_magnitude_4 = abs(1.02 * (u_exp_4_cleaned - u_moose_4))
+        error_magnitude_6 = abs(1.02 * (u_exp_6_cleaned - u_moose_6))
+        error_magnitude_10 = abs(1.02 * (u_exp_10_cleaned - u_moose_10))
 
         # Min & max error calculations based on (ERCOFTAC - MOOSE: Reference)
         sim_min_error_1 = u_exp_1 - error_magnitude_1
@@ -212,27 +212,27 @@ class TestCase(ValidationCase):
                     (self.ercoftac_cp_x, 'Normalized distance', '-'),
                     (self.sim_cp_interp, 'Pressure coefficient', '-'),
                     bounds=((self.min_error, self.max_error)))
-        
+
         self.addVectorData('xh_cf',
             (self.ercoftac_x_cf, 'Normalized distance', '-'),
             (self.sim_moose_cf_interp, 'Skin friction coefficient', '-'),
             bounds=((self.min_error_cf, self.max_error_cf)))
-        
+
         self.addVectorData('yh_1',
             (self.y_grid, 'Normalized distance', '-'),
             (self.sim_u_moose_1, 'Vertical x-Velocity at x/H=1', '-'),
             bounds=((self.sim_min_error_1_cleaned, self.sim_max_error_1_cleaned)))
-        
+
         self.addVectorData('yh_4',
             (self.y_grid, 'Normalized distance', '-'),
             (self.sim_u_moose_4, 'Vertical x-Velocity at x/H=4', '-'),
             bounds=((self.sim_min_error_4_cleaned, self.sim_max_error_4_cleaned)))
-        
+
         self.addVectorData('yh_6',
             (self.y_grid, 'Normalized distance', '-'),
             (self.sim_u_moose_6, 'Vertical x-Velocity at x/H=6', '-'),
             bounds=((self.sim_min_error_6_cleaned, self.sim_max_error_6_cleaned)))
-        
+
         self.addVectorData('yh_10',
             (self.y_grid, 'Normalized distance', '-'),
             (self.sim_u_moose_10, 'Vertical x-Velocity at x/H=10', '-'),

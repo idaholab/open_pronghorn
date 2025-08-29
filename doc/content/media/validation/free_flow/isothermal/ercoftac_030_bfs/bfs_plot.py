@@ -34,7 +34,7 @@ cf_exp = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercof
 ############################ Pressure Coefficient Analysis ############################
 
 H = 0.0127
-cp_factor = 0.5*1.18415*48.18**2 # 1/2 rho U_ref^2 
+cp_factor = 0.5*1.18415*48.18**2 # 1/2 rho U_ref^2
 
 
 # Concatenate inlet and outlet data for MOOSE .csv
@@ -127,7 +127,7 @@ interpolated_results = {}
 for file in linear_files:
     df_linear = pd.read_csv(file)
     y_linear = (df_linear['y'].to_numpy() + 0.0127) / 0.0127 # Normalize y-values to y/H
-    vel_x_linear = df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities 
+    vel_x_linear = df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities
     interpolated_vel_x = interpolate_vel_x(y_linear, vel_x_linear, y_grid) # Interpolate MOOSE data to y/H
     interpolated_results[file] = interpolated_vel_x
 
@@ -150,7 +150,7 @@ sim_interpolated_results = {}
 for file in sim_linear_files:
     sim_df_linear = pd.read_csv(file)
     sim_y_linear = (sim_df_linear['y'].to_numpy() + 0.0127) / 0.0127 # Normalize y-values to y/H
-    sim_vel_x_linear = sim_df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities 
+    sim_vel_x_linear = sim_df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities
     sim_interpolated_vel_x = interpolate_vel_x(sim_y_linear, sim_vel_x_linear, y_grid) # Interpolate MOOSE data to y/H
     sim_interpolated_results[file] = sim_interpolated_vel_x
 
@@ -293,10 +293,10 @@ sim_u_moose_10 = sim_interpolated_results['../../../../../../../validation/free_
 
 
 ### Error calculations based on (ERCOFTAC - MOOSE: Reference)
-error_magnitude_1 = abs(1.02 * (u_exp_1_cleaned - u_moose_1)) 
-error_magnitude_4 = abs(1.02 * (u_exp_4_cleaned - u_moose_4)) 
-error_magnitude_6 = abs(1.02 * (u_exp_6_cleaned - u_moose_6)) 
-error_magnitude_10 = abs(1.02 * (u_exp_10_cleaned - u_moose_10)) 
+error_magnitude_1 = abs(1.02 * (u_exp_1_cleaned - u_moose_1))
+error_magnitude_4 = abs(1.02 * (u_exp_4_cleaned - u_moose_4))
+error_magnitude_6 = abs(1.02 * (u_exp_6_cleaned - u_moose_6))
+error_magnitude_10 = abs(1.02 * (u_exp_10_cleaned - u_moose_10))
 
 min_error_1 = u_exp_1 - error_magnitude_1
 max_error_1 = u_exp_1 + error_magnitude_1
