@@ -60,10 +60,3 @@ class TestCase(ValidationCase):
     def testValidation(self):
         self.addScalarData(key="number", value=self.value, description="Root Mean Square Error", units='-',
                            bounds=(self.lower_bound,self.upper_bound))
-
-# if __name__ == "__main__":
-
-#     print("here")
-
-#     a = TestCase()
-#     a.initialize()
