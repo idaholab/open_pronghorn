@@ -8,12 +8,11 @@ class TestCase(ValidationCase):
     def initialize(self):
 
         ### Load .csv files for MOOSE and ERCOFTAC, respectively
-        moose_csv = pd.read_csv('1_input/Ret590_linear_SIMPLE_k-epsilon_csv_test_csv_0002.csv')
-        ercoftac_csv = pd.read_csv('2_plots/Ret590.csv')
+        moose_csv = pd.read_csv('Ret590_MOOSE_LSFV_k-epsilon_test_csv_0002.csv')
+        ercoftac_csv = pd.read_csv('gold/Ret590.csv')
 
         self.lower_bound = float(self.getParam('validation_lower_bound'))
         self.upper_bound = float(self.getParam('validation_upper_bound'))
-
 
         ### Extract necessary data from the .csv files
         # NOTE: ERCOFTAC data ordered with ascending U-mean and MOOSE is ordered with descending U-mean.
@@ -25,28 +24,26 @@ class TestCase(ValidationCase):
         # Interpolate the fine ERCOFTAC data onto the MOOSE-measurements
         ercoftac_U_mean = np.interp(1.0 - moose_csv['y'], ercoftac_csv['y'], ercoftac_csv['Umean'])
 
-
         ### Compute friction velocity u_tau (rho = 1)
         nu = 2. / 22250
         yd = 0.08
         u_tau_moose = (moose_yplus * nu) / yd
 
-
         ### Normalize the velocities from MOOSE by dividing by friction velocity u_tau
         moose_vel_x_norm = moose_vel_x / u_tau_moose
 
+        ### Save coordinates and result
+        self.y = moose_csv['y']
+        self.velocity = moose_vel_x_norm
 
-        ### Root Mean Square Error
-        difference = moose_vel_x_norm - ercoftac_U_mean
-        square = difference ** 2
-        summation = sum(square)
-        divide = summation / len(moose_vel_x)
-        self.value = divide ** 0.5 # Calculated RMSE
-
-
-        # Save the output to CSV
-        df = pd.DataFrame([self.value], columns=["RMSE_Ux"])
-        df.to_csv("RMSE_Ux_590.csv", index=False)
+        ### Get the error of the MOOSE reference results
+        moose_lsfv_ref_csv = pd.read_csv('gold/Ret590_MOOSE_LSFV_k-epsilon_test_csv_0002.csv')
+        moose_lsfv_yp = moose_lsfv_ref_csv['yplus'].iloc[-1]
+        moose_lsfv_vel = moose_lsfv_ref_csv['vel_x'].to_numpy()
+        moose_lsfv_vel_norm = moose_lsfv_vel / (moose_lsfv_yp * nu) * yd
+        error_magnitude = np.abs(1.02 * (moose_lsfv_vel_norm - ercoftac_U_mean))
+        self.sim_min_error = moose_lsfv_vel_norm - error_magnitude
+        self.sim_max_error = moose_lsfv_vel_norm + error_magnitude
 
 
     @staticmethod
@@ -58,5 +55,7 @@ class TestCase(ValidationCase):
 
 
     def testValidation(self):
-        self.addScalarData(key="number", value=self.value, description="Root Mean Square Error", units='-',
-                           bounds=(self.lower_bound,self.upper_bound))
+        self.addVectorData('Ux',
+                    (self.y, 'Wall distance', '-'),
+                    (self.velocity, 'Normalized X-velocity', '-'),
+                    bounds=((self.sim_min_error, self.sim_max_error)))

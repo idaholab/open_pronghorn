@@ -8,7 +8,6 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 plt.rcParams["font.family"] = "serif"
 plt.rcParams["font.size"] = 12
 
-# /Users/tranh/projects/open_pronghorn_other_contribs/validation/free_flow/isothermal/vortex_shedding/cylinder/gold/strouhal.csv
 csv_file_395 = '../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/RMSE_Ux_395.csv'
 data_395 = pd.read_csv(csv_file_395)
 value_395 = data_395.iloc[0, 0]

@@ -11,8 +11,8 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 ### Ret 395: Comparison of axial velocity radial profiles at the outlet of the channel against DNS ###
 
 # Load .csv files
-df_395_MOOSE_linear = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/2_plots/Ret395_MOOSE_LSFV_k-epsilon.csv')
-df_395_ercoftac = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/2_plots/Ret395.csv')
+df_395_MOOSE_linear = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/gold/Ret395_MOOSE_LSFV_k-epsilon_test_csv_0002.csv')
+df_395_ercoftac = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/gold/Ret395.csv')
 
 # Problem Parameters
 nu = 2./14000. # Bulk Reynolds number
@@ -72,15 +72,12 @@ print('tau_w MOOSE LSFV k-eps: ',tau_w_MOOSE_linear )
 print('Error % MOOSE LSFV k-eps: ', 100*(tau_w_MOOSE_linear-tau_w_dns)/tau_w_dns)
 
 
-
-
-
 ####################################################################################################################################
 ### Ret 590: Comparison of axial velocity radial profiles at the outlet of the channel against DNS ###
 
 # Load .csv files
-df_590_ercoftac = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/2_plots/Ret590.csv')
-df_590_MOOSE_linear = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/2_plots/Ret590_MOOSE_LSFV_k-epsilon.csv')
+df_590_ercoftac = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/gold/Ret590.csv')
+df_590_MOOSE_linear = pd.read_csv('../../../../../../../validation/free_flow/isothermal/ercoftac_032_channel_flow/gold/Ret590_MOOSE_LSFV_k-epsilon_test_csv_0002.csv')
 
 # Problem Parameters
 nu = 2./22250. # Bulk Reynolds number
