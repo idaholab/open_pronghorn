@@ -9,16 +9,16 @@ class TestCase(ValidationCase):
 
         ### Load .csv files for MOOSE and ERCOFTAC, respectively
         moose_csv = pd.read_csv('Ret395_MOOSE_LSFV_k-epsilon_test_csv_0002.csv')
+        moose_ref_csv = pd.read_csv('gold/Ret395_MOOSE_LSFV_k-epsilon_test_csv_0002.csv')
         ercoftac_csv = pd.read_csv('gold/Ret395.csv')
-
-        self.lower_bound = float(self.getParam('validation_lower_bound'))
-        self.upper_bound = float(self.getParam('validation_upper_bound'))
 
         ### Extract necessary data from the .csv files
         # NOTE: ERCOFTAC data ordered with ascending U-mean and MOOSE is ordered with descending U-mean.
         moose_vel_x = moose_csv['vel_x'].to_numpy()
         moose_yplus = moose_csv['yplus'].iloc[-1]
-        print('\n MOOSE Y+ value: ', moose_yplus)
+        moose_ref_yplus = moose_ref_csv['yplus'].iloc[-1]
+        print('\n Current MOOSE Y+ value: ', moose_yplus)
+        print('\n Reference MOOSE Y+ value: ', moose_ref_yplus)
 
         # Because the ERCOFTAC results has more data points than the MOOSE results...
         # Interpolate the fine ERCOFTAC data onto the MOOSE-measurements
@@ -36,15 +36,21 @@ class TestCase(ValidationCase):
         self.y = moose_csv['y']
         self.velocity = moose_vel_x_norm
 
+        ### Retrieve the tolerances set in the input
+        self.lower_bound = float(self.getParam('validation_lower_bound'))
+        self.upper_bound = float(self.getParam('validation_upper_bound'))
+
         ### Get the error of the MOOSE reference results
         moose_lsfv_ref_csv = pd.read_csv('gold/Ret395_MOOSE_LSFV_k-epsilon_test_csv_0002.csv')
         moose_lsfv_yp = moose_lsfv_ref_csv['yplus'].iloc[-1]
         moose_lsfv_vel = moose_lsfv_ref_csv['vel_x'].to_numpy()
 
         moose_lsfv_vel_norm = moose_lsfv_vel / (moose_lsfv_yp * nu) * yd
-        error_magnitude = np.abs(1.02 * (moose_lsfv_vel_norm - ercoftac_U_mean))
-        self.sim_min_error = moose_lsfv_vel_norm - error_magnitude
-        self.sim_max_error = moose_lsfv_vel_norm + error_magnitude
+        self.sim_min_error = moose_lsfv_vel_norm - np.abs((1.0 - self.lower_bound) * (moose_lsfv_vel_norm - ercoftac_U_mean))
+        self.sim_max_error = moose_lsfv_vel_norm + np.abs((1.0 + self.upper_bound) * (moose_lsfv_vel_norm - ercoftac_U_mean))
+
+        # Set the Y-Plus validation limits and values
+        self.yplus_rel_diff = (moose_yplus - moose_ref_yplus) / moose_ref_yplus
 
 
     @staticmethod
@@ -60,3 +66,5 @@ class TestCase(ValidationCase):
                     (self.y, 'Wall distance', '-'),
                     (self.velocity, 'Normalized X-velocity', '-'),
                     bounds=((self.sim_min_error, self.sim_max_error)))
+        self.addScalarData(key="y_plus", value=self.yplus_rel_diff, description="Relative difference on outlet wall adjacent cell Y plus", units='-',
+                           bounds=(self.lower_bound, self.upper_bound))

@@ -106,4 +106,7 @@ U_{DNS_i}-U_{norm_i}
 \end{equation}
 
 where +$U_{DNS_i}$+ is the tangeantial velocity of the benchmark case, +$U_{norm_i}$+ is the velocity of the `OpenPronghorn` model.
-The allowable interval is within two percents of the current solution difference.
+The allowable interval is within 2\% of the current solution difference.
+
+The $y^{+}$ of the first cell near the wall at the outlet of the system, in the fully developed flow region is also tracked.
+A 2\% deviation is allowed on that value.

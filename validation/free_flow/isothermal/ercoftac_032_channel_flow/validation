@@ -8,8 +8,11 @@
     min_parallel = 10
     max_time = 1000
     validation_test = '3_vel_RMSE_vnv_395.py'
-    validation_lower_bound = 0.0 # Based on literature benchmark values; 0.0 means data fits perfectly
-    validation_upper_bound = 0.25 # Based on literature benchmark values
+    # 2% error allowed
+    # On the axial velocity profile: can add or remove 2% of the current error to the ERCOFTAC data
+    # On the outlet first wall cell y+: 2% relative difference to the reference MOOSE result
+    validation_lower_bound = -0.02
+    validation_upper_bound = 0.02
   []
 
   [channel_590]
@@ -21,7 +24,8 @@
     min_parallel = 10
     max_time = 1000
     validation_test = '4_vel_RMSE_vnv_590.py'
-    validation_lower_bound = 0.0 # Based on literature benchmark values
-    validation_upper_bound = 0.25 # Based on literature benchmark values
+    # 2% error allowed
+    validation_lower_bound = -0.02
+    validation_upper_bound = 0.02
   []
 []
