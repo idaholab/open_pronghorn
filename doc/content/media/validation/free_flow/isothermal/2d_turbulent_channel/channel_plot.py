@@ -34,7 +34,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5)) # 1, 1, figsize=(4, 4)
 # Plotting
 # The velocities are normalized by u_tau
 ax1.plot(df_395_MOOSE_linear['y'][::2],
-         df_395_MOOSE_linear['vel_x'][::2] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: LSFV k-eps')
+         df_395_MOOSE_linear['vel_x'][::2] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: FV k-eps')
 ax1.plot(1.0 - df_395_ercoftac['y'], df_395_ercoftac['Umean'], 'k-', label = 'DNS')
 
 # Plot Settings
@@ -50,7 +50,7 @@ ax1.set_title(r'Axial Velocity Profiles for $\mathrm{Re_{\tau}~395}$')
 
 # Plotting
 ax2.semilogx((1.0 - df_395_MOOSE_linear['y'][::2][10:]) * u_tau_MOOSE_linear / nu,
-             df_395_MOOSE_linear['vel_x'][::2][10:] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: LSFV k-eps')
+             df_395_MOOSE_linear['vel_x'][::2][10:] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: FV k-eps')
 ax2.semilogx(df_395_ercoftac['y+'], df_395_ercoftac['Umean'], 'k-', label = 'DNS')
 
 # Plot Settings
@@ -68,8 +68,8 @@ plt.savefig('7_Ret395_dual_plots')
 ### Ret 395: Comparing the wall shear stress against DNS ###
 
 print('tau_w DNS: ',tau_w_dns )
-print('tau_w MOOSE LSFV k-eps: ',tau_w_MOOSE_linear )
-print('Error % MOOSE LSFV k-eps: ', 100*(tau_w_MOOSE_linear-tau_w_dns)/tau_w_dns)
+print('tau_w MOOSE FV k-eps: ',tau_w_MOOSE_linear )
+print('Error % MOOSE FV k-eps: ', 100*(tau_w_MOOSE_linear-tau_w_dns)/tau_w_dns)
 
 
 ####################################################################################################################################
@@ -98,7 +98,7 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))
 
 # Plotting
 ax1.plot(df_590_MOOSE_linear['y'][::2],
-         df_590_MOOSE_linear['vel_x'][::2] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: LSFV k-eps')
+         df_590_MOOSE_linear['vel_x'][::2] / u_tau_MOOSE_linear, 'rx', markersize = 6, label = 'MOOSE: FV k-eps')
 ax1.plot(1.0 - df_590_ercoftac['y'], df_590_ercoftac['Umean'], 'k-', label = 'DNS')
 
 # Plot Settings
@@ -114,7 +114,7 @@ ax1.set_title(r'Axial Velocity Profile for $\mathrm{Re_{\tau}~590}$')
 
 # Plotting
 ax2.semilogx((1.0 - df_590_MOOSE_linear['y'][1::2][10:]) * u_tau_MOOSE_linear / nu,
-             df_590_MOOSE_linear['vel_x'][1::2][10:]/u_tau_MOOSE_linear, 'rx', markersize = 6,  label = 'MOOSE: LSFV k-eps')
+             df_590_MOOSE_linear['vel_x'][1::2][10:]/u_tau_MOOSE_linear, 'rx', markersize = 6,  label = 'MOOSE: FV k-eps')
 ax2.semilogx(df_590_ercoftac['y+'], df_590_ercoftac['Umean'], 'k-', label = 'DNS')
 
 # Plot Settings
@@ -132,5 +132,5 @@ plt.savefig('8_Ret590_dual_plots')
 ### Ret 590: Comparing the wall shear stress against DNS ###
 
 print('tau_w DNS: ',tau_w_dns )
-print('tau_w MOOSE LSFV k-eps: ',tau_w_MOOSE_linear )
-print('Error % MOOSE LSFV k-eps: ', 100 * (tau_w_MOOSE_linear - tau_w_dns) / tau_w_dns)
+print('tau_w MOOSE FV k-eps: ',tau_w_MOOSE_linear )
+print('Error % MOOSE FV k-eps: ', 100 * (tau_w_MOOSE_linear - tau_w_dns) / tau_w_dns)

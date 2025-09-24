@@ -7,7 +7,7 @@
            compressibility:incompressible
            heattransfer:isothermal
            convection_type:forced
-           transient:transient
+           transient:steady
            flow_regime:turbulent
            fluid:fictional
            flow_configuration:free-flow
@@ -18,8 +18,8 @@
 This problem describes a fully-developed, turbulent channel flow in a 2D domain. Two cases were studied based on the following Reynolds numbers, $Re$, and their respective friction Reynolds numbers, $Re_\tau$:
 
 \begin{equation}
-Re = 14,000 \; and \; Re_\tau = 395 \\\\
-Re = 22,250 \; and \; Re_\tau = 590
+Re = 14,000 \; \text{and} \; Re_\tau = 395 \\\\
+Re = 22,250 \; \text{and} \; Re_\tau = 590
 \end{equation}
 
 ## Modeling Parameters
@@ -36,7 +36,7 @@ The fluid itself is air with the following material properties:
 Density, +$\rho$+ | $1$ | $\frac{kg}{m^3}$
 Dynamic viscosity, +$\mu$+ |  $\frac{\rho vH \cdot 2}{Re}$  |  $Pa \cdot s$  |
 
-+Note:+ The dynamic viscosity varies based on the Reynolds number for each case and was calculated within the input file (see `OpenPronghorn` Model).
++Note:+ The dynamic viscosity varies based on the Reynolds number for each case and was calculated within the input file (see `OpenPronghorn` model).
 
 The k-epsilon turbulence model is implemented using the following initial conditions:
 
@@ -50,11 +50,11 @@ where $I$ is the turbulence intensity, $U_{ref}$ is a reference flow speed, and 
 
 ## `OpenPronghorn` Model
 
-The mesh is generated using the native mesh generation capabilities in MOOSE. The mesh contains 4,092 quadrilateral cells altogether and is depicted in +Figure 1+ and +Figure 2+ below. Notice the mesh for $Re_\tau = 590$ has a different configuration for the intervals in the Y direction. The size of the first cell near the wall is tied to the $y^{+}$ used in the wall function.
+The mesh is generated using the native mesh generation capabilities in MOOSE. The mesh contains 4,092 quadrilateral cells altogether and is depicted in +[fig:mesh395]+ and +[fig:mesh590]+ below. Notice the mesh for $Re_\tau = 590$ has a different configuration for the intervals in the Y direction. The size of the first cell near the wall is tied to the $y^{+}$ used in the wall function.
 
-!media media/validation/free_flow/isothermal/2d_turbulent_channel/mesh395_2.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh395 caption=Closeup of mesh at the outlet for $Re_\tau = 395$ (channel half-width of 1).
+!media media/validation/free_flow/isothermal/2d_turbulent_channel/mesh395_2.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh395 caption=Closeup of mesh at the outlet for $Re_\tau = 395$ (channel half-width of 1~m).
 
-!media media/validation/free_flow/isothermal/2d_turbulent_channel/mesh590_3.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh590 caption=Closeup of mesh at the outlet for $Re_\tau = 590$ (channel half-width of 1).
+!media media/validation/free_flow/isothermal/2d_turbulent_channel/mesh590_3.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh590 caption=Closeup of mesh at the outlet for $Re_\tau = 590$ (channel half-width of 1~m).
 
 The simulations were executed using a +linear SIMPLE finite volume solver+ with +k-epsilon turbulence modeling+.
 Additional model and discretization parameters may be found in [tab:numparameters].
@@ -62,18 +62,20 @@ Additional model and discretization parameters may be found in [tab:numparameter
 !table id=tab:numparameters caption=Model and discretization parameters.
 | Parameter | Inlet | Outlet | Walls | Bulk Face Interpolation |
 | --- | --- | --- | --- | --- |
-| +Velocity+ | Dirichlet          | Fully-developed | No-slip | Rhie-Chow velocity, upwind momentum |
-| +Pressure+ | Two-term expansion | Dirichlet | - | Average |
-| +TKE+      | Dirichlet          | Fully-developed | Equilibrium | upwind |
-| +TKED+.    | Dirichlet          | Fully-developed | Equilibrium | upwind |
+| +Velocity+ | Dirichlet          | Fully-developed | No-slip | Rhie-Chow mass flux, upwind advected quantity |
+| +Pressure+ | Two-term expansion | Dirichlet | One-term expansion | Average |
+| +TKE+      | Dirichlet          | Fully-developed | Equilibrium wall function | upwind |
+| +TKED+.    | Dirichlet          | Fully-developed | Equilibrium wall function | upwind |
 
-The input file for the solve is embedded below.
+The input file for the solve with $Re_\tau=395$ is embedded below.
 
 !listing validation/free_flow/isothermal/ercoftac_032_channel_flow/1_input/Ret395_linear_SIMPLE_k-epsilon.i
 
 ## Results
 
-The main quantities of interest are the horizontal velocities, $U_{x}$, at the channel outlet and the $y^{+}$. The horizontal velocities were recorded at varying heights up the channel and normalized by the frictional velocity $u_\tau$ via the following operations:
+The main quantities of interest are the horizontal velocities, $U_{x}$, at the channel outlet and the $y^{+}$.
+The $y^{+}$ in the first cell is used to compute the normalization factor for the velocity.
+The horizontal velocities were recorded at varying heights up the channel and normalized by the frictional velocity $u_\tau$ via the following operations:
 
 \begin{equation}
 u_\tau = \frac{y^{+} \cdot Re_{bulk}}{\Delta y}
@@ -97,18 +99,11 @@ where $Re_{bulk}$ is the bulk Reynolds number, and $\Delta y$ is the centroid di
 
 ## Validation
 
-The `OpenPronghorn` results are examined using the root mean square error, +$RMSE$+, calculated as follows:
+The `OpenPronghorn` results are examined using the difference to the normalized axial velocity, calculated as follows:
 
 \begin{equation}
-RMSE = \sqrt\frac{\sum(U_{DNS_i}-U_{norm_i})^2}{N}
+U_{DNS_i}-U_{norm_i}
 \end{equation}
 
-where +$U_{DNS_i}$+ is the tangeantial velocity of the benchmark case, +$U_{norm_i}$+ is the velocity of the `OpenPronghorn` model, and +$N$+ is the number of data points. The lower and upper validation bounds for the +$RMSE$+ are 0.0 and 0.25, respectively, and assigned based on an average deviation within 2.5% of the ERCOFTAC results.
-
-The RMSE results for the two cases are as follows:
-
-!table id=tab:rmse caption=RMSE for `OpenPronghorn` simulations.
-| Re@t@ | RMSE | Acceptable Range |
-| --- | --- | --- |
-395 | 0.220 | 0.00 -- 0.250 |
-590 | 0.145 | 0.00 -- 0.250 |
+where +$U_{DNS_i}$+ is the tangeantial velocity of the benchmark case, +$U_{norm_i}$+ is the velocity of the `OpenPronghorn` model.
+The allowable interval is within two percents of the current solution difference.
