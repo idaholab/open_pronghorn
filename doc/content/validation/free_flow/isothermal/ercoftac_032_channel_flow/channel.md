@@ -69,7 +69,7 @@ Additional model and discretization parameters may be found in [tab:numparameter
 
 The input file for the solve with $Re_\tau=395$ is embedded below.
 
-!listing validation/free_flow/isothermal/ercoftac_032_channel_flow/1_input/Ret395_linear_SIMPLE_k-epsilon.i
+!listing validation/free_flow/isothermal/ercoftac_032_channel_flow/Ret395_linear_SIMPLE_k-epsilon.i
 
 ## Results
 

@@ -1,7 +1,7 @@
 [Tests]
   [channel_395]
     type = CSVDiff
-    input = '1_input/Ret395_linear_SIMPLE_k-epsilon.i'
+    input = 'Ret395_linear_SIMPLE_k-epsilon.i'
     cli_args = 'Outputs/file_base=Ret395_MOOSE_LSFV_k-epsilon'
     csvdiff = 'Ret395_MOOSE_LSFV_k-epsilon_test_csv_0002.csv'
     requirement = 'The system should be able to accurately simulate turbulent flow in a pipe at a Reynolds number of 395 using the linear finite volume discretization and a K-Epsilon turbulence model.'
@@ -17,7 +17,7 @@
 
   [channel_590]
     type = CSVDiff
-    input = '1_input/Ret590_linear_SIMPLE_k-epsilon.i'
+    input = 'Ret590_linear_SIMPLE_k-epsilon.i'
     cli_args = 'Outputs/file_base=Ret590_MOOSE_LSFV_k-epsilon'
     csvdiff = 'Ret590_MOOSE_LSFV_k-epsilon_test_csv_0002.csv'
     requirement = 'The system should be able to accurately simulate turbulent flow in a pipe at a Reynolds number of 395 using the linear finite volume discretization and a K-Epsilon turbulence model.'
