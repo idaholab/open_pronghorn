@@ -19,9 +19,6 @@ class TestCase(ValidationCase):
         cf_exp = pd.read_csv('reference_csv/cf.csv')
 
 
-
-
-
         ############################ Pressure Coefficient ############################
         ### Concatenate the MOOSE data at the inlet and outlet
         x = np.concatenate([moose_inlet_csv['x'], moose_outlet_csv['x']])
@@ -60,8 +57,6 @@ class TestCase(ValidationCase):
         self.sim_cp_interp = np.interp(ercoftac_csv['x/h'], sim_x_norm, sim_pressure_cp)
 
 
-
-
         ############################ Skin Friction Coefficient ############################
 
         H = 0.0127
@@ -95,8 +90,6 @@ class TestCase(ValidationCase):
         # Error Ranges
         self.min_error_cf = ercoftac_cf - error_magnitude_cf
         self.max_error_cf = ercoftac_cf + error_magnitude_cf
-
-
 
 
         ############################ Vertical x-Velocity Profiles ############################
@@ -162,6 +155,7 @@ class TestCase(ValidationCase):
         u_exp_6_cleaned = u_exp_6[~np.isnan(u_exp_6)]
         u_exp_10 = u_exp['x+10']
         u_exp_10_cleaned = u_exp_10[~np.isnan(u_exp_10)]
+        # Note: the nans are removed for the last row with invalid data from the CSV reference, downloaded as is
 
         # MOOSE Reference Data
         u_moose_1 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']

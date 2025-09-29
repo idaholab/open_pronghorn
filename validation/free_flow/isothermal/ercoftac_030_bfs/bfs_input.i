@@ -1,4 +1,3 @@
-
 # Modeling Parameters
 rho = 1.18415
 bulk_u = 44.2
@@ -34,7 +33,6 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 [GlobalParams]
   rhie_chow_user_object = 'rc'
   advected_interp_method = ${advected_interp_method}
-  #velocity_interp_method = 'rc'
 []
 [UserObjects]
   [rc]
@@ -245,6 +243,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     variable = TKE
     functor = 'fully_developed_tke'
   []
+  # Alternative constant inlet BC
   # [inlet_TKE]
   #   type = INSFVInletIntensityTKEBC
   #   boundary = 'inlet'
@@ -260,6 +259,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     variable = TKED
     functor = 'fully_developed_tked'
   []
+  # Alternative constant inlet BC
   # [inlet_TKED]
   #   type = INSFVMixingLengthTKEDBC
   #   boundary = 'inlet'
@@ -324,10 +324,8 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 [UserObjects]
   [read_recycling]
     type = PropertyReadFile
-    #prop_file_name = 'FDflow.csv'
     prop_file_name = 'BFS_FDprofile.csv'
     read_type = 'voronoi'
-    #nprop = 13 # number of columns in CSV
     nprop = 7
     execute_on = TIMESTEP_BEGIN
     nvoronoi = 60

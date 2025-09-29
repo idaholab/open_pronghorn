@@ -1,17 +1,18 @@
 # Backward-Facing Step with Inclined Opposite Wall (2D)
 
 !tag name=BFS with Inclined Opposite Wall
-    image=media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png
+    image=../../media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png
     description=Backward-Facing Wall with Inclined Opposite Wall
     pairs=flow_type:free-flow
-                       compressibility:incompressible
-                       heattransfer:isothermal
-                       convection_type:forced
-                       transient:transient
-                       flow_regime:turbulent
-                       fluid:air
-                       flow_configuration:free-flow
-                       number_of_phases:one
+          compressibility:incompressible
+          heattransfer:isothermal
+          convection_type:forced
+          transient:steady
+          flow_regime:turbulent
+          fluid:air
+          flow_configuration:free-flow
+          number_of_phases:one
+
 
 ## Problem Description
 
@@ -29,7 +30,7 @@ The fluid is air with the following material properties:
 | Density, $\rho$          | $1.18415$               | $\frac{kg}{m^3}$ |
 | Dynamic viscosity, $\mu$ | $1.8551 \times 10^{-5}$ | $Pa \cdot s$     |
 
-The initial conditions including horizontal and vertical velocities, pressure, $k_{init}$, and $\varepsilon_{init}$ are initialized from `.csv` files. The k-epsilon turbulence model is implemented using the following parameters and initial conditions:
+The initial conditions including horizontal and vertical velocities, pressure, $k_{init}$, and $\varepsilon_{init}$ are initialized from `.csv` files. The standard k-epsilon turbulence model is used with the following parameters and initial conditions:
 
 !table id=tab:kepsparam caption=*k-epsilon* turbulence model parameters.
 | Parameter                         | Value    | Units         |
@@ -49,21 +50,21 @@ A no-slip boundary condition is used for all walls. The fluid enters the domain 
 
 ## `OpenPronghorn` Model
 
-The mesh is loaded externally via `FileMeshGenerator` and contains 20,022 quadrilateral cells altogether. [fig:mesh1] shows the mesh in its entirety. [fig:mesh2] is a closeup of the step and the surrounding mesh profile.
+The mesh is loaded externally via `FileMeshGenerator` and contains 20,022 quadrilateral cells altogether. +[fig:mesh1]+ shows the mesh in its entirety. +[fig:mesh2]+ is a closeup of the step and the surrounding mesh profile.
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/mesh.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh1 caption=Overview of the entire mesh.
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_closeup.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh2 caption=Closeup of the step.
 
-The simulations were executed using a +nonlinear SIMPLE finite volume solver+ with +k-epsilon turbulence modeling+. Additional modeling and discretization parameters are found in [tab:numparameters].
+The simulations were executed using a +nonlinear SIMPLE finite volume solver+ with the +standard two-equation k-epsilon turbulence model+. Additional modeling and discretization parameters are found in [tab:numparameters].
 
 !table id=tab:numparameters caption=Modeling and discretization parameters.
-| Parameter  | Inlet              | Outlet          | Walls           | Bulk Face Interpolation             |
-| ---        | ---                | ---             | ---             | ---                                 |
-| +Velocity+ | Dirichlet          | Fully-developed | No-slip         | Rhie-Chow velocity, Upwind momentum |
-| +Pressure+ | Two-term expansion | Dirichlet       | -               | Average                             |
-| +TKE+      | Dirichlet          | Fully-developed | Non-equilibrium | Upwind                              |
-| +TKED+.    | Dirichlet          | Fully-developed | Non-equilibrium | Upwind                              |
+| Parameter  | Inlet              | Outlet          | Walls                         | Bulk Face Interpolation             |
+| ---        | ---                | ---             | ---                           | ---                                 |
+| +Velocity+ | Dirichlet          | Fully-developed | No-slip                       | Rhie-Chow mass flux, Upwind advected quantity |
+| +Pressure+ | Two-term expansion | Dirichlet       | One-term expansion            | Average                             |
+| +TKE+      | Dirichlet          | Fully-developed | Non-equilibrium wall function | Upwind                              |
+| +TKED+.    | Dirichlet          | Fully-developed | Non-equilibrium wall function | Upwind                              |
 
 The input file for the solve is embedded below.
 
@@ -71,7 +72,7 @@ The input file for the solve is embedded below.
 
 ## Results
 
-The main quantities of interest are pressure coefficient $c_{p}$, wall-skin friction coefficient $c_{f}$, and the x-velocity profiles up the height of the channel.
+The main quantities of interest are pressure coefficient $c_{p}$, wall skin friction coefficient $c_{f}$, and the x-velocity profiles up the height of the channel.
 Further manipulation in post was required to derive $c_{p}$ and $c_{f}$.
 
 To derive the pressure coefficient $c_{p}$, the pressure variable was recorded by `OpenPronghorn` and divided by the dynamic pressure $q$, as follows:
@@ -90,9 +91,14 @@ c_p = \frac{p_{s}}{q}
 | Density, $\rho$    | $1.18415$ | $\frac{kg}{m^3}$ |
 | Flow velocity, $u$ | $48.18$   | $\frac{m}{s}$    |
 
-!media media/validation/free_flow/isothermal/ercoftac_030_bfs/plots_cp_main.png style=width:50%;margin-left:auto;margin-right:auto;text-align:center; id=fig:plot1 caption=Graph of the pressure coefficient across the length of the channel.
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
+       image_name=plots_cp_main.png
+       style=width:50%;margin-left:auto;margin-right:auto;text-align:center;
+       id=fig:plot1
+       caption=Graph of the pressure coefficient across the length of the channel.
 
-To derive the wall-skin friction coefficient $c_{f}$, the following variables were recorded in `OpenPronghorn` and manipulated as follows: turbulent dynamic viscosity $\mu_{t}$, wall distance $d_{wall}$, and horizontal velocity $u_x$.
+To derive the wall skin friction coefficient $c_{f}$, the following variables were recorded in `OpenPronghorn` and manipulated as follows: turbulent dynamic viscosity $\mu_{t}$, wall distance $d_{wall}$, and horizontal velocity $u_x$. +[fig:plot3]+ shows the horizontal velocity at different lengths along the channel,
+and +[fig:plot2]+ shows the wall skin friction coefficient.
 
 \begin{equation}
 q = \frac{\rho u^2}{2}
@@ -108,26 +114,47 @@ c_f = \frac{\mu_{t}u_x}{d_{wall}} \cdot \frac{1}{q}
 | Density, $\rho$    | $1.18415$ | $\frac{kg}{m^3}$ |
 | Flow velocity, $u$ | $47$      | $\frac{m}{s}$    |
 
-!media media/validation/free_flow/isothermal/ercoftac_030_bfs/plots_cf_main.png style=width:50%;margin-left:auto;margin-right:auto;text-align:center; id=fig:plot2 caption=Graph of the wall-skin friction coefficient across the length of the channel.
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
+       image_name=plots_cf_main.png
+       style=width:50%;margin-left:auto;margin-right:auto;text-align:center
+       id=fig:plot2
+       caption=Graph of the wall skin friction coefficient across the length of the channel.
 
-!media media/validation/free_flow/isothermal/ercoftac_030_bfs/plots_u_profiles_main.png style=width:100%;margin-left:auto;margin-right:auto;text-align:center; id=fig:plot3 caption=Graphs of the vertical x-velocity profiles at different lengths down the channel.
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
+       image_name=plots_u_profiles_main.png
+       style=width:100%;margin-left:auto;margin-right:auto;text-align:center
+       id=fig:plot3
+       caption=Graphs of the horizontal x-velocity profiles at different lengths down the channel.
 
 ## Validation
 
 Current `OpenPronghorn` results were validated by comparing against errors representing uncertainty between the benchmark data and reference `OpenPronghorn` results. The error bars were calculated as follows:
 
 \begin{equation}
-Maximum \: Absolute \: Deviation = 1.02 \cdot |X_R - X_E|
+\text{Maximum Absolute Deviation} = 1.02 \cdot |X_R - X_E|
 \end{equation}
 
 \begin{equation}
-Acceptable \: Range = X_E \: \pm \: Maximum \: Deviation
+\text{Acceptable Range} = X_E \: \pm \: \text{Maximum Absolute Deviation}
 \end{equation}
 
 where $X_E$ is the ERCOFTAC data and $X_R$ is the reference data. The errors on this validation case should not increase by more than 2\% over the current difference to the validation data. If the current `OpenPronghorn` simulation data fall within the error ranges, the results are validated.
++[fig:plot4]+, +[fig:plot5]+ and +[fig:plot6]+ show the reference results and error ranges for the metrics tracked.
 
-!media media/validation/free_flow/isothermal/ercoftac_030_bfs/plots_cp_cf_error_main.png style=width:100%;margin-left:auto;margin-right:auto;text-align:center; id=fig:plot4 caption=Current `OpenPronghorn` results for $c_p$ and $c_f$.
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
+       image_name=plots_cp_cf_error_main.png
+       style=width:100%;margin-left:auto;margin-right:auto;text-align:center
+       id=fig:plot4
+       caption=Reference `OpenPronghorn` results for $c_p$ and $c_f$.
 
-!media media/validation/free_flow/isothermal/ercoftac_030_bfs/plots_u_profiles_error1_main.png style=width:100%;margin-left:auto;margin-right:auto;text-align:center; id=fig:plot5 caption=Current `OpenPronghorn` results for vertical x-velocities at x/H = 1 and 4.
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
+       image_name=plots_u_profiles_error1_main.png
+       style=width:100%;margin-left:auto;margin-right:auto;text-align:center
+       id=fig:plot5
+       caption=Reference `OpenPronghorn` results for vertical x-velocities at x/H = 1 and 4.
 
-!media media/validation/free_flow/isothermal/ercoftac_030_bfs/plots_u_profiles_error2_main.png style=width:100%;margin-left:auto;margin-right:auto;text-align:center; id=fig:plot6 caption=Current `OpenPronghorn` results for vertical x-velocities at x/H = 6 and 10.
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
+       image_name=plots_u_profiles_error2_main.png
+       style=width:100%;margin-left:auto;margin-right:auto;text-align:center
+       id=fig:plot6
+       caption=Reference `OpenPronghorn` results for vertical x-velocities at x/H = 6 and 10.
