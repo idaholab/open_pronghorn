@@ -1,0 +1,31 @@
+[Tests]
+  [channel_395]
+    type = CSVDiff
+    input = 'Ret395_linear_SIMPLE_k-epsilon.i'
+    cli_args = 'Outputs/file_base=Ret395_MOOSE_LSFV_k-epsilon'
+    csvdiff = 'Ret395_MOOSE_LSFV_k-epsilon_test_csv_0002.csv'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a pipe at a Reynolds number of 395 using the linear finite volume discretization and a K-Epsilon turbulence model.'
+    min_parallel = 10
+    max_time = 1000
+    validation_test = '3_vel_RMSE_vnv_395.py'
+    # 2% error allowed
+    # On the axial velocity profile: can add or remove 2% of the current error to the ERCOFTAC data
+    # On the outlet first wall cell y+: 2% relative difference to the reference MOOSE result
+    validation_lower_bound = -0.02
+    validation_upper_bound = 0.02
+  []
+
+  [channel_590]
+    type = CSVDiff
+    input = 'Ret590_linear_SIMPLE_k-epsilon.i'
+    cli_args = 'Outputs/file_base=Ret590_MOOSE_LSFV_k-epsilon'
+    csvdiff = 'Ret590_MOOSE_LSFV_k-epsilon_test_csv_0002.csv'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a pipe at a Reynolds number of 395 using the linear finite volume discretization and a K-Epsilon turbulence model.'
+    min_parallel = 10
+    max_time = 1000
+    validation_test = '4_vel_RMSE_vnv_590.py'
+    # 2% error allowed
+    validation_lower_bound = -0.02
+    validation_upper_bound = 0.02
+  []
+[]
