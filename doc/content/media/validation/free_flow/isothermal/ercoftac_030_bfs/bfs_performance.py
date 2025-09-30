@@ -6,7 +6,7 @@ import pandas as pd
 from TestHarness.resultsreader.reader import TestHarnessResultsReader
 
 reader = TestHarnessResultsReader("civet_tests_open_pronghorn_validation")
-results = reader.getTestResults("free_flow/isothermal/ercoftac_030_bfs_copy","bfs_030")
+results = reader.getTestResults("free_flow/isothermal/ercoftac_030_bfs", "bfs_030")
 
 # We populate the dataframe
 dates = []

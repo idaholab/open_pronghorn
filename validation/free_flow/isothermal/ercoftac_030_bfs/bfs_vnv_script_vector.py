@@ -7,6 +7,8 @@ import os
 class TestCase(ValidationCase):
     def initialize(self):
 
+        # Authorized relative increase in the error
+        err_max = 0.01
 
         ############################ Setting Up Reference Data ############################
 
@@ -37,10 +39,10 @@ class TestCase(ValidationCase):
         moose_cp_interp = np.interp(ercoftac_csv['x/h'], moose_cp_x, moose_cp)
         self.moose_cp = moose_cp_interp
 
-        error_magnitude = abs(1.02 * (ercoftac_cp - moose_cp_interp))
+        error_magnitude = abs((1 + err_max) * (ercoftac_cp - moose_cp_interp))
 
-        self.min_error = ercoftac_cp - error_magnitude
-        self.max_error = ercoftac_cp + error_magnitude
+        self.min_values_cp = ercoftac_cp - error_magnitude
+        self.max_values_cp = ercoftac_cp + error_magnitude
 
         ### Setting Up Simulation Data
         ### Modify with respective .csv files from OpenPronghorn simulations
@@ -85,11 +87,11 @@ class TestCase(ValidationCase):
         ### Interpolate MOOSE onto ERCOFTAC
         self.sim_moose_cf_interp = np.interp(cf_exp['x/h'], sim_moose_x, sim_moose_cf)
         moose_cf_interp = np.interp(cf_exp['x/h'], moose_x, moose_cf)
-        error_magnitude_cf = (abs( 1.02 * (ercoftac_cf - moose_cf_interp) ) )
+        error_magnitude_cf = (abs( (1 + err_max) * (ercoftac_cf - moose_cf_interp) ) )
 
         # Error Ranges
-        self.min_error_cf = ercoftac_cf - error_magnitude_cf
-        self.max_error_cf = ercoftac_cf + error_magnitude_cf
+        self.min_values_cf = ercoftac_cf - error_magnitude_cf
+        self.max_values_cf = ercoftac_cf + error_magnitude_cf
 
 
         ############################ Vertical x-Velocity Profiles ############################
@@ -171,63 +173,59 @@ class TestCase(ValidationCase):
 
 
         ### Error calculations based on (ERCOFTAC - MOOSE: Reference)
-        error_magnitude_1 = abs(1.02 * (u_exp_1_cleaned - u_moose_1))
-        error_magnitude_4 = abs(1.02 * (u_exp_4_cleaned - u_moose_4))
-        error_magnitude_6 = abs(1.02 * (u_exp_6_cleaned - u_moose_6))
-        error_magnitude_10 = abs(1.02 * (u_exp_10_cleaned - u_moose_10))
+        error_magnitude_1 = abs((1 + err_max) * (u_exp_1_cleaned - u_moose_1))
+        error_magnitude_4 = abs((1 + err_max) * (u_exp_4_cleaned - u_moose_4))
+        error_magnitude_6 = abs((1 + err_max) * (u_exp_6_cleaned - u_moose_6))
+        error_magnitude_10 = abs((1 + err_max) * (u_exp_10_cleaned - u_moose_10))
 
         # Min & max error calculations based on (ERCOFTAC - MOOSE: Reference)
-        sim_min_error_1 = u_exp_1 - error_magnitude_1
-        self.sim_min_error_1_cleaned = sim_min_error_1[~np.isnan(sim_min_error_1)]
-        sim_max_error_1 = u_exp_1 + error_magnitude_1
-        self.sim_max_error_1_cleaned = sim_max_error_1[~np.isnan(sim_max_error_1)]
+        sim_min_values_1 = u_exp_1 - error_magnitude_1
+        self.sim_min_values_1_cleaned = sim_min_values_1[~np.isnan(sim_min_values_1)]
+        sim_max_values_1 = u_exp_1 + error_magnitude_1
+        self.sim_max_values_1_cleaned = sim_max_values_1[~np.isnan(sim_max_values_1)]
 
-        sim_min_error_4 = u_exp_4 - error_magnitude_4
-        self.sim_min_error_4_cleaned = sim_min_error_4[~np.isnan(sim_min_error_4)]
-        sim_max_error_4 = u_exp_4 + error_magnitude_4
-        self.sim_max_error_4_cleaned = sim_max_error_4[~np.isnan(sim_max_error_4)]
+        sim_min_values_4 = u_exp_4 - error_magnitude_4
+        self.sim_min_values_4_cleaned = sim_min_values_4[~np.isnan(sim_min_values_4)]
+        sim_max_values_4 = u_exp_4 + error_magnitude_4
+        self.sim_max_values_4_cleaned = sim_max_values_4[~np.isnan(sim_max_values_4)]
 
-        sim_min_error_6 = u_exp_6 - error_magnitude_6
-        self.sim_min_error_6_cleaned = sim_min_error_6[~np.isnan(sim_min_error_6)]
-        sim_max_error_6 = u_exp_6 + error_magnitude_6
-        self.sim_max_error_6_cleaned = sim_max_error_6[~np.isnan(sim_max_error_6)]
+        sim_min_values_6 = u_exp_6 - error_magnitude_6
+        self.sim_min_values_6_cleaned = sim_min_values_6[~np.isnan(sim_min_values_6)]
+        sim_max_values_6 = u_exp_6 + error_magnitude_6
+        self.sim_max_values_6_cleaned = sim_max_values_6[~np.isnan(sim_max_values_6)]
 
-        sim_min_error_10 = u_exp_10 - error_magnitude_10
-        self.sim_min_error_10_cleaned = sim_min_error_10[~np.isnan(sim_min_error_10)]
-        sim_max_error_10 = u_exp_10 + error_magnitude_10
-        self.sim_max_error_10_cleaned = sim_max_error_10[~np.isnan(sim_max_error_10)]
-
-
-
-
+        sim_min_values_10 = u_exp_10 - error_magnitude_10
+        self.sim_min_values_10_cleaned = sim_min_values_10[~np.isnan(sim_min_values_10)]
+        sim_max_values_10 = u_exp_10 + error_magnitude_10
+        self.sim_max_values_10_cleaned = sim_max_values_10[~np.isnan(sim_max_values_10)]
 
     def testValidation(self):
         self.addVectorData('xh_cp',
                     (self.ercoftac_cp_x, 'Normalized distance', '-'),
                     (self.sim_cp_interp, 'Pressure coefficient', '-'),
-                    bounds=((self.min_error, self.max_error)))
+                    bounds=((self.min_values_cp, self.max_values_cp)))
 
         self.addVectorData('xh_cf',
             (self.ercoftac_x_cf, 'Normalized distance', '-'),
             (self.sim_moose_cf_interp, 'Skin friction coefficient', '-'),
-            bounds=((self.min_error_cf, self.max_error_cf)))
+            bounds=((self.min_values_cf, self.max_values_cf)))
 
         self.addVectorData('yh_1',
             (self.y_grid, 'Normalized distance', '-'),
             (self.sim_u_moose_1, 'Vertical x-Velocity at x/H=1', '-'),
-            bounds=((self.sim_min_error_1_cleaned, self.sim_max_error_1_cleaned)))
+            bounds=((self.sim_min_values_1_cleaned, self.sim_max_values_1_cleaned)))
 
         self.addVectorData('yh_4',
             (self.y_grid, 'Normalized distance', '-'),
             (self.sim_u_moose_4, 'Vertical x-Velocity at x/H=4', '-'),
-            bounds=((self.sim_min_error_4_cleaned, self.sim_max_error_4_cleaned)))
+            bounds=((self.sim_min_values_4_cleaned, self.sim_max_values_4_cleaned)))
 
         self.addVectorData('yh_6',
             (self.y_grid, 'Normalized distance', '-'),
             (self.sim_u_moose_6, 'Vertical x-Velocity at x/H=6', '-'),
-            bounds=((self.sim_min_error_6_cleaned, self.sim_max_error_6_cleaned)))
+            bounds=((self.sim_min_values_6_cleaned, self.sim_max_values_6_cleaned)))
 
         self.addVectorData('yh_10',
             (self.y_grid, 'Normalized distance', '-'),
             (self.sim_u_moose_10, 'Vertical x-Velocity at x/H=10', '-'),
-            bounds=((self.sim_min_error_10_cleaned, self.sim_max_error_10_cleaned)))
+            bounds=((self.sim_min_values_10_cleaned, self.sim_max_values_10_cleaned)))

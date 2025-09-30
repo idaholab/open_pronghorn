@@ -1,4 +1,4 @@
-# Backward-Facing Step with Inclined Opposite Wall (2D)
+# Backward-Facing Step with Straight Opposite Wall (2D)
 
 !tag name=BFS with Inclined Opposite Wall
     image=../../media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png
@@ -17,6 +17,8 @@
 ## Problem Description
 
 This problem describes a fully-developed turbulent flow in a channel with a rear-facing step in a 2D domain. A detailed description of the benchmark can be found in [!cite](driver1985benchmark) or the [ERCOFTAC database](http://cfd.mace.manchester.ac.uk/ercoftac/doku.php?id=cases:case030). The original benchmark by Driver and Seegmiller tested the case at varying degrees of inclination of the opposite wall. The `OpenPronghorn` model focuses only on the scenario in which the opposing wall is at $0^{\circ}$ (completely horizontal).
+
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/geometry.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh1 caption=Backwards-facing step geometry
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh3 caption=Velocity streamlines near the step.
 
@@ -65,6 +67,8 @@ The simulations were executed using a +nonlinear SIMPLE finite volume solver+ wi
 | +Pressure+ | Two-term expansion | Dirichlet       | One-term expansion            | Average                             |
 | +TKE+      | Dirichlet          | Fully-developed | Non-equilibrium wall function | Upwind                              |
 | +TKED+.    | Dirichlet          | Fully-developed | Non-equilibrium wall function | Upwind                              |
+| $mu_t$     |                    |                 | Non-equilibrium wall function | Average                             |
+
 
 The input file for the solve is embedded below.
 
@@ -97,7 +101,7 @@ c_p = \frac{p_{s}}{q}
        id=fig:plot1
        caption=Graph of the pressure coefficient across the length of the channel.
 
-To derive the wall skin friction coefficient $c_{f}$, the following variables were recorded in `OpenPronghorn` and manipulated as follows: turbulent dynamic viscosity $\mu_{t}$, wall distance $d_{wall}$, and horizontal velocity $u_x$. +[fig:plot3]+ shows the horizontal velocity at different lengths along the channel,
+To derive the wall skin friction coefficient $c_{f}$, the following variables were recorded in `OpenPronghorn` and manipulated as follows: turbulent dynamic viscosity $\mu_{t}$, $\mu_{eff} = \mu + \mu_{t}$ the effective dynamic viscosity, wall distance $d_{wall}$, and horizontal velocity $u_x$. +[fig:plot3]+ shows the horizontal velocity at different lengths along the channel,
 and +[fig:plot2]+ shows the wall skin friction coefficient.
 
 \begin{equation}
@@ -105,7 +109,7 @@ q = \frac{\rho u^2}{2}
 \end{equation}
 
 \begin{equation}
-c_f = \frac{\mu_{t}u_x}{d_{wall}} \cdot \frac{1}{q}
+c_f = \frac{\mu_{eff}u_x}{d_{wall}} \cdot \frac{1}{q}
 \end{equation}
 
 !table id=tab:cfparam caption= $c_{f}$ calculation variables.
@@ -158,3 +162,18 @@ where $X_E$ is the ERCOFTAC data and $X_R$ is the reference data. The errors on 
        style=width:100%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:plot6
        caption=Reference `OpenPronghorn` results for vertical x-velocities at x/H = 6 and 10.
+
+## Performance Chart
+
+!alert note
+The following figure showcases the measured total runtime of the problem over the different
+commit history. We utilized INL's High-Performance Computational resources to run these
+simulations so runtimes might vary depending on which physical resource the job got allocated.
+
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_performance.py
+       image_name=bfs_performance.png
+       id=fig:bfs_performance
+       caption=Runtime over the latest commits.
+       style=width:75%;margin-left:auto;margin-right:auto;text-align:center
+
+

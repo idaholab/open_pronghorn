@@ -47,28 +47,23 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    #initial_condition = ${bulk_u}
     solver_sys = u_system
   []
   [vel_y]
     type = MooseLinearVariableFVReal
-    #initial_condition = 0
     solver_sys = v_system
   []
   [pressure]
     type = MooseLinearVariableFVReal
-    #initial_condition = 1e-8
     solver_sys = pressure_system
   []
   [TKE]
     type = MooseLinearVariableFVReal
     solver_sys = TKE_system
-    #initial_condition = ${k_init}
   []
   [TKED]
     type = MooseLinearVariableFVReal
     solver_sys = TKED_system
-    #initial_condition = ${eps_init}
   []
 []
 [FVICs]
@@ -108,14 +103,14 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     v = vel_y
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = true
-    use_deviatoric_terms = false
+    use_nonorthogonal_correction = false
+    use_deviatoric_terms = true
   []
   [u_diffusion]
     type = LinearFVDiffusion
     variable = vel_x
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -132,14 +127,14 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     v = vel_y
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = true
-    use_deviatoric_terms = false
+    use_nonorthogonal_correction = false
+    use_deviatoric_terms = true
   []
   [v_diffusion]
     type = LinearFVDiffusion
     variable = vel_y
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -151,7 +146,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = Ainv
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [HbyA_divergence]
     type = LinearFVDivergence
@@ -167,14 +162,14 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [TKE_turb_diffusion]
     type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_k}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [TKE_source_sink]
     type = LinearFVTKESourceSink
@@ -198,7 +193,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = LinearFVTurbulentDiffusion
     variable = TKED
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     walls = ${walls}
   []
   [TKED_turb_diffusion]
@@ -206,7 +201,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     variable = TKED
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_eps}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     walls = ${walls}
   []
   [TKED_source_sink]
@@ -455,12 +450,12 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   turbulence_systems = 'TKE_system TKED_system'
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
-  turbulence_l_abs_tol = 1e-14
-  momentum_l_tol = 1e-14
-  pressure_l_tol = 1e-14
-  turbulence_l_tol = 1e-14
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
+  turbulence_l_abs_tol = 1e-10
+  momentum_l_tol = 1e-10
+  pressure_l_tol = 1e-10
+  turbulence_l_tol = 1e-10
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   turbulence_equation_relaxation = '0.25 0.25'
@@ -531,7 +526,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   []
 []
 [Outputs]
-  [durbin]
+  [exo]
     type = Exodus
   []
   [csv]

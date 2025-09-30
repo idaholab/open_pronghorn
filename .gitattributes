@@ -9,3 +9,4 @@ doc/content/media/validation/free_flow/isothermal/ercoftac_030_bfs/mesh.png filt
 doc/content/media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png filter=lfs diff=lfs merge=lfs -text
 doc/content/media/validation/free_flow/isothermal/ercoftac_030_bfs/title_image.png filter=lfs diff=lfs merge=lfs -text
 doc/content/media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_closeup.png filter=lfs diff=lfs merge=lfs -text
+doc/content/media/validation/free_flow/isothermal/ercoftac_030_bfs/geometry.png filter=lfs diff=lfs merge=lfs -text

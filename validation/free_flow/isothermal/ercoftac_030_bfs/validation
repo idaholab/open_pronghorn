@@ -6,7 +6,7 @@
     requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a standard K-Epsilon turbulence model.'
     min_parallel = 10
     max_time = 10000
-    # The tolerance is hardcoded at 2% of the current error
+    # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
   []
 []
