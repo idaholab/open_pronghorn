@@ -208,6 +208,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     C2_eps = ${C2_eps}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
+    C_pl = 2.0
   []
 []
 [LinearFVBCs]
@@ -328,7 +329,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = kEpsilonViscosityAux
     variable = mu_t
     C_mu = ${C_mu}
-    tke =TKE
+    tke = TKE
     epsilon = TKED
     mu = ${mu}
     rho = ${rho}
@@ -404,15 +405,15 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   turbulence_systems = 'TKE_system TKED_system'
-  momentum_l_abs_tol = 1e-10
-  pressure_l_abs_tol = 1e-10
-  turbulence_l_abs_tol = 1e-10
+  momentum_l_abs_tol = 1e-8
+  pressure_l_abs_tol = 1e-8
+  turbulence_l_abs_tol = 1e-8
   momentum_l_tol = 1e-10
   pressure_l_tol = 1e-10
   turbulence_l_tol = 1e-10
   momentum_equation_relaxation = 0.9
   pressure_variable_relaxation = 0.5
-  turbulence_equation_relaxation = '0.4 0.4'
+  turbulence_equation_relaxation = '0.5 0.5'
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   turbulence_absolute_tolerance = '1e-8 1e-8'
