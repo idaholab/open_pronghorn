@@ -42,6 +42,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    pressure_projection_method = 'consistent'
   []
 []
 [Variables]
@@ -70,27 +71,17 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   [vel_x_ic]
      type = FVFunctionIC
      variable = 'vel_x'
-     function = IC_vel_x
-  []
-  [vel_y_ic]
-    type = FVFunctionIC
-    variable = 'vel_y'
-    function = IC_vel_y
-  []
-  [pressure_ic]
-    type = FVFunctionIC
-    variable = 'pressure'
-    function = IC_pressure
+     function = 1e-3
   []
   [TKE_ic]
     type = FVFunctionIC
     variable = 'TKE'
-    function = IC_TKE
+    function = ${k_init}
   []
   [TKED_ic]
     type = FVFunctionIC
     variable = 'TKED'
-    function = IC_TKED
+    function = ${eps_init}
   []
 []
 [LinearFVKernels]
@@ -316,74 +307,6 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     wall_treatment = ${wall_treatment}
   []
 []
-[UserObjects]
-  [read_recycling]
-    type = PropertyReadFile
-    prop_file_name = 'BFS_FDprofile.csv'
-    read_type = 'voronoi'
-    nprop = 7
-    execute_on = TIMESTEP_BEGIN
-    nvoronoi = 60
-  []
-  [read_IC]
-    type = PropertyReadFile
-    prop_file_name = 'BFS_IC.csv'
-    read_type = 'voronoi'
-    nprop = 8 # number of columns in CSV
-    execute_on = TIMESTEP_BEGIN
-    nvoronoi = 10575
-  []
-[]
-[Functions]
-  [fully_developed_velocity]
-    type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_recycling'
-    read_type = 'voronoi'
-    column_number = '3'
-  []
-  [fully_developed_tke]
-    type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_recycling'
-    read_type = 'voronoi'
-    column_number = '6'
-  []
-  [fully_developed_tked]
-    type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_recycling'
-    read_type = 'voronoi'
-    column_number = '5'
-  []
-  [IC_vel_x]
-   type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_IC'
-    read_type = 'voronoi'
-    column_number = '6'
-  []
-  [IC_vel_y]
-    type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_IC'
-    read_type = 'voronoi'
-    column_number = '7'
-  []
-  [IC_pressure]
-    type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_IC'
-    read_type = 'voronoi'
-    column_number = '3'
-  []
-  [IC_TKE]
-    type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_IC'
-    read_type = 'voronoi'
-    column_number = '4'
-  []
-  [IC_TKED]
-    type = PiecewiseConstantFromCSV
-    read_prop_user_object = 'read_IC'
-    read_type = 'voronoi'
-    column_number = '5'
-  []
-[]
 [AuxVariables]
   [mu_t]
     type = MooseLinearVariableFVReal
@@ -394,7 +317,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   []
   [mu_eff]
     type = MooseLinearVariableFVReal
-    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
+    initial_condition = '${fparse mu + rho * C_mu * ${k_init}^2 / eps_init}'
   []
   [distance]
     type = MooseVariableFVReal
@@ -444,6 +367,37 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     von_karman_const = 1.0
   []
 []
+
+[UserObjects]
+  [read_recycling]
+    type = PropertyReadFile
+    prop_file_name = 'BFS_FDprofile.csv'
+    read_type = 'voronoi'
+    nprop = 7
+    execute_on = TIMESTEP_BEGIN
+    nvoronoi = 60
+  []
+[]
+[Functions]
+  [fully_developed_velocity]
+    type = PiecewiseConstantFromCSV
+    read_prop_user_object = 'read_recycling'
+    read_type = 'voronoi'
+    column_number = '3'
+  []
+  [fully_developed_tke]
+    type = PiecewiseConstantFromCSV
+    read_prop_user_object = 'read_recycling'
+    read_type = 'voronoi'
+    column_number = '6'
+  []
+  [fully_developed_tked]
+    type = PiecewiseConstantFromCSV
+    read_prop_user_object = 'read_recycling'
+    read_type = 'voronoi'
+    column_number = '5'
+  []
+[]
 [Executioner]
   type = SIMPLE
   rhie_chow_user_object = 'rc'
@@ -456,10 +410,9 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   momentum_l_tol = 1e-10
   pressure_l_tol = 1e-10
   turbulence_l_tol = 1e-10
-  momentum_equation_relaxation = 0.7
-  pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.25 0.25'
-  num_iterations = 3000
+  momentum_equation_relaxation = 0.9
+  pressure_variable_relaxation = 0.5
+  turbulence_equation_relaxation = '0.4 0.4'
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   turbulence_absolute_tolerance = '1e-8 1e-8'
@@ -473,7 +426,9 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   pressure_l_max_its = 300
   turbulence_l_max_its = 30
   print_fields = false
-  continue_on_max_its = true
+
+  num_iterations = 6000
+  continue_on_max_its = false
 []
 [VectorPostprocessors]
   [inlet_sampler]
