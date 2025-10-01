@@ -18,7 +18,7 @@
 
 This problem describes a fully-developed turbulent flow in a channel with a rear-facing step in a 2D domain. A detailed description of the benchmark can be found in [!cite](driver1985benchmark) or the [ERCOFTAC database](http://cfd.mace.manchester.ac.uk/ercoftac/doku.php?id=cases:case030). The original benchmark by Driver and Seegmiller tested the case at varying degrees of inclination of the opposite wall. The `OpenPronghorn` model focuses only on the scenario in which the opposing wall is at $0^{\circ}$ (completely horizontal).
 
-!media media/validation/free_flow/isothermal/ercoftac_030_bfs/geometry.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh1 caption=Backwards-facing step geometry
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/geometry.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:geom caption=Backwards-facing step geometry
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh3 caption=Velocity streamlines near the step.
 
@@ -58,7 +58,7 @@ The mesh is loaded externally via `FileMeshGenerator` and contains 20,022 quadri
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_closeup.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh2 caption=Closeup of the step.
 
-The simulations were executed using a +nonlinear SIMPLE finite volume solver+ with the +standard two-equation k-epsilon turbulence model+. Additional modeling and discretization parameters are found in [tab:numparameters].
+The simulations were executed using a +nonlinear SIMPLE finite volume solver+ with the +standard two-equation k-epsilon turbulence model+. Additional modeling and discretization parameters are found in [tab:numparameters] .
 
 !table id=tab:numparameters caption=Modeling and discretization parameters.
 | Parameter  | Inlet              | Outlet          | Walls                         | Bulk Face Interpolation             |
@@ -67,7 +67,7 @@ The simulations were executed using a +nonlinear SIMPLE finite volume solver+ wi
 | +Pressure+ | Two-term expansion | Dirichlet       | One-term expansion            | Average                             |
 | +TKE+      | Dirichlet          | Fully-developed | Non-equilibrium wall function | Upwind                              |
 | +TKED+.    | Dirichlet          | Fully-developed | Non-equilibrium wall function | Upwind                              |
-| $mu_t$     |                    |                 | Non-equilibrium wall function | Average                             |
+| $\mu_t$     |                    |                 | Non-equilibrium wall function | Average                             |
 
 
 The input file for the solve is embedded below.
@@ -142,7 +142,8 @@ Current `OpenPronghorn` results were validated by comparing against errors repre
 \text{Acceptable Range} = X_E \: \pm \: \text{Maximum Absolute Deviation}
 \end{equation}
 
-where $X_E$ is the ERCOFTAC data and $X_R$ is the reference data. The errors on this validation case should not increase by more than 2\% over the current difference to the validation data. If the current `OpenPronghorn` simulation data fall within the error ranges, the results are validated.
+where $X_E$ is the ERCOFTAC data and $X_R$ is the reference data. The errors on this validation case should not increase by more than 1% over the current difference to the validation data. If the current `OpenPronghorn` simulation data fall within the error ranges, the results are validated. This
+ensures the error is only improved over time with refinements in the model.
 +[fig:plot4]+, +[fig:plot5]+ and +[fig:plot6]+ show the reference results and error ranges for the metrics tracked.
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py

@@ -69,7 +69,7 @@ if plot_current_results:
 
 
 # Create subplots
-fig, ax1 = plt.subplots(1, 1, figsize=(4, 4))
+fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
 
 ax1.plot(cp_exp['x/h'], cp_exp['cp'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
@@ -106,7 +106,7 @@ if plot_current_results:
 
 
 # Create subplots
-fig, ax1 = plt.subplots(1, 1, figsize=(4, 4))
+fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
 
 ax1.plot(cf_exp['x/h'], cf_exp['cf'], 'k.', label='Exp')
 if plot_reference_results:
@@ -180,7 +180,7 @@ u_exp = pd.read_csv(validation_folder + 'reference_csv/u_profiles_exp.csv')
 
 
 # Create subplots
-fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(4, 4), constrained_layout=True)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10), constrained_layout=True)
 fig.suptitle("Vertical X-Velocity Profiles", fontsize="14")
 
 ax1.plot(u_exp['x+1'], u_exp['y/h'], 'k.', label='ERCOFTAC')

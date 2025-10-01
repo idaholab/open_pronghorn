@@ -66,7 +66,7 @@ Additional model and discretization parameters may be found in [tab:numparameter
 | +Pressure+ | Two-term expansion | Dirichlet | One-term expansion | Average |
 | +TKE+      | Dirichlet          | Fully-developed | Equilibrium wall function | Upwind |
 | +TKED+.    | Dirichlet          | Fully-developed | Equilibrium wall function | Upwind |
-| $mu_t$     |                    |                 | Equilibrium wall function | Average  |
+| $\mu_t$     |                    |                 | Equilibrium wall function | Average  |
 
 The input file for the solve with $Re_\tau=395$ is embedded below.
 
