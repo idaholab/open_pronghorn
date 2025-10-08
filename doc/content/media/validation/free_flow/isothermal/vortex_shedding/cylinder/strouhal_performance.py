@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from TestHarness.resultsreader.reader import TestHarnessResultsReader
+from TestHarness.resultsstore.reader import ResultsReader
 import os
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # We load the results
-reader = TestHarnessResultsReader("civet_tests_open_pronghorn_validation")
+reader = ResultsReader("civet_tests_open_pronghorn_validation")
 results = reader.getTestResults("free_flow/isothermal/vortex_shedding/cylinder","strouhal")
 
 df = pd.DataFrame({
