@@ -13,6 +13,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 plot_current_results = False
 plot_reference_results = True
+plot_errors = True
 
 # Authorized relative increase in the error
 err_max = 0.01
@@ -272,30 +273,54 @@ max_error_cf = ercoftac_cf + error_magnitude_cf
 # Create subplots
 fig, (ax5, ax6) = plt.subplots(1, 2, figsize=(10, 5), constrained_layout=True)
 
-ax5.errorbar(ercoftac_x_cp, ercoftac_cp, yerr=error_magnitude_cp, ecolor='r', capsize = 3, fmt='k-', barsabove=False)
-ax5.plot(ercoftac_x_cp, ercoftac_cp, 'k.', markersize=5, label='ERCOFTAC')
-if plot_reference_results:
-    ax5.plot(ercoftac_x_cp, moose_cp_interp, color='g', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
-if plot_current_results:
-    ax5.plot(ercoftac_x_cp, sim_moose_cp_interp, color='b', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+if not plot_errors:
+    ax5.errorbar(ercoftac_x_cp, ercoftac_cp, yerr=error_magnitude_cp, ecolor='r', capsize = 3, fmt='k-', barsabove=False)
+    ax5.plot(ercoftac_x_cp, ercoftac_cp, 'k.', markersize=5, label='ERCOFTAC')
+    if plot_reference_results:
+        ax5.plot(ercoftac_x_cp, moose_cp_interp, color='g', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax5.plot(ercoftac_x_cp, sim_moose_cp_interp, color='b', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+else:
+    if plot_reference_results:
+        ax5.plot(ercoftac_x_cp, moose_cp_interp - ercoftac_cp, color='g', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax5.plot(ercoftac_x_cp, sim_moose_cp_interp - ercoftac_cp, color='b', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
 ax5.set_xlabel(r'$\mathrm{x/h}$', fontsize=14)
-ax5.set_ylabel(r'$\mathrm{c_p}$', fontsize=14)
+if plot_errors:
+    ax5.set_ylabel(r'$\mathrm{c_p - c_{p,exp}}$', fontsize=14)
+else:
+    ax5.set_ylabel(r'$\mathrm{c_p}$', fontsize=14)
 ax5.legend()
 ax5.grid(True)
-ax5.set_title("Pressure Coefficient with Error Bars")
+if plot_errors:
+    ax5.set_title("Error in Pressure Coefficient")
+else:
+    ax5.set_title("Pressure Coefficient with Error Bars")
 ax5.set_xlim([-5,22])
 
-ax6.errorbar(ercoftac_x_cf, ercoftac_cf, yerr=error_magnitude_cf, ecolor='r', capsize = 3, fmt='k-', barsabove=False)
-ax6.plot(ercoftac_x_cf, ercoftac_cf, 'k.', markersize=5, label='ERCOFTAC')
-if plot_reference_results:
-    ax6.plot(ercoftac_x_cf, moose_cf_interp, color='g', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
-if plot_current_results:
-    ax6.plot(ercoftac_x_cf, sim_moose_cf_interp, color='b', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+if not plot_errors:
+    ax6.errorbar(ercoftac_x_cf, ercoftac_cf, yerr=error_magnitude_cf, ecolor='r', capsize = 3, fmt='k-', barsabove=False)
+    ax6.plot(ercoftac_x_cf, ercoftac_cf, 'k.', markersize=5, label='ERCOFTAC')
+    if plot_reference_results:
+        ax6.plot(ercoftac_x_cf, moose_cf_interp, color='g', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax6.plot(ercoftac_x_cf, sim_moose_cf_interp, color='b', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+else:
+    if plot_reference_results:
+        ax6.plot(ercoftac_x_cf, moose_cf_interp - ercoftac_cf, color='g', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax6.plot(ercoftac_x_cf, sim_moose_cf_interp - ercoftac_cf, color='b', linestyle='--', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
 ax6.set_xlabel(r'$\mathrm{x/h}$', fontsize=14)
-ax6.set_ylabel(r'$\mathrm{c_f}$', fontsize=14)
+if plot_errors:
+    ax6.set_ylabel(r'$\mathrm{c_f - c_{f,exp}}$', fontsize=14)
+else:
+    ax6.set_ylabel(r'$\mathrm{c_f}$', fontsize=14)
 ax6.legend()
 ax6.grid(True)
-ax6.set_title("Wall-Skin Friction Coefficient with Error Bars")
+if plot_errors:
+    ax6.set_title("Error in Wall-Skin Friction Coefficient")
+else:
+    ax6.set_title("Wall-Skin Friction Coefficient with Error Bars")
 
 plt.savefig('plots_cp_cf_error_main.png', dpi=300)
 
@@ -337,31 +362,50 @@ max_error_6 = u_exp_6 + error_magnitude_6
 min_error_10 = u_exp_10 - error_magnitude_10
 max_error_10 = u_exp_10 + error_magnitude_10
 
+if plot_errors:
+    x_label = r'$\mathrm{(U - U_{exp})/U_{ref}}$'
+else:
+    x_label = r'$\mathrm{U/U_{ref}}$'
 
 # x/H = 1 and x/H = 4
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5), constrained_layout=True)
-fig.suptitle("Vertical X-Velocity Profiles with Error Bars", fontsize="14")
+if plot_errors:
+    fig.suptitle("Error in Vertical X-Velocity Profiles", fontsize="14")
+else:
+    fig.suptitle("Vertical X-Velocity Profiles with Error Bars", fontsize="14")
 
-ax1.errorbar(u_exp_1_cleaned, y_grid, xerr=error_magnitude_1, ecolor='r', capsize = 3, fmt='k.', barsabove=False)
-ax1.plot(u_exp_1_cleaned, y_grid, marker='o', markersize=4, label='ERCOFTAC')
-if plot_reference_results:
-    ax1.plot(u_moose_1, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
-if plot_current_results:
-    ax1.plot(sim_u_moose_1, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
-ax1.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
+if not plot_errors:
+    ax1.errorbar(u_exp_1_cleaned, y_grid, xerr=error_magnitude_1, ecolor='r', capsize = 3, fmt='k.', barsabove=False)
+    ax1.plot(u_exp_1_cleaned, y_grid, marker='o', markersize=4, label='ERCOFTAC')
+    if plot_reference_results:
+        ax1.plot(u_moose_1, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax1.plot(sim_u_moose_1, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+else:
+    if plot_reference_results:
+        ax1.plot(u_moose_1 - u_exp_1_cleaned, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax1.plot(sim_u_moose_1 - u_exp_1_cleaned, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+ax1.set_xlabel(x_label, fontsize=14)
 ax1.set_ylabel(r'$\mathrm{y/h}$', fontsize=14)
 ax1.legend()
 ax1.grid(True)
 ax1.set_title("x/H = 1")
 ax1.set_ylim([-0.1, 4.5])
 
-ax2.errorbar(u_exp_4_cleaned, y_grid, xerr=error_magnitude_4, ecolor='r', capsize = 3, fmt='k.', barsabove=False)
-ax2.plot(u_exp_4_cleaned, y_grid, marker='o', markersize=4, label='ERCOFTAC')
-if plot_reference_results:
-    ax2.plot(u_moose_4, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
-if plot_current_results:
-    ax2.plot(sim_u_moose_4, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
-ax2.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
+if not plot_errors:
+    ax2.errorbar(u_exp_4_cleaned, y_grid, xerr=error_magnitude_4, ecolor='r', capsize = 3, fmt='k.', barsabove=False)
+    ax2.plot(u_exp_4_cleaned, y_grid, marker='o', markersize=4, label='ERCOFTAC')
+    if plot_reference_results:
+        ax2.plot(u_moose_4, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax2.plot(sim_u_moose_4, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+else:
+    if plot_reference_results:
+        ax2.plot(u_moose_4 - u_exp_4_cleaned, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax2.plot(sim_u_moose_4 - u_exp_4_cleaned, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+ax2.set_xlabel(x_label, fontsize=14)
 ax2.set_ylabel(r'$\mathrm{y/h}$', fontsize=14)
 ax2.legend()
 ax2.grid(True)
@@ -375,26 +419,38 @@ plt.savefig('plots_u_profiles_error1_main.png', dpi=300)
 fig, (ax3, ax4) = plt.subplots(1, 2, figsize=(10, 5), constrained_layout=True)
 fig.suptitle("Vertical X-Velocity Profiles with Error Bars", fontsize="14")
 
-ax3.errorbar(u_exp_6_cleaned, y_grid, xerr=error_magnitude_6, ecolor='r', capsize = 3, fmt='k.', barsabove=False)
-ax3.plot(u_exp_6_cleaned, y_grid, marker='o', markersize=4, label='ERCOFTAC')
-if plot_reference_results:
-    ax3.plot(u_moose_6, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
-if plot_current_results:
-    ax3.plot(sim_u_moose_6, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
-ax3.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
+if not plot_errors:
+    ax3.errorbar(u_exp_6_cleaned, y_grid, xerr=error_magnitude_6, ecolor='r', capsize = 3, fmt='k.', barsabove=False)
+    ax3.plot(u_exp_6_cleaned, y_grid, marker='o', markersize=4, label='ERCOFTAC')
+    if plot_reference_results:
+        ax3.plot(u_moose_6, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax3.plot(sim_u_moose_6, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+else:
+    if plot_reference_results:
+        ax3.plot(u_moose_6 - u_exp_6_cleaned, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax3.plot(sim_u_moose_6 - u_exp_6_cleaned, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+ax3.set_xlabel(x_label, fontsize=14)
 ax3.set_ylabel(r'$\mathrm{y/h}$', fontsize=14)
 ax3.legend()
 ax3.grid(True)
 ax3.set_title("x/H = 6")
 ax3.set_ylim([-0.1, 4.5])
 
-ax4.errorbar(u_exp_10_cleaned, y_grid, xerr=error_magnitude_10, ecolor='r', capsize = 3, fmt='k.', barsabove=False)
-ax4.plot(u_exp_10_cleaned, y_grid, marker='o', markersize=4, label='ERCOFTAC')
-if plot_reference_results:
-    ax4.plot(u_moose_10, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
-if plot_current_results:
-    ax4.plot(sim_u_moose_10, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
-ax4.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
+if not plot_errors:
+    ax4.errorbar(u_exp_10_cleaned, y_grid, xerr=error_magnitude_10, ecolor='r', capsize = 3, fmt='k.', barsabove=False)
+    ax4.plot(u_exp_10_cleaned, y_grid, marker='o', markersize=4, label='ERCOFTAC')
+    if plot_reference_results:
+        ax4.plot(u_moose_10, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax4.plot(sim_u_moose_10, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+else:
+    if plot_reference_results:
+        ax4.plot(u_moose_10 - u_exp_10_cleaned, y_grid, linestyle='--', color='g', marker='o', markersize=4, label='MOOSE-FV K-epsilon' + ref_suffix)
+    if plot_current_results:
+        ax4.plot(sim_u_moose_10 - u_exp_10_cleaned, y_grid, linestyle='--', color='b', marker='o', markersize=4, label='MOOSE-FV K-epsilon current')
+ax4.set_xlabel(x_label, fontsize=14)
 ax4.set_ylabel(r'$\mathrm{y/h}$', fontsize=14)
 ax4.legend()
 ax4.grid(True)

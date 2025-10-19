@@ -145,23 +145,23 @@ Current `OpenPronghorn` results were validated by comparing against errors repre
 
 where $X_E$ is the ERCOFTAC data and $X_R$ is the reference data. The errors on this validation case should not increase by more than 1% over the current difference to the validation data. If the current `OpenPronghorn` simulation data fall within the error ranges, the results are validated. This
 ensures the error is only improved over time with refinements in the model.
-+[fig:plot4]+, +[fig:plot5]+ and +[fig:plot6]+ show the reference results and error ranges for the metrics tracked.
++[fig:plot4]+, +[fig:plot5]+ and +[fig:plot6]+ show the current errors for the metrics tracked.
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
        image_name=plots_cp_cf_error_main.png
        style=width:100%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:plot4
-       caption=Reference `OpenPronghorn` results for $c_p$ and $c_f$.
+       caption=Reference `OpenPronghorn` error for $c_p$ and $c_f$.
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
        image_name=plots_u_profiles_error1_main.png
        style=width:100%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:plot5
-       caption=Reference `OpenPronghorn` results for vertical x-velocities at x/H = 1 and 4.
+       caption=Reference `OpenPronghorn` error for vertical x-velocities at x/H = 1 and 4.
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
        image_name=plots_u_profiles_error2_main.png
        style=width:100%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:plot6
-       caption=Reference `OpenPronghorn` results for vertical x-velocities at x/H = 6 and 10.
+       caption=Reference `OpenPronghorn` error for vertical x-velocities at x/H = 6 and 10.
 
