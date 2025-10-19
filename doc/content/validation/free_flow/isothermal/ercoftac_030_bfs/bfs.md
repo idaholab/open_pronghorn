@@ -32,7 +32,7 @@ The fluid is air with the following material properties:
 | Density, $\rho$          | $1.18415$               | $\frac{kg}{m^3}$ |
 | Dynamic viscosity, $\mu$ | $1.8551 \times 10^{-5}$ | $Pa \cdot s$     |
 
-The initial conditions including horizontal and vertical velocities, pressure, $k_{init}$, and $\varepsilon_{init}$ are initialized from `.csv` files. The standard k-epsilon turbulence model is used with the following parameters and initial conditions:
+The standard k-epsilon turbulence model is used with the following parameters and initial conditions:
 
 !table id=tab:kepsparam caption=*k-epsilon* turbulence model parameters.
 | Parameter                         | Value    | Units         |
@@ -49,6 +49,7 @@ Initial turbulence dissipation rate, $\varepsilon_{init}$ | $\frac{C_{\mu}^\frac
 
 
 A no-slip boundary condition is used for all walls. The fluid enters the domain through the left boundary (inlet) and exits out the right boundary (outlet).
+The inlet velocity and turbulence field profiles have been previously obtained from a well-developed flow simulation and are imposed at the inlet boundary using `.csv` files.
 
 ## `OpenPronghorn` Model
 
