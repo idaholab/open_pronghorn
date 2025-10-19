@@ -57,8 +57,13 @@ cf_exp = pd.read_csv(validation_folder + 'reference_csv/cf.csv')
 
 ############################ Pressure Coefficient Analysis ############################
 
+# Velocity at center of channel at x/H = -4
+U_ref = 48.2783
+# Height of the step
 H = 0.0127
-cp_factor = 0.5*1.18415*48.18**2 # 1/2 rho U_ref^2
+# Density of the fluid
+rho = 1.18415
+cp_factor = 0.5*rho*U_ref**2 # 1/2 rho U_ref^2
 
 # Concatenate inlet and outlet data for MOOSE .csv
 x = np.concatenate([reference_in['x'], reference_out['x']])
@@ -89,9 +94,7 @@ plt.savefig('plots_cp_main.png', dpi=300)
 
 ############################ Wall-Skin Friction Coefficient Analysis ############################
 
-H = 0.0127
-cf_factor = 0.5*1.18415*47.**2
-
+cf_factor = 0.5*rho*U_ref**2
 
 # Concatenate inlet and outlet data for MOOSE .csv
 x = np.concatenate([reference_in['x'], reference_out['x']])
@@ -151,8 +154,8 @@ interpolated_results = {}
 
 for file in linear_files:
     df_linear = pd.read_csv(validation_folder + file)
-    y_linear = (df_linear['y'].to_numpy() + 0.0127) / 0.0127 # Normalize y-values to y/H
-    vel_x_linear = df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities
+    y_linear = (df_linear['y'].to_numpy() + H) / H # Normalize y-values to y/H
+    vel_x_linear = df_linear['vel_x'].to_numpy() / U_ref # Normalize velocities
     interpolated_vel_x = interpolate_vel_x(y_linear, vel_x_linear, y_grid) # Interpolate MOOSE data to y/H
     interpolated_results[file] = interpolated_vel_x
 
@@ -170,8 +173,8 @@ sim_interpolated_results = {}
 if plot_current_results:
     for file in sim_linear_files:
         sim_df_linear = pd.read_csv(validation_folder + file)
-        sim_y_linear = (sim_df_linear['y'].to_numpy() + 0.0127) / 0.0127 # Normalize y-values to y/H
-        sim_vel_x_linear = sim_df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities
+        sim_y_linear = (sim_df_linear['y'].to_numpy() + H) / H # Normalize y-values to y/H
+        sim_vel_x_linear = sim_df_linear['vel_x'].to_numpy() / U_ref # Normalize velocities
         sim_interpolated_vel_x = interpolate_vel_x(sim_y_linear, sim_vel_x_linear, y_grid) # Interpolate MOOSE data to y/H
         sim_interpolated_results[file] = sim_interpolated_vel_x
 
@@ -247,7 +250,8 @@ sim_moose_cp = (pressure / cp_factor) + 0.125
 
 ercoftac_cf = cf_exp['cf']
 moose_cf = (mu_t*vel_x/distance)/cf_factor
-sim_moose_cf = (mu_t*vel_x/distance)/cf_factor
+if plot_current_results:
+    sim_moose_cf = (sim_mu_t*sim_vel_x/sim_distance)/cf_factor
 
 moose_x = x/H
 sim_moose_x = x/H
@@ -255,13 +259,15 @@ ercoftac_x_cp = cp_exp['x/h']
 ercoftac_x_cf = cf_exp['x/h']
 
 ### Interpolate MOOSE onto ERCOFTAC
-sim_moose_cp_interp = np.interp(cp_exp['x/h'], sim_moose_x, sim_moose_cp)
 moose_cp_interp = np.interp(cp_exp['x/h'], moose_x, moose_cp)
 error_magnitude_cp = (abs( (1 + err_max) * (ercoftac_cp - moose_cp_interp) ) )
+if plot_current_results:
+    sim_moose_cp_interp = np.interp(cp_exp['x/h'], sim_moose_x, sim_moose_cp)
 
-sim_moose_cf_interp = np.interp(cf_exp['x/h'], sim_moose_x, sim_moose_cf)
 moose_cf_interp = np.interp(cf_exp['x/h'], moose_x, moose_cf)
 error_magnitude_cf = (abs( (1 + err_max) * (ercoftac_cf - moose_cf_interp) ) )
+if plot_current_results:
+    sim_moose_cf_interp = np.interp(cf_exp['x/h'], sim_moose_x, sim_moose_cf)
 
 # Error Ranges
 min_error_cp = ercoftac_cp - error_magnitude_cp
