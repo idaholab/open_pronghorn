@@ -1,4 +1,5 @@
 OpenPronghorn
+
 =====
 
 Fork "OpenPronghorn" to create a new MOOSE-based application.
