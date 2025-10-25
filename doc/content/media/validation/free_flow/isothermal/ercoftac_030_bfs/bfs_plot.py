@@ -1,7 +1,10 @@
 ### ERCOFTAC Case 030: BFS with Straight Opposite Wall
-### Plot Script courtesy of Dr. Mauricio Tanoret
-### Last Edited by Hailey Tran-Kieu
-### Date: August 12, 2025
+### Plot Script
+### Authors:
+###  Dr. Mauricio Tanore
+###  Hailey Tran-Kieu
+###  Dr. Guillaume Giudicelli
+### Date: October 24th, 2025
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -15,7 +18,7 @@ plot_current_results = False
 plot_reference_results = True
 plot_errors = True
 
-# Authorized relative increase in the error
+# Authorized relative increase in the error, shown in error bars
 err_max = 0.01
 
 ############################ Plot settings #############################
@@ -43,13 +46,14 @@ validation_folder = '../../../../../../../validation/free_flow/isothermal/ercoft
 ### Read simulation MOOSE .csv files
 # Modify based on current MOOSE results
 if plot_current_results:
-    sim_in = pd.read_csv(validation_folder + 'bfs_input_csv_inlet_sampler_0002.csv')
-    sim_out = pd.read_csv(validation_folder + 'bfs_input_csv_outlet_sampler_0002.csv')
+    file_base = 'bfs_input_csv'
+    sim_in = pd.read_csv(validation_folder + file_base + '_inlet_channel_wall_sampler_0002.csv')
+    sim_out = pd.read_csv(validation_folder + file_base + '_outlet_channel_wall_sampler_0002.csv')
 
 ### Read reference MOOSE .csv files
 # Modify if changing reference parameters
-reference_in = pd.read_csv(validation_folder + 'reference_csv/reference_bfs_input_csv_inlet_sampler_0002.csv')
-reference_out = pd.read_csv(validation_folder + 'reference_csv/reference_bfs_input_csv_outlet_sampler_0002.csv')
+reference_in = pd.read_csv(validation_folder + 'reference_csv/reference_bfs_input_csv_inlet_channel_wall_sampler_0002.csv')
+reference_out = pd.read_csv(validation_folder + 'reference_csv/reference_bfs_input_csv_outlet_channel_wall_sampler_0002.csv')
 
 ### Read ERCOFTAC benchmark .csv files
 cp_exp = pd.read_csv(validation_folder + 'reference_csv/cp.csv')
@@ -58,11 +62,13 @@ cf_exp = pd.read_csv(validation_folder + 'reference_csv/cf.csv')
 ############################ Pressure Coefficient Analysis ############################
 
 # Velocity at center of channel at x/H = -4
-U_ref = 48.2783
+U_ref = 4.402663e+01 # if your simulation is not exactly at 44.2 for free stream, update this number
 # Height of the step
 H = 0.0127
 # Density of the fluid
 rho = 1.18415
+# Viscosity of the fluid
+mu = 1.8551e-5
 cp_factor = 0.5*rho*U_ref**2 # 1/2 rho U_ref^2
 
 # Concatenate inlet and outlet data for MOOSE .csv
@@ -98,13 +104,13 @@ cf_factor = 0.5*rho*U_ref**2
 
 # Concatenate inlet and outlet data for MOOSE .csv
 x = np.concatenate([reference_in['x'], reference_out['x']])
-mu_t = np.concatenate([reference_in['mu_t'], reference_out['mu_t']]) / 6.0
+mu_t = np.concatenate([reference_in['mu_t'], reference_out['mu_t']])
 distance = np.concatenate([reference_in['distance'], reference_out['distance']])
 vel_x = np.concatenate([reference_in['vel_x'], reference_out['vel_x']])
 
 if plot_current_results:
     sim_x = np.concatenate([sim_in['x'], sim_out['x']])
-    sim_mu_t = np.concatenate([sim_in['mu_t'], sim_out['mu_t']]) / 6.0
+    sim_mu_t = np.concatenate([sim_in['mu_t_wall'], sim_out['mu_t_wall']])
     sim_distance = np.concatenate([sim_in['distance'], sim_out['distance']])
     sim_vel_x = np.concatenate([sim_in['vel_x'], sim_out['vel_x']])
 
@@ -114,9 +120,9 @@ fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
 
 ax1.plot(cf_exp['x/h'], cf_exp['cf'], 'k.', label='Exp')
 if plot_reference_results:
-    ax1.plot(x/H, (mu_t*vel_x/distance)/cf_factor, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
+    ax1.plot(x/H, ((mu_t + mu)*vel_x/distance)/cf_factor, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
-    ax1.plot(sim_x/H, (sim_mu_t*sim_vel_x/sim_distance)/cf_factor, 'b', label='MOOSE-FV K-epsilon current')
+    ax1.plot(sim_x/H, ((sim_mu_t + mu)*sim_vel_x/sim_distance)/cf_factor, 'b', label='MOOSE-FV K-epsilon current')
 
 ax1.set_xlabel(r'$\mathrm{x/h}$', fontsize=14)
 ax1.set_ylabel(r'$\mathrm{c_f}$', fontsize=14)
@@ -128,9 +134,6 @@ ax1.grid(True)
 plt.title('Skin Friction Coefficient')
 plt.tight_layout()
 plt.savefig('plots_cf_main.png', dpi=300)
-
-
-
 
 
 ############################ Vertical X-Velocity Profiles Analysis ############################
@@ -162,10 +165,10 @@ for file in linear_files:
 
 # Read and process each linear CSV
 sim_linear_files = [
-    'bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
-    'bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
-    'bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
-    'bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
+    file_base + '_vel_x_xoH_1_sampler_0002.csv',
+    file_base + '_vel_x_xoH_4_sampler_0002.csv',
+    file_base + '_vel_x_xoH_6_sampler_0002.csv',
+    file_base + '_vel_x_xoH_10_sampler_0002.csv'
 ]
 
 sim_interpolated_results = {}
@@ -191,7 +194,7 @@ ax1.plot(u_exp['x+1'], u_exp['y/h'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
     ax1.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
-    ax1.plot(sim_interpolated_results['bfs_input_csv_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
+    ax1.plot(sim_interpolated_results[file_base + '_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
 ax1.set_title('Vertical x-Velocity Profile for x/h = 1', fontsize=14)
 ax1.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
 ax1.set_ylabel(r'$\mathrm{y/h}$', fontsize=14)
@@ -203,7 +206,7 @@ ax2.plot(u_exp['x+4'], u_exp['y/h'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
     ax2.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
-    ax2.plot(sim_interpolated_results['bfs_input_csv_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
+    ax2.plot(sim_interpolated_results[file_base + '_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
 ax2.set_title('Vertical x-Velocity Profile for x/h = 4', fontsize=14)
 ax2.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
 ax2.set_ylabel(r'$\mathrm{y/h}$', fontsize=14)
@@ -215,7 +218,7 @@ ax3.plot(u_exp['x+6'], u_exp['y/h'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
     ax3.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
-    ax3.plot(sim_interpolated_results['bfs_input_csv_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
+    ax3.plot(sim_interpolated_results[file_base + '_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
 ax3.set_title('Vertical x-Velocity Profile for x/h = 6', fontsize=14)
 ax3.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
 ax3.set_ylabel(r'$\mathrm{y/h}$', fontsize=14)
@@ -227,7 +230,7 @@ ax4.plot(u_exp['x+10'], u_exp['y/h'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
     ax4.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
-    ax4.plot(sim_interpolated_results['bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
+    ax4.plot(sim_interpolated_results[file_base + '_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
 ax4.set_title('Vertical x-Velocity Profile for x/h = 10', fontsize=14)
 ax4.set_xlabel(r'$\mathrm{U/U_{ref}}$', fontsize=14)
 ax4.set_ylabel(r'$\mathrm{y/h}$', fontsize=14)
@@ -246,15 +249,15 @@ plt.savefig('plots_u_profiles_main.png', dpi=300)
 ############################ Pressure Coefficient and Skin Friction Coefficient ############################
 ercoftac_cp = cp_exp['cp']
 moose_cp = (pressure / cp_factor) + 0.125
-sim_moose_cp = (pressure / cp_factor) + 0.125
+sim_moose_cp = (sim_pressure / cp_factor) + 0.125
 
 ercoftac_cf = cf_exp['cf']
-moose_cf = (mu_t*vel_x/distance)/cf_factor
+moose_cf = ((mu_t + mu) * vel_x / distance) / cf_factor
 if plot_current_results:
-    sim_moose_cf = (sim_mu_t*sim_vel_x/sim_distance)/cf_factor
+    sim_moose_cf = ((sim_mu_t + mu) * sim_vel_x / sim_distance) / cf_factor
 
 moose_x = x/H
-sim_moose_x = x/H
+sim_moose_x = sim_x/H
 ercoftac_x_cp = cp_exp['x/h']
 ercoftac_x_cf = cf_exp['x/h']
 
@@ -347,10 +350,10 @@ u_moose_6 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xo
 u_moose_10 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
 
 if plot_current_results:
-    sim_u_moose_1 = sim_interpolated_results['bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
-    sim_u_moose_4 = sim_interpolated_results['bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
-    sim_u_moose_6 = sim_interpolated_results['bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
-    sim_u_moose_10 = sim_interpolated_results['bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
+    sim_u_moose_1 = sim_interpolated_results[file_base + '_vel_x_xoH_1_sampler_0002.csv']
+    sim_u_moose_4 = sim_interpolated_results[file_base + '_vel_x_xoH_4_sampler_0002.csv']
+    sim_u_moose_6 = sim_interpolated_results[file_base + '_vel_x_xoH_6_sampler_0002.csv']
+    sim_u_moose_10 = sim_interpolated_results[file_base + '_vel_x_xoH_10_sampler_0002.csv']
 
 
 ### Error calculations based on (ERCOFTAC - MOOSE FV K-epsilon Reference)
