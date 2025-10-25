@@ -110,7 +110,7 @@ q = \frac{\rho u^2}{2}
 \end{equation}
 
 \begin{equation}
-c_f = \frac{\mu_t u_x}{d_{wall}} \cdot \frac{1}{q}
+c_f = \frac{\mu_{wall} u_x}{d_{wall}} \cdot \frac{1}{q}
 \end{equation}
 
 !table id=tab:cfparam caption= $c_{f}$ calculation variables.
