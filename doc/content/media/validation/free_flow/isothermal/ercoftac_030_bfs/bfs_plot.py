@@ -52,8 +52,8 @@ if plot_current_results:
 
 ### Read reference MOOSE .csv files
 # Modify if changing reference parameters
-reference_in = pd.read_csv(validation_folder + 'reference_csv/reference_bfs_input_csv_inlet_channel_wall_sampler_0002.csv')
-reference_out = pd.read_csv(validation_folder + 'reference_csv/reference_bfs_input_csv_outlet_channel_wall_sampler_0002.csv')
+reference_in = pd.read_csv(validation_folder + 'gold/bfs_input_csv_inlet_channel_wall_sampler_0002.csv')
+reference_out = pd.read_csv(validation_folder + 'gold/bfs_input_csv_outlet_channel_wall_sampler_0002.csv')
 
 ### Read ERCOFTAC benchmark .csv files
 cp_exp = pd.read_csv(validation_folder + 'reference_csv/cp.csv')
@@ -104,7 +104,7 @@ cf_factor = 0.5*rho*U_ref**2
 
 # Concatenate inlet and outlet data for MOOSE .csv
 x = np.concatenate([reference_in['x'], reference_out['x']])
-mu_t = np.concatenate([reference_in['mu_t'], reference_out['mu_t']])
+mu_t = np.concatenate([reference_in['mu_t_wall'], reference_out['mu_t_wall']])
 distance = np.concatenate([reference_in['distance'], reference_out['distance']])
 vel_x = np.concatenate([reference_in['vel_x'], reference_out['vel_x']])
 
@@ -147,10 +147,10 @@ def interpolate_vel_x(y_values, vel_x_values, y_grid):
 
 # Read and process each linear CSV
 linear_files = [
-    'reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
-    'reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
-    'reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
-    'reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
+    'gold/bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
+    'gold/bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
+    'gold/bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
+    'gold/bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
 ]
 
 interpolated_results = {}
@@ -164,16 +164,14 @@ for file in linear_files:
 
 
 # Read and process each linear CSV
-sim_linear_files = [
+sim_interpolated_results = {}
+if plot_current_results:
+    sim_linear_files = [
     file_base + '_vel_x_xoH_1_sampler_0002.csv',
     file_base + '_vel_x_xoH_4_sampler_0002.csv',
     file_base + '_vel_x_xoH_6_sampler_0002.csv',
-    file_base + '_vel_x_xoH_10_sampler_0002.csv'
-]
+    file_base + '_vel_x_xoH_10_sampler_0002.csv']
 
-sim_interpolated_results = {}
-
-if plot_current_results:
     for file in sim_linear_files:
         sim_df_linear = pd.read_csv(validation_folder + file)
         sim_y_linear = (sim_df_linear['y'].to_numpy() + H) / H # Normalize y-values to y/H
@@ -192,7 +190,7 @@ fig.suptitle("Vertical X-Velocity Profiles", fontsize="14")
 
 ax1.plot(u_exp['x+1'], u_exp['y/h'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
-    ax1.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
+    ax1.plot(interpolated_results['gold/bfs_input_csv_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
     ax1.plot(sim_interpolated_results[file_base + '_vel_x_xoH_1_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
 ax1.set_title('Vertical x-Velocity Profile for x/h = 1', fontsize=14)
@@ -204,7 +202,7 @@ ax1.grid(True)
 
 ax2.plot(u_exp['x+4'], u_exp['y/h'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
-    ax2.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
+    ax2.plot(interpolated_results['gold/bfs_input_csv_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
     ax2.plot(sim_interpolated_results[file_base + '_vel_x_xoH_4_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
 ax2.set_title('Vertical x-Velocity Profile for x/h = 4', fontsize=14)
@@ -216,7 +214,7 @@ ax2.grid(True)
 
 ax3.plot(u_exp['x+6'], u_exp['y/h'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
-    ax3.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
+    ax3.plot(interpolated_results['gold/bfs_input_csv_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
     ax3.plot(sim_interpolated_results[file_base + '_vel_x_xoH_6_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
 ax3.set_title('Vertical x-Velocity Profile for x/h = 6', fontsize=14)
@@ -228,7 +226,7 @@ ax3.grid(True)
 
 ax4.plot(u_exp['x+10'], u_exp['y/h'], 'k.', label='ERCOFTAC')
 if plot_reference_results:
-    ax4.plot(interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
+    ax4.plot(interpolated_results['gold/bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
     ax4.plot(sim_interpolated_results[file_base + '_vel_x_xoH_10_sampler_0002.csv'], y_grid, 'b', label='MOOSE-FV K-epsilon current')
 ax4.set_title('Vertical x-Velocity Profile for x/h = 10', fontsize=14)
@@ -249,7 +247,8 @@ plt.savefig('plots_u_profiles_main.png', dpi=300)
 ############################ Pressure Coefficient and Skin Friction Coefficient ############################
 ercoftac_cp = cp_exp['cp']
 moose_cp = (pressure / cp_factor) + 0.125
-sim_moose_cp = (sim_pressure / cp_factor) + 0.125
+if plot_current_results:
+    sim_moose_cp = (sim_pressure / cp_factor) + 0.125
 
 ercoftac_cf = cf_exp['cf']
 moose_cf = ((mu_t + mu) * vel_x / distance) / cf_factor
@@ -257,7 +256,8 @@ if plot_current_results:
     sim_moose_cf = ((sim_mu_t + mu) * sim_vel_x / sim_distance) / cf_factor
 
 moose_x = x/H
-sim_moose_x = sim_x/H
+if plot_current_results:
+    sim_moose_x = sim_x/H
 ercoftac_x_cp = cp_exp['x/h']
 ercoftac_x_cf = cf_exp['x/h']
 
@@ -344,10 +344,10 @@ u_exp_6_cleaned = u_exp_6[~np.isnan(u_exp_6)]
 u_exp_10 = u_exp['x+10']
 u_exp_10_cleaned = u_exp_10[~np.isnan(u_exp_10)]
 
-u_moose_1 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
-u_moose_4 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
-u_moose_6 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
-u_moose_10 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
+u_moose_1 = interpolated_results['gold/bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
+u_moose_4 = interpolated_results['gold/bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
+u_moose_6 = interpolated_results['gold/bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
+u_moose_10 = interpolated_results['gold/bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
 
 if plot_current_results:
     sim_u_moose_1 = sim_interpolated_results[file_base + '_vel_x_xoH_1_sampler_0002.csv']
