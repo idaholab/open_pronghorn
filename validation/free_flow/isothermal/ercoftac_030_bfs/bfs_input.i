@@ -1,39 +1,50 @@
+########################################################################
+# BFS simulation
+########################################################################
+
 # Modeling Parameters
 rho = 1.18415
 bulk_u = 44.2
-D = 0.2032
+D = 0.1016
 mu = 1.8551e-5
 
 advected_interp_method = 'upwind'
 
-### k-epslilon Closure Parameters ###
+### k-epsilon Closure Parameters ###
 sigma_k = 1.0
 sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
+walls = 'wall'
+wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 ### Initial and Boundary Conditions ###
 intensity = 0.01
 k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / D}'
-### Modeling parameters ###
-walls = 'wall'
-wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
+
+### Postprocessing
+y_first_cell_1 = 5e-4
+y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
+
 [Mesh]
-    [load_mesh]
-      type = FileMeshGenerator
-      file = 'BFS_mesh_fine1.e'
-    []
+  [load_mesh]
+    type = FileMeshGenerator
+    file = 'BFS_mesh_fine1.e'
+  []
 []
+
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
   previous_nl_solution_required = true
 []
+
 [GlobalParams]
   rhie_chow_user_object = 'rc'
   advected_interp_method = ${advected_interp_method}
 []
+
 [UserObjects]
   [rc]
     type = RhieChowMassFlux
@@ -45,6 +56,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     pressure_projection_method = 'consistent'
   []
 []
+
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
@@ -67,23 +79,35 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     solver_sys = TKED_system
   []
 []
+
 [FVICs]
   [vel_x_ic]
      type = FVFunctionIC
      variable = 'vel_x'
-     function = 1e-3
+     function = fully_developed_velocity
+  []
+  [vel_y_ic]
+    type = FVFunctionIC
+    variable = 'vel_y'
+    function = 0
+  []
+  [pressure_ic]
+    type = FVFunctionIC
+    variable = 'pressure'
+    function = 0
   []
   [TKE_ic]
     type = FVFunctionIC
     variable = 'TKE'
-    function = ${k_init}
+    function = fully_developed_tke
   []
   [TKED_ic]
     type = FVFunctionIC
     variable = 'TKED'
-    function = ${eps_init}
+    function = fully_developed_tked
   []
 []
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
@@ -173,7 +197,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     mu_t = 'mu_t'
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    C_pl = 2.0
+    C_pl = 2
   []
   [TKED_advection]
     type = LinearFVTurbulentAdvection
@@ -208,9 +232,10 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     C2_eps = ${C2_eps}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    C_pl = 2.0
+    C_pl = 2
   []
 []
+
 [LinearFVBCs]
   [inlet_u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -308,10 +333,15 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     wall_treatment = ${wall_treatment}
   []
 []
+
 [AuxVariables]
   [mu_t]
     type = MooseLinearVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
+  []
+  # For computing c_f
+  [mu_t_wall]
+    type = MooseLinearVariableFVReal
   []
   [yplus]
     type = MooseLinearVariableFVReal
@@ -324,6 +354,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = MooseVariableFVReal
   []
 []
+
 [AuxKernels]
   [compute_mu_t]
     type = kEpsilonViscosityAux
@@ -338,13 +369,37 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     bulk_wall_treatment = false
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    execute_on = 'NONLINEAR'
+    execute_on = 'INITIAL NONLINEAR TIMESTEP_END'
     mu_t_ratio_max = 1e20
   []
+  [compute_mu_t_wall_neq]
+    type = ParsedAux
+    variable = 'mu_t_wall'
+    expression = '${mu} * (0.4187 * yplus / log(max(9.793 * yplus, 1.0 + 1e-4)) - 1)'
+    coupled_variables = 'yplus'
+    execute_on = 'TIMESTEP_END'
+  []
+  # Equivalent way of computing mu_t_wall
+  # [compute_mu_t_wall]
+  #   type = kEpsilonViscosityAux
+  #   variable = mu_t_wall
+  #   C_mu = ${C_mu}
+  #   tke = TKE
+  #   epsilon = TKED
+  #   mu = ${mu}
+  #   rho = ${rho}
+  #   u = vel_x
+  #   v = vel_y
+  #   bulk_wall_treatment = true
+  #   walls = ${walls}
+  #   wall_treatment = ${wall_treatment}
+  #   execute_on = 'TIMESTEP_END'
+  #   mu_t_ratio_max = 1e20
+  # []
   [compute_y_plus]
     type = RANSYPlusAux
     variable = yplus
-    tke =TKE
+    tke = TKE
     mu = ${mu}
     rho = ${rho}
     u = vel_x
@@ -379,26 +434,28 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     nvoronoi = 60
   []
 []
+
 [Functions]
   [fully_developed_velocity]
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'read_recycling'
     read_type = 'voronoi'
-    column_number = '3'
+    column_number = '6'
   []
   [fully_developed_tke]
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'read_recycling'
     read_type = 'voronoi'
-    column_number = '6'
+    column_number = '3'
   []
   [fully_developed_tked]
     type = PiecewiseConstantFromCSV
     read_prop_user_object = 'read_recycling'
     read_type = 'voronoi'
-    column_number = '5'
+    column_number = '4'
   []
 []
+
 [Executioner]
   type = SIMPLE
   rhie_chow_user_object = 'rc'
@@ -413,7 +470,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   turbulence_l_tol = 1e-10
   momentum_equation_relaxation = 0.9
   pressure_variable_relaxation = 0.5
-  turbulence_equation_relaxation = '0.5 0.5'
+  turbulence_equation_relaxation = '0.2 0.2'
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   turbulence_absolute_tolerance = '1e-8 1e-8'
@@ -429,22 +486,23 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   print_fields = false
 
   num_iterations = 6000
-  continue_on_max_its = false
+  continue_on_max_its = true
 []
+
 [VectorPostprocessors]
-  [inlet_sampler]
+  [inlet_channel_wall_sampler]
     type = LineValueSampler
-    variable = 'distance vel_x pressure mu_t'
-    start_point = '-0.05 1e-5 0.0'
-    end_point = '1e-5 1e-5 0.0'
+    variable = 'distance vel_x pressure mu_t_wall'
+    start_point = '${fparse -0.048} ${y_first_cell_1} 0.0'
+    end_point   = '${fparse -1e-3}  ${y_first_cell_1} 0.0'
     sort_by = 'x'
     num_points = 100
   []
-  [outlet_sampler]
+  [outlet_channel_wall_sampler]
     type = LineValueSampler
-    variable = 'distance vel_x pressure mu_t'
-    start_point = '0.0 ${fparse -0.0127 + 1e-5} 0.0'
-    end_point = '0.25 ${fparse -0.0127 + 1e-5} 0.0'
+    variable = 'distance vel_x pressure mu_t_wall'
+    start_point = '6.1e-4 ${fparse -0.0127 + y_first_cell_2} 0.0'
+    end_point =   '0.2492 ${fparse -0.0127 + y_first_cell_2} 0.0'
     sort_by = 'x'
     num_points = 100
   []
@@ -481,6 +539,33 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     num_points = 100
   []
 []
+
+[Postprocessors]
+  [mdot]
+    type = VolumetricFlowRate
+    vel_x = vel_x
+    vel_y = vel_y
+    advected_interp_method = ${advected_interp_method}
+    advected_quantity = ${rho}
+    boundary = 'inlet'
+    execute_on = 'TIMESTEP_END'
+  []
+  [bulk_u]
+    type = SideExtremeValue
+    boundary = 'inlet'
+    variable = 'vel_x'
+    execute_on = 'TIMESTEP_END'
+  []
+  [Reynolds_in]
+    type = ParsedPostprocessor
+    expression = 'bulk_u / mu * rho * D'
+    pp_names = 'bulk_u'
+    constant_expressions = '${mu} ${rho} ${D}'
+    constant_names = 'mu rho D'
+    execute_on = 'TIMESTEP_END'
+  []
+[]
+
 [Outputs]
   [exo]
     type = Exodus
