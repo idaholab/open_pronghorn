@@ -14,8 +14,8 @@ class TestCase(ValidationCase):
 
         ### REFERENCE FILES: Please do not modify, unless updating reference data
         ### Load .csv files for MOOSE and ERCOFTAC, respectively
-        moose_inlet_csv = pd.read_csv('reference_csv/reference_bfs_input_csv_inlet_sampler_0002.csv')
-        moose_outlet_csv = pd.read_csv('reference_csv/reference_bfs_input_csv_outlet_sampler_0002.csv')
+        moose_inlet_csv = pd.read_csv('gold/bfs_input_csv_inlet_channel_wall_sampler_0002.csv')
+        moose_outlet_csv = pd.read_csv('gold/bfs_input_csv_outlet_channel_wall_sampler_0002.csv')
 
         ercoftac_csv = pd.read_csv('reference_csv/cp.csv')
         cf_exp = pd.read_csv('reference_csv/cf.csv')
@@ -26,10 +26,14 @@ class TestCase(ValidationCase):
         x = np.concatenate([moose_inlet_csv['x'], moose_outlet_csv['x']])
         pressure = np.concatenate([moose_inlet_csv['pressure'], moose_outlet_csv['pressure']])
 
+        # note: U_ref should be updated if the inlet condition is changed
+        U_ref = 4.402663e+01
+        rho = 1.18415
+        mu = 1.8551e-5
         H = 0.0127
-        cp_factor = 0.5*1.18415*48.18**2 # 1/2 rho U_ref^2
+        cp_factor = 0.5 * rho * U_ref**2 # 1/2 rho U_ref^2
 
-        moose_cp_x = x/H
+        moose_cp_x = x / H
         self.moose_cp_x = moose_cp_x
         moose_cp = (pressure / cp_factor) + 0.125
         ercoftac_cp = ercoftac_csv['cp']
@@ -47,8 +51,8 @@ class TestCase(ValidationCase):
         ### Setting Up Simulation Data
         ### Modify with respective .csv files from OpenPronghorn simulations
 
-        sim_inlet_csv = pd.read_csv('bfs_input_csv_inlet_sampler_0002.csv')
-        sim_outlet_csv = pd.read_csv('bfs_input_csv_outlet_sampler_0002.csv')
+        sim_inlet_csv = pd.read_csv('bfs_input_csv_inlet_channel_wall_sampler_0002.csv')
+        sim_outlet_csv = pd.read_csv('bfs_input_csv_outlet_channel_wall_sampler_0002.csv')
 
         sim_x = np.concatenate([sim_inlet_csv['x'], sim_outlet_csv['x']])
         sim_x_norm = sim_x/H
@@ -62,23 +66,23 @@ class TestCase(ValidationCase):
         ############################ Skin Friction Coefficient ############################
 
         H = 0.0127
-        cf_factor = 0.5*1.18415*47.**2
+        cf_factor = 0.5*rho*U_ref**2
 
         # Concatenate inlet and outlet data for MOOSE .csv
         x = np.concatenate([moose_inlet_csv['x'], moose_outlet_csv['x']])
-        mu_t = np.concatenate([moose_inlet_csv['mu_t'], moose_outlet_csv['mu_t']]) / 6.0
+        mu_t = np.concatenate([moose_inlet_csv['mu_t_wall'], moose_outlet_csv['mu_t_wall']]) / 6.0
         distance = np.concatenate([moose_inlet_csv['distance'], moose_outlet_csv['distance']])
         vel_x = np.concatenate([moose_inlet_csv['vel_x'], moose_outlet_csv['vel_x']])
 
         sim_x = np.concatenate([sim_inlet_csv['x'], sim_outlet_csv['x']])
-        sim_mu_t = np.concatenate([sim_inlet_csv['mu_t'], sim_outlet_csv['mu_t']]) / 6.0
+        sim_mu_t = np.concatenate([sim_inlet_csv['mu_t_wall'], sim_outlet_csv['mu_t_wall']]) / 6.0
         sim_distance = np.concatenate([sim_inlet_csv['distance'], sim_outlet_csv['distance']])
         sim_vel_x = np.concatenate([sim_inlet_csv['vel_x'], sim_outlet_csv['vel_x']])
 
         # cf and x/H values
         ercoftac_cf = cf_exp['cf']
-        moose_cf = (mu_t*vel_x/distance)/cf_factor
-        sim_moose_cf = (mu_t*vel_x/distance)/cf_factor
+        moose_cf = ((mu_t + mu) * vel_x / distance) / cf_factor
+        sim_moose_cf = ((mu_t + mu) * vel_x / distance) / cf_factor
 
         moose_x = x/H
         sim_moose_x = x/H
@@ -106,18 +110,18 @@ class TestCase(ValidationCase):
 
         # MOOSE Reference: Read and process each linear CSV
         linear_files = [
-            'reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
-            'reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
-            'reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
-            'reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
+            'gold/bfs_input_csv_vel_x_xoH_1_sampler_0002.csv',
+            'gold/bfs_input_csv_vel_x_xoH_4_sampler_0002.csv',
+            'gold/bfs_input_csv_vel_x_xoH_6_sampler_0002.csv',
+            'gold/bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
         ]
 
         interpolated_results = {}
 
         for file in linear_files:
             df_linear = pd.read_csv(file)
-            y_linear = (df_linear['y'].to_numpy() + 0.0127) / 0.0127 # Normalize y-values to y/H
-            vel_x_linear = df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities
+            y_linear = (df_linear['y'].to_numpy() + H) / H # Normalize y-values to y/H
+            vel_x_linear = df_linear['vel_x'].to_numpy() / U_ref # Normalize velocities
             interpolated_vel_x = interpolate_vel_x(y_linear, vel_x_linear, y_grid) # Interpolate MOOSE data to y/H
             interpolated_results[file] = interpolated_vel_x
 
@@ -137,8 +141,8 @@ class TestCase(ValidationCase):
 
         for file in sim_linear_files:
             sim_df_linear = pd.read_csv(file)
-            sim_y_linear = (sim_df_linear['y'].to_numpy() + 0.0127) / 0.0127 # Normalize y-values to y/H
-            sim_vel_x_linear = sim_df_linear['vel_x'].to_numpy() / 48.2 # Normalize velocities
+            sim_y_linear = (sim_df_linear['y'].to_numpy() + H) / H # Normalize y-values to y/H
+            sim_vel_x_linear = sim_df_linear['vel_x'].to_numpy() / U_ref # Normalize velocities
             sim_interpolated_vel_x = interpolate_vel_x(sim_y_linear, sim_vel_x_linear, y_grid) # Interpolate MOOSE data to y/H
             sim_interpolated_results[file] = sim_interpolated_vel_x
 
@@ -160,10 +164,10 @@ class TestCase(ValidationCase):
         # Note: the nans are removed for the last row with invalid data from the CSV reference, downloaded as is
 
         # MOOSE Reference Data
-        u_moose_1 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
-        u_moose_4 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
-        u_moose_6 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
-        u_moose_10 = interpolated_results['reference_csv/reference_bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
+        u_moose_1 = interpolated_results['gold/bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
+        u_moose_4 = interpolated_results['gold/bfs_input_csv_vel_x_xoH_4_sampler_0002.csv']
+        u_moose_6 = interpolated_results['gold/bfs_input_csv_vel_x_xoH_6_sampler_0002.csv']
+        u_moose_10 = interpolated_results['gold/bfs_input_csv_vel_x_xoH_10_sampler_0002.csv']
 
         # MOOSE Current Data
         self.sim_u_moose_1 = sim_interpolated_results['bfs_input_csv_vel_x_xoH_1_sampler_0002.csv']
