@@ -49,7 +49,12 @@ Initial turbulence dissipation rate, $\varepsilon_{init}$ | $\frac{C_{\mu}^\frac
 
 
 A no-slip boundary condition is used for all walls. The fluid enters the domain through the left boundary (inlet) and exits out the right boundary (outlet).
-The inlet velocity and turbulence field profiles have been previously obtained from a well-developed flow simulation and are imposed at the inlet boundary using `.csv` files.
+The inlet velocity and turbulence field profiles have been previously obtained from a well-developed channel flow simulation and are imposed at the inlet boundary using `CSV` files.
+
+!alert note title=Regenerating inlet conditions
+An additional input file for a flow channel with the mesh discretization as the inlet of the backward-facing step simulation can be found in the input file.
+The `CSV` output of the outlet sampler vectorpostprocessor can be used to generate a new `CSV` input for boundary conditions. Performing this step once
+with the flow channel simulation (=recycling the boundary condition) helps develop the flow more before using it at the backward-facing step inlet.
 
 ## `OpenPronghorn` Model
 
@@ -68,7 +73,7 @@ The simulations were executed using a +nonlinear SIMPLE finite volume solver+ wi
 | +Pressure+ | Two-term expansion | Dirichlet       | One-term expansion            | Average                             |
 | +TKE+      | Dirichlet          | Fully-developed | Non-equilibrium wall function | Upwind                              |
 | +TKED+.    | Dirichlet          | Fully-developed | Non-equilibrium wall function | Upwind                              |
-| $\mu_t$     |                    |                 | Non-equilibrium wall function | Average                             |
+| $\mu_t$    |                    |                 | Non-equilibrium wall function | Average                             |
 
 
 The input file for the solve is embedded below.
