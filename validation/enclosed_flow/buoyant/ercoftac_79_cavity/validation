@@ -1,0 +1,13 @@
+[Tests]
+  [twoD_newton_wcnsfv]
+    type = CSVDiff
+    input = '2D_wcnsfv_keps_newton.i'
+    csvdiff = '2D_wcnsfv_keps_newton_CSV_plot_temperature_10_0228.csv 2D_wcnsfv_keps_newton_CSV_plot_vel_x_10_0228.csv 2D_wcnsfv_keps_newton_CSV_plot_vel_y_10_0228.csv       2D_wcnsfv_keps_newton_CSV.csv
+               2D_wcnsfv_keps_newton_CSV_plot_temperature_50_0228.csv 2D_wcnsfv_keps_newton_CSV_plot_vel_x_50_0228.csv 2D_wcnsfv_keps_newton_CSV_plot_vel_y_50_0228.csv
+               2D_wcnsfv_keps_newton_CSV_plot_temperature_90_0228.csv 2D_wcnsfv_keps_newton_CSV_plot_vel_x_90_0228.csv 2D_wcnsfv_keps_newton_CSV_plot_vel_y_90_0228.csv'
+    requirement = 'The system should be able to accurately simulate buoyancy driven flow in a cavity.'
+    min_parallel = 10
+    max_time = 800
+    validation_test = 'validation_wcnsfv_newton.py'
+  []
+[]
