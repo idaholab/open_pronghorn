@@ -180,3 +180,16 @@ by the validation suite, but are not plotted on this page.
        id=fig:plot6
        caption=Reference `OpenPronghorn` error for vertical x-velocities at x/H = 6 and 10.
 
+## Performance Chart
+
+!alert note
+The following figure showcases the measured total runtime of the problem over the different
+commit history. We utilized INL's High-Performance Computational resources to run these
+simulations so runtimes might vary depending on which physical resource the job got allocated.
+
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_performance.py
+       image_name=bfs_performance.png
+       id=fig:bfs_performance
+       caption=Runtime over the latest commits.
+       style=width:75%;margin-left:auto;margin-right:auto;text-align:center
+

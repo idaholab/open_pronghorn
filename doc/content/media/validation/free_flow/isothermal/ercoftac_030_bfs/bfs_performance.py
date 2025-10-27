@@ -3,26 +3,22 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from TestHarness.resultsreader.reader import TestHarnessResultsReader
+from TestHarness.resultsstore.reader import ResultsReader
+import os
 
-reader = TestHarnessResultsReader("civet_tests_open_pronghorn_validation")
+# To make the relative paths work
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+reader = ResultsReader("civet_tests_open_pronghorn_validation")
 results = reader.getTestResults("free_flow/isothermal/ercoftac_030_bfs", "bfs_030")
 
-# We populate the dataframe
-dates = []
-runtimes = []
-for c in results:
-  dates.append(c.results.time)
-  runtimes.append(c.run_time)
-
 df = pd.DataFrame({
-    'Date': dates,
-    'Runtime': runtimes
+    'Date': [v.results.time for v in results],
+    'Runtime': [v.run_time for v in results]
 })
 
 df = df.sort_values(by='Date')
-df['DateStr'] = df['Date'].dt.strftime('%Y-%m-%d')
-df['3pt Avg'] = df['Runtime'].rolling(window=3, min_periods=1).mean()
+df['DateStr'] = df['Date'] #.dt.strftime('%Y-%m-%d')
 df['5pt Avg'] = df['Runtime'].rolling(window=5, min_periods=1).mean()
 x_pos = np.arange(len(df))
 
