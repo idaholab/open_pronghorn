@@ -71,6 +71,9 @@ rho = 1.18415
 mu = 1.8551e-5
 cp_factor = 0.5*rho*U_ref**2 # 1/2 rho U_ref^2
 
+# Uncertainty reported in http://cfd.mace.manchester.ac.uk/ercoftac/doku.php?id=cases:case030
+uncertainty_cp = 0.009
+
 # Concatenate inlet and outlet data for MOOSE .csv
 x = np.concatenate([reference_in['x'], reference_out['x']])
 pressure = np.concatenate([reference_in['pressure'], reference_out['pressure']])
@@ -84,6 +87,7 @@ if plot_current_results:
 fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
 
 ax1.plot(cp_exp['x/h'], cp_exp['cp'], 'k.', label='ERCOFTAC')
+ax1.errorbar(cp_exp['x/h'], cp_exp['cp'], yerr=uncertainty_cp, ecolor='r', capsize = 3, fmt='k.', barsabove=False, label='Reported 95% confidence')
 if plot_reference_results:
     ax1.plot(x/H, pressure/cp_factor + 0.125, 'g', label='MOOSE-FV k-epsilon' + ref_suffix)
 if plot_current_results:
@@ -114,11 +118,17 @@ if plot_current_results:
     sim_distance = np.concatenate([sim_in['distance'], sim_out['distance']])
     sim_vel_x = np.concatenate([sim_in['vel_x'], sim_out['vel_x']])
 
+# Uncertainty reported in http://cfd.mace.manchester.ac.uk/ercoftac/doku.php?id=cases:case030
+uncertainty_cf_inlet_percent = 0.08
+uncertainty_cf_detached_percent = 0.15
+uncertainty_cf = np.abs(cf_exp['cf']) * np.array([uncertainty_cf_inlet_percent * (x_over_H < 0 or x_over_H > 6.26) +
+                                                  uncertainty_cf_detached_percent * (x_over_H >= 0 and x_over_H <= 6.26) for x_over_H in cf_exp['x/h']])
 
 # Create subplots
 fig, ax1 = plt.subplots(1, 1, figsize=(5, 5))
 
-ax1.plot(cf_exp['x/h'], cf_exp['cf'], 'k.', label='Exp')
+ax1.plot(cf_exp['x/h'], cf_exp['cf'], 'k.', label='Exp.')
+ax1.errorbar(cf_exp['x/h'], cf_exp['cf'], yerr=uncertainty_cf, ecolor='r', capsize = 3, fmt='k.', barsabove=False, label='Reported 95% confidence')
 if plot_reference_results:
     ax1.plot(x/H, ((mu_t + mu)*vel_x/distance)/cf_factor, 'g', label='MOOSE-FV K-epsilon' + ref_suffix)
 if plot_current_results:
