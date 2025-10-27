@@ -18,7 +18,7 @@
 
 This problem describes a fully-developed turbulent flow in a channel with a rear-facing step in a 2D domain. A detailed description of the benchmark can be found in [!cite](driver1985benchmark) or the [ERCOFTAC database](http://cfd.mace.manchester.ac.uk/ercoftac/doku.php?id=cases:case030). The original benchmark by Driver and Seegmiller tested the case at varying degrees of inclination of the opposite wall. The `OpenPronghorn` model focuses only on the scenario in which the opposing wall is at $0^{\circ}$ (completely horizontal).
 
-!media media/validation/free_flow/isothermal/ercoftac_030_bfs/geometry.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:geom caption=Backwards-facing step geometry
+!media media/validation/free_flow/isothermal/ercoftac_030_bfs/geometry.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:geom caption=Backwards-facing step geometry.
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh3 caption=Velocity streamlines near the step.
 
@@ -64,7 +64,7 @@ The mesh is loaded externally via `FileMeshGenerator` and contains 20,022 quadri
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_closeup.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh2 caption=Closeup of the step.
 
-The simulations were executed using a +nonlinear SIMPLE finite volume solver+ with the +standard two-equation k-epsilon turbulence model+. Additional modeling and discretization parameters are found in [tab:numparameters] .
+The simulations were executed using the +SIMPLE finite volume solver+ with the +standard two-equation k-epsilon turbulence model+. Additional modeling and discretization parameters are found in [tab:numparameters] .
 
 !table id=tab:numparameters caption=Modeling and discretization parameters.
 | Parameter  | Inlet              | Outlet          | Walls                         | Bulk Face Interpolation             |
@@ -83,7 +83,7 @@ The input file for the solve is embedded below.
 ## Results
 
 The main quantities of interest are pressure coefficient $c_{p}$, wall skin friction coefficient $c_{f}$, and the x-velocity profiles up the height of the channel.
-Further manipulation in post was required to derive $c_{p}$ and $c_{f}$.
+Further computations using the postprocessor values was required to derive $c_{p}$ and $c_{f}$.
 
 To derive the pressure coefficient $c_{p}$, the pressure variable was recorded by `OpenPronghorn` and divided by the dynamic pressure $q$, as follows:
 
@@ -99,7 +99,7 @@ c_p = \frac{p_{s}}{q}
 | Variable           | Value     | Units            |
 | ---                | ---       | ---              |
 | Density, $\rho$    | $1.18415$ | $\frac{kg}{m^3}$ |
-| Flow velocity, $u$ | $48.18$   | $\frac{m}{s}$    |
+| Flow velocity, $u$ | $44.02$   | $\frac{m}{s}$    |
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
        image_name=plots_cp_main.png
@@ -122,7 +122,7 @@ c_f = \frac{\mu_{wall} u_x}{d_{wall}} \cdot \frac{1}{q}
 | Variable           | Value     | Units            |
 | ---                | ---       | ---              |
 | Density, $\rho$    | $1.18415$ | $\frac{kg}{m^3}$ |
-| Flow velocity, $u$ | $47$      | $\frac{m}{s}$    |
+| Flow velocity, $u$ | $44.02$      | $\frac{m}{s}$    |
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
        image_name=plots_cf_main.png
@@ -138,19 +138,29 @@ c_f = \frac{\mu_{wall} u_x}{d_{wall}} \cdot \frac{1}{q}
 
 ## Validation
 
-Current `OpenPronghorn` results were validated by comparing against errors representing uncertainty between the benchmark data and reference `OpenPronghorn` results. The error bars were calculated as follows:
+Current `OpenPronghorn` results were validated by comparing against errors between the benchmark data and reference `OpenPronghorn` results. The measurement uncertainty was also
+considered, and compared to the error. The measurement uncertainty can be found in [fig:plot2], which can be compared to the errors found in [fig:plot4].
+The limited accuracy obtained by the $k-\epsilon$ model was confirmed using external software. The $k-\omega$ model, not yet released in MOOSE,
+has been found to have more accurate results.
+
+The errors on this validation case should not increase by more than 1% over the current difference to the validation data.
+If the current `OpenPronghorn` simulation data fall within the error ranges, the results are validated. This
+ensures the error is only improved over time with refinements in the model. The logic for ensuring the error does not increase
+is reproduced below. We first compute the maximum absolute deviation with the 1% allowed increase, then compare
+the current error to the maximum absolute deviation. This ensures the performance of the validation basis is not degraded
+when modifying `OpenPronghorn` or `MOOSE`.
 
 \begin{equation}
-\text{Maximum Absolute Deviation} = 1.02 \cdot |X_R - X_E|
+\text{Maximum Absolute Deviation} = 1.01 \cdot |X_R - X_E|
 \end{equation}
 
 \begin{equation}
 \text{Acceptable Range} = X_E \: \pm \: \text{Maximum Absolute Deviation}
 \end{equation}
 
-where $X_E$ is the ERCOFTAC data and $X_R$ is the reference data. The errors on this validation case should not increase by more than 1% over the current difference to the validation data. If the current `OpenPronghorn` simulation data fall within the error ranges, the results are validated. This
-ensures the error is only improved over time with refinements in the model.
-+[fig:plot4]+, +[fig:plot5]+ and +[fig:plot6]+ show the current errors for the metrics tracked.
+where $X_E$ is the ERCOFTAC data and $X_R$ is the reference data.
++[fig:plot4]+, +[fig:plot5]+ and +[fig:plot6]+ show the reference errors for the metrics tracked. The current errors are checked
+by the validation suite, but are not plotted on this page.
 
 !media media/validation/free_flow/isothermal/ercoftac_030_bfs/bfs_plot.py
        image_name=plots_cp_cf_error_main.png

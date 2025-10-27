@@ -40,7 +40,6 @@ plt.rcParams.update({
 # Plot
 fig, ax = plt.subplots(figsize=(15, 6))
 ax.plot(x_pos, df['Runtime'], marker='o', color='#1f1f1f', label='Runtime')                # black
-ax.plot(x_pos, df['3pt Avg'], marker='s', linestyle='--', color="#629ABB", label='3-point Avg')  # blue
 ax.plot(x_pos, df['5pt Avg'], marker='^', linestyle='-.', color='#D55E00', label='5-point Avg')  # reddish-orange
 
 # X-axis
