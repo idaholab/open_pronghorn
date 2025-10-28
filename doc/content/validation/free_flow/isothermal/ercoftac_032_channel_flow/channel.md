@@ -64,8 +64,9 @@ Additional model and discretization parameters may be found in [tab:numparameter
 | --- | --- | --- | --- | --- |
 | +Velocity+ | Dirichlet          | Fully-developed | No-slip | Rhie-Chow mass flux, upwind advected quantity |
 | +Pressure+ | Two-term expansion | Dirichlet | One-term expansion | Average |
-| +TKE+      | Dirichlet          | Fully-developed | Equilibrium wall function | upwind |
-| +TKED+.    | Dirichlet          | Fully-developed | Equilibrium wall function | upwind |
+| +TKE+      | Dirichlet          | Fully-developed | Equilibrium wall function | Upwind |
+| +TKED+.    | Dirichlet          | Fully-developed | Equilibrium wall function | Upwind |
+| $\mu_t$     |                    |                 | Equilibrium wall function | Average  |
 
 The input file for the solve with $Re_\tau=395$ is embedded below.
 

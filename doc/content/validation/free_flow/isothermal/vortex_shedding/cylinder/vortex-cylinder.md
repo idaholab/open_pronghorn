@@ -94,7 +94,7 @@ simulations so runtimes might vary depending on which physical resource the job 
 !media media/validation/free_flow/isothermal/vortex_shedding/cylinder/strouhal_performance.py
        image_name=strouhal_performance.png
        id=fig:st_performance
-       caption=Runtime over the latest commtits.
+       caption=Runtime over the latest commits.
        style=width:75%;margin-left:auto;margin-right:auto;text-align:center
 
 
