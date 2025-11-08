@@ -17,11 +17,12 @@ df = pd.DataFrame({
     'Runtime': [v.run_time for v in results]
 })
 
+# Convert 'Date' to datetime, coercing errors to NaT
 df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 df = df.sort_values(by='Date')
-df['DateStr'] = df['Date'].dt.strftime('%Y-%m-%d')
-df['5pt Avg'] = df['Runtime'].rolling(window=5, min_periods=1).mean()
-x_pos = np.arange(len(df))
+
+# Drop rows with NaT in 'Date'
+df = df.dropna(subset=['Date'])
 
 # Formal appearance
 plt.rcParams.update({
@@ -34,20 +35,31 @@ plt.rcParams.update({
     "axes.titleweight": 'bold'
 })
 
-# Plot
 fig, ax = plt.subplots(figsize=(10, 6))
-ax.plot(x_pos, df['Runtime'], marker='o', color='#1f1f1f', label='Runtime')                # black
-ax.plot(x_pos, df['5pt Avg'], marker='^', linestyle='-.', color='#D55E00', label='5-point Avg')  # reddish-orange
 
-# X-axis
-ax.set_xticks(x_pos)
-ax.set_xticklabels(df['DateStr'], rotation=90)
+if df.empty:
+    # Plot an empty figure with a message
+    ax.text(0.5, 0.5, 'No valid datetime data available to plot.',
+            horizontalalignment='center', verticalalignment='center',
+            fontsize=12, transform=ax.transAxes)
+else:
+    df['DateStr'] = df['Date'].dt.strftime('%Y-%m-%d')
+    df['5pt Avg'] = df['Runtime'].rolling(window=5, min_periods=1).mean()
+    x_pos = np.arange(len(df))
 
-# Axis labels only (no title)
-ax.set_xlabel("Date")
-ax.set_ylabel("Runtime (seconds)")
-ax.legend()
-ax.grid(True, color='gray', linestyle='--', linewidth=0.5, alpha=0.4)
+    # Plot data
+    ax.plot(x_pos, df['Runtime'], marker='o', color='#1f1f1f', label='Runtime')                # black
+    ax.plot(x_pos, df['5pt Avg'], marker='^', linestyle='-.', color='#D55E00', label='5-point Avg')  # reddish-orange
+
+    # X-axis
+    ax.set_xticks(x_pos)
+    ax.set_xticklabels(df['DateStr'], rotation=90)
+
+    # Axis labels only (no title)
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Runtime (seconds)")
+    ax.legend()
+    ax.grid(True, color='gray', linestyle='--', linewidth=0.5, alpha=0.4)
 
 fig.subplots_adjust(top=0.9, bottom=0.25, left=0.10)
 
