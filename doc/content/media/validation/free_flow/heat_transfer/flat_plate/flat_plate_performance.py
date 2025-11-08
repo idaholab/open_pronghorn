@@ -18,6 +18,7 @@ df = pd.DataFrame({
     'Runtime': [v.run_time for v in results]
 })
 
+df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 df = df.sort_values(by='Date')
 df['DateStr'] = df['Date'].dt.strftime('%Y-%m-%d')
 df['5pt Avg'] = df['Runtime'].rolling(window=5, min_periods=1).mean()
