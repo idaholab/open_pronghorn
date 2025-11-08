@@ -1,0 +1,15 @@
+[Tests]
+  [flat_plate]
+    type = CSVDiff
+    input = 'cht_rob-rob.i'
+    csvdiff = 'cht_rob-rob_out_interface_temp_0001.csv cht_rob-rob_out_y_vs_tf_0001.csv cht_rob-rob_out_y_vs_ts_0001.csv'
+    requirement = 'The system should be able to accurately simulate laminar fluid flow with conjugate heat transfer over a flat plate.'
+    min_parallel = 20
+    max_time = 400
+    validation_test = 'flat_plate_vnv.py'
+    # 1% deviation is allowed from previous error
+    validation_lower_bound = -0.01
+    validation_upper_bound = 0.01
+    rel_err = 5e-4
+  []
+[]
