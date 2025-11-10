@@ -1,6 +1,13 @@
-### benchmark sources:
-### https://doi.org/10.1016/j.compfluid.2018.06.016
-### https://doi.org/10.1016/0017-9310(74)90087-8
+##########################################################
+# Conjugate heat transfer over a flat plate test case
+# Author: Anshuman Chaube & PEter German
+# Last Update: Check the commit history
+# Flow model: Newtonian fluid, laminarf low
+# SIMPLE solve
+# benchmark sources:
+# https://doi.org/10.1016/j.compfluid.2018.06.016
+# https://doi.org/10.1016/0017-9310(74)90087-8
+##########################################################
 
 b = 0.01 # plate thickness
 l = 0.2 # plate length

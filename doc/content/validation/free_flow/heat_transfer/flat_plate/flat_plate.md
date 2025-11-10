@@ -48,7 +48,7 @@ The boundary conditions for the fluid and solid energy equations are the followi
 | +Fluid inlet+ | Fixed temperature, $T_{in}=1000~K$ |
 | +Fluid top+ | Insulated |
 | +Fluid outlet+ | Outlet enthalpy |
-| +Fluid bottom+ | Insulated |
+| +Fluid bottom before solid+ | Insulated |
 | +Solid top+ | Conjugate heat transfer |
 | +Solid bottom+ | Fixed temperature $T_b=600~K$ |
 | +Solid sides+ | Insulated |
@@ -70,12 +70,12 @@ mesh bias parameters.
 
 !media media/validation/free_flow/heat_transfer/flat_plate/mesh.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh caption=Mesh showing the fluid and solid regions in the 2D CHT channel.
 
-Altogether, the mesh has 125 divisions horizontally in the entrance region and 250 in the fluidregion
+Altogether, the mesh has 125 divisions horizontally in the entrance region and 250 in the fluid region
 above the plate. The solid plate has 80 while the fluid domain 160 vertical divisions. Altogether,
 the mesh consists of 80,000 quad cells. A mesh sensitivity has been carried out and the included model
 provides closely converged results with the least amount of cells.
 
-The simulation employs a +SIMPLE solver+. Second order geometric average interpolation has been
+The simulation employs a +SIMPLE solver+ to obtain the steady state solution. Second order geometric average interpolation has been
 used for the advection discretization, while the stress and conduction operators have been
 discretized using an arithmetic average discretization. The mesh is orthogonal, so no correction terms were used.
 The input file for this case is embedded below.
@@ -91,18 +91,18 @@ Two key validation metrics are examined:
 
 To judge the acceptability of the results, we utilize the analytic expressions by Luikov from
 [!cite](luikov1974conjugate). These expressions utilized techniques like the boundary layer integral (BL)
-and differential heat transfer (DTH). It is important to note, however, that these expressions were derived
+and differential heat transfer (DHT). It is important to note, however, that these expressions were derived
 using approximations such as assuming an averaged velocity in the boundary layer and no stream-wise
 conduction in the solid and fluid domains.
 
 [!ref](fig:vertprofile) presents the temperature profile along the $x=0.1~m$ vertical line. We see that the
 numerical solution is between the two analytic expressions. As expected, the numerical results are slightly
-lower than the DHT approach mainly due to the neglection of the stream-wise conduction in the corresponding derivation.
+lower than the DHT approach mainly due to the neglect of the stream-wise conduction in the corresponding derivation in DHT.
 
 !media media/validation/free_flow/heat_transfer/flat_plate/vertical_plot.py
        image_name=vertical-temperature.png
        id=fig:vertprofile
-       caption=Vertical temperature profile along the channel centerline.
+       caption=Vertical temperature profile at $x=0.1~m$.
        style=width:70%;margin-left:auto;margin-right:auto;text-align:center
 
 [!ref](fig:interfaceprofile) presents the temperature profile along the solid-fluid interface. We see considerable
@@ -123,7 +123,7 @@ middle and end tail of the plate this error shrinks to approximately 2%.
 
 Using the automatic testing of OpenPronghorn, we make sure this error does not increase over time.
 We allow a 1% deviation from previous error levels. We emphasize this is a change in the error levels, not in
-the solution itself. If software changes surpass this level we
+the solution itself. If software lead to a different solution with errors that surpass this level we
 declare a failed validation test. Furthermore, if we encounter changes in results more than 0.1%
 we notify the developers with a failed regression test. The validation test might still
 pass at this point.
