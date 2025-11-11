@@ -86,7 +86,7 @@ The input file for this case is embedded below.
 
 Two key validation metrics are examined:
 
-1. **Vertical temperature profile:** temperature variation along the vertical line at $x=0.1~m$.
+1. **Vertical temperature profile:** temperature variation along the vertical line at $x=0.1~m$ .
 2. **Wall temperature distribution:** temperature along the solid-fluid interface.
 
 To judge the acceptability of the results, we utilize the analytic expressions by Luikov from
@@ -102,7 +102,7 @@ lower than the DHT approach mainly due to the neglect of the stream-wise conduct
 !media media/validation/free_flow/heat_transfer/flat_plate/vertical_plot.py
        image_name=vertical-temperature.png
        id=fig:vertprofile
-       caption=Vertical temperature profile at $x=0.1~m$.
+       caption=Vertical temperature profile at 0.1 m from the leading edge of the flat plate.
        style=width:70%;margin-left:auto;margin-right:auto;text-align:center
 
 [!ref](fig:interfaceprofile) presents the temperature profile along the solid-fluid interface. We see considerable
