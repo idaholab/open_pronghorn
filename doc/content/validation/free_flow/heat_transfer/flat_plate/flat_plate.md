@@ -28,8 +28,8 @@ The geometry of the problem is depicted in [!ref](fig:geom).
 !style halign=center
 !media media/validation/free_flow/heat_transfer/flat_plate/geometry.png style=width:100% id=fig:geom caption=The geometry of the problem (dimensions in m).
 
-We note that an entrance reagion has been added to the domain to allow boundary layer buildup before the
-flow reaching the solid domian.
+We note that an entrance region has been added to the domain to allow the boundary layer to buildup before the
+flow reaches the solid domain.
 The boundary conditions for the momentum and pressure equations are the following:
 
 !table id=tab:momentum-pressure-bc caption=Momentum and pressure boundary conditions.
@@ -71,7 +71,7 @@ mesh bias parameters.
 !media media/validation/free_flow/heat_transfer/flat_plate/mesh.png style=width:70%;margin-left:auto;margin-right:auto;text-align:center; id=fig:mesh caption=Mesh showing the fluid and solid regions in the 2D CHT channel.
 
 Altogether, the mesh has 125 divisions horizontally in the entrance region and 250 in the fluid region
-above the plate. The solid plate has 80 while the fluid domain 160 vertical divisions. Altogether,
+above the plate. The solid plate has 80 vertical divisions while the fluid domain 160 vertical divisions. Altogether,
 the mesh consists of 80,000 quad cells. A mesh sensitivity has been carried out and the included model
 provides closely converged results with the least amount of cells.
 
@@ -84,7 +84,7 @@ The input file for this case is embedded below.
 
 ## Results
 
-Two key validation metrics are examined:
+Two key physical quantities are being considered to build validation metrics:
 
 1. **Vertical temperature profile:** temperature variation along the vertical line at $x=0.1~m$ .
 2. **Wall temperature distribution:** temperature along the solid-fluid interface.
@@ -118,12 +118,12 @@ is especially high serving as an explanation for the experienced deviation.
 ## Discussion of errors
 
 Mainly due to the approximations used in the analytic solutions, we see a considerable
-(up to 7-8%) error in the interface temperatures close to the leading edge. Closer to the
-middle and end tail of the plate this error shrinks to approximately 2%.
+(up to 7-8%) error in the interface temperatures close to the leading edge of the plate. Closer to the
+middle and end tail of the plate, this error shrinks to approximately 2%.
 
 Using the automatic testing of OpenPronghorn, we make sure this error does not increase over time.
 We allow a 1% deviation from previous error levels. We emphasize this is a change in the error levels, not in
-the solution itself. If software lead to a different solution with errors that surpass this level we
+the solution itself. If software changes lead to a different solution with errors that surpass this level we
 declare a failed validation test. Furthermore, if we encounter changes in results more than 0.1%
 we notify the developers with a failed regression test. The validation test might still
 pass at this point.
