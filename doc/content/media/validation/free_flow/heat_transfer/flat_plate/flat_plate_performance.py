@@ -1,16 +1,15 @@
-#!/usr/bin/env python3
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
 from TestHarness.resultsstore.reader import ResultsReader
 import os
 
-# To make the relative paths work
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# We load the results
 reader = ResultsReader("civet_tests_open_pronghorn_validation")
-results = reader.getTestResults("free_flow/isothermal/ercoftac_030_bfs", "bfs_030")
+results = reader.getTestResults("free_flow/heat_transfer/flat_plate", "flat_plate")
 
 df = pd.DataFrame({
     'Date': [v.results.time for v in results],
@@ -64,6 +63,6 @@ else:
 fig.subplots_adjust(top=0.9, bottom=0.25, left=0.10)
 
 # Export to PNG
-output_file = "bfs_performance.png"
+output_file = "flat_plate_performance.png"
 plt.savefig(output_file, dpi=300)
-plt.show()
+plt.close()
