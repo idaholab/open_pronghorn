@@ -136,6 +136,9 @@ c_f = \frac{\mu_{wall} u_x}{d_{wall}} \cdot \frac{1}{q}
        id=fig:plot3
        caption=Graphs of the horizontal x-velocity profiles at different lengths down the channel.
 
+!alert note
+The secondary recirculation zone at the corner of the step is not captured by the standard k-epsilon model with high y$^+$ wall functions.
+
 ## Validation
 
 Current `OpenPronghorn` results were validated by comparing against errors between the benchmark data and reference `OpenPronghorn` results. The measurement uncertainty was also
