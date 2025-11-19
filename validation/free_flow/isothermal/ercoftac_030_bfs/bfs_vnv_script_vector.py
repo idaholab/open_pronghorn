@@ -248,42 +248,42 @@ class TestCase(ValidationCase):
     def testValidation(self):
         self.addVectorData(
             "xh_cp",
-            (self.ercoftac_cp_x, "Normalized distance", "-"),
-            (self.sim_cp_interp, "Pressure coefficient", "-"),
+            (self.ercoftac_cp_x, "Normalized distance", None),
+            (self.sim_cp_interp, "Pressure coefficient", None),
             bounds=((self.min_values_cp, self.max_values_cp)),
         )
 
         self.addVectorData(
             "xh_cf",
-            (self.ercoftac_x_cf, "Normalized distance", "-"),
-            (self.sim_moose_cf_interp, "Skin friction coefficient", "-"),
+            (self.ercoftac_x_cf, "Normalized distance", None),
+            (self.sim_moose_cf_interp, "Skin friction coefficient", None),
             bounds=((self.min_values_cf, self.max_values_cf)),
         )
 
         self.addVectorData(
             "yh_1",
-            (self.y_grid, "Normalized distance", "-"),
-            (self.sim_u_moose_1, "Vertical x-Velocity at x/H=1", "-"),
+            (self.y_grid, "Normalized distance", None),
+            (self.sim_u_moose_1, "Vertical x-Velocity at x/H=1", None),
             bounds=((self.sim_min_values_1_cleaned, self.sim_max_values_1_cleaned)),
         )
 
         self.addVectorData(
             "yh_4",
-            (self.y_grid, "Normalized distance", "-"),
-            (self.sim_u_moose_4, "Vertical x-Velocity at x/H=4", "-"),
+            (self.y_grid, "Normalized distance", None),
+            (self.sim_u_moose_4, "Vertical x-Velocity at x/H=4", None),
             bounds=((self.sim_min_values_4_cleaned, self.sim_max_values_4_cleaned)),
         )
 
         self.addVectorData(
             "yh_6",
-            (self.y_grid, "Normalized distance", "-"),
-            (self.sim_u_moose_6, "Vertical x-Velocity at x/H=6", "-"),
+            (self.y_grid, "Normalized distance", None),
+            (self.sim_u_moose_6, "Vertical x-Velocity at x/H=6", None),
             bounds=((self.sim_min_values_6_cleaned, self.sim_max_values_6_cleaned)),
         )
 
         self.addVectorData(
             "yh_10",
-            (self.y_grid, "Normalized distance", "-"),
-            (self.sim_u_moose_10, "Vertical x-Velocity at x/H=10", "-"),
+            (self.y_grid, "Normalized distance", None),
+            (self.sim_u_moose_10, "Vertical x-Velocity at x/H=10", None),
             bounds=((self.sim_min_values_10_cleaned, self.sim_max_values_10_cleaned)),
         )
