@@ -3,7 +3,7 @@
 !tag name=Conjugate heat transfer on a flat plate
      image=../../media/validation/free_flow/heat_transfer/flat_plate/icon.png
      description=Conjugate heat transfer on a flat plate
-     pairs=flow_type:free-flow
+     pairs=flow_configuration:free-flow
            compressibility:incompressible
            heattransfer:conjugate_heat_transfer
            convection_type:forced

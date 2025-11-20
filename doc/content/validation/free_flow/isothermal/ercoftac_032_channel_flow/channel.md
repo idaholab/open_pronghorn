@@ -3,8 +3,7 @@
 !tag name=Turbulent Flow in a Channel
      image=../../media/validation/free_flow/isothermal/2d_turbulent_channel/1_icon.png
      description=Fully developed, turbulent flow in a 2D channel
-     pairs=flow_type:free-flow
-           compressibility:incompressible
+     pairs=compressibility:incompressible
            heattransfer:isothermal
            convection_type:forced
            transient:steady

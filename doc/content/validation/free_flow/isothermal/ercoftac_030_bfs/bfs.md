@@ -3,8 +3,7 @@
 !tag name=BFS with Inclined Opposite Wall
     image=../../media/validation/free_flow/isothermal/ercoftac_030_bfs/vel_streamlines.png
     description=Backward-Facing Wall with Inclined Opposite Wall
-    pairs=flow_type:free-flow
-          compressibility:incompressible
+    pairs=compressibility:incompressible
           heattransfer:isothermal
           convection_type:forced
           transient:steady

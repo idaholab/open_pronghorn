@@ -64,7 +64,6 @@ Extensions:
         active: True
         js_file: index-6fae072b.js
         allowed_keys:
-            - flow_type
             - compressibility
             - heattransfer
             - convection_type
