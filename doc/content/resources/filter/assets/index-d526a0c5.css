@@ -146,3 +146,10 @@ span.MuiButtonBase-root {
         background-color: #f9f9f9;
     }
 }
+/* Card header title size */
+.MuiCardHeader-title,
+.MuiCardHeader-root .MuiTypography-root {
+    font-size: 1rem !important;
+    line-height: 1.2 !important;
+}
+
