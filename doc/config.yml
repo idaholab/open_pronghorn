@@ -30,7 +30,7 @@ Renderer:
 Extensions:
     MooseDocs.extensions.navigation:
         name: OpenPronghorn
-        repo: https://github.inl.gov/idaholab/open_pronghorn
+        repo: https://github.com/idaholab/open_pronghorn
         menu:
             Validation: resources/filter/index.html
             Documentation:
