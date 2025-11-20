@@ -152,4 +152,40 @@ span.MuiButtonBase-root {
     font-size: 1rem !important;
     line-height: 1.2 !important;
 }
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    align-items: stretch;
+}
+
+.tile-grid-item {
+    width: 100%;
+}
+
+@media (max-width: 1200px) {
+    .tile-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .tile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.tile-grid-item .MuiCard-root {
+    height: 420px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tile-grid-item .MuiCardContent-root {
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+.tile-grid-item .MuiCardActions-root {
+    margin-top: auto;
+}
 
