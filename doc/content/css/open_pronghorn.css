@@ -1,6 +1,8 @@
- :root {
-  --pronghorn-color: rgba(163, 95, 27, 1.0);
+:root {
+  --pronghorn-color: #8b5a2b;
   --gray: rgba(102, 102, 102, 1.0);
+  --logo-speed: 10s;
+  --hero-logo-height: 300px;
 }
 
 .moose-col-icon{
@@ -72,4 +74,198 @@ footer.page-footer{
 /* Link weight (affects top menus, a-to-z index, and other body links) */
 a {
   font-weight: 450;
+}
+
+.pronghorn-card {
+  background-color: #fff;
+  border-radius: 8px;
+  border-top: 4px solid var(--pronghorn-color);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  padding: 20px 22px;
+  margin-bottom: 24px;
+  height: 100%;
+}
+
+.pronghorn-card h4,
+.pronghorn-card h5 {
+  margin-top: 0;
+  font-weight: 600;
+}
+
+.pronghorn-card ul {
+  margin: 8px 0 12px 18px;
+}
+
+.pronghorn-card p {
+  margin: 0 0 10px 0;
+}
+
+.pronghorn-card a {
+  font-weight: 600;
+}
+
+.landing-logo {
+  transition: filter 0.3s ease;
+  display: block;
+}
+
+.logo-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin: 0 auto;
+}
+
+.logo-hero + h1 {
+  margin-top: 0 !important;
+}
+
+.hero-logo {
+  height: min(var(--hero-logo-height), 32vw);
+  width: auto;
+  max-width: min(360px, 40vw);
+}
+
+.logo-belt {
+  width: min(65%, 620px);
+  overflow: hidden;
+  position: relative;
+  mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+  margin: 0 auto;
+}
+
+.logo-belt__track {
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  width: fit-content;
+  will-change: transform;
+}
+
+.logo-belt__item {
+  display: block;
+  height: clamp(120px, calc(var(--hero-logo-height) * 0.8), 180px);
+  width: auto;
+  border-radius: 8px;
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.18);
+  object-fit: cover;
+}
+
+.logo-belt--open {
+  mask-image: none;
+  -webkit-mask-image: none;
+  overflow: visible;
+}
+
+.logo-belt--open .logo-belt__item.materialboxed.active {
+  z-index: 5;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+#home-button {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+#home-button:before {
+  content: '';
+  display: inline-block;
+  width: 42px;
+  height: 42px;
+  background-image: url("../media/open_pronghorn_logo.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: brightness(1.3) invert(1);
+}
+
+.column-avatar-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px 0 4px;
+}
+
+.column-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: var(--pronghorn-color);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.column-avatar--accent {
+  background-color: var(--gray);
+}
+
+.coming-soon {
+  max-width: 420px;
+  margin: 40px auto 80px;
+  padding: 24px 32px 28px;
+  border-radius: 14px;
+  border: 1px solid rgba(139, 90, 43, 0.35);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.coming-soon ul {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.coming-soon li {
+  margin-bottom: 6px;
+  font-size: 1.05em;
+  font-weight: 400;
+}
+
+.inl-logo-block {
+  text-align: center;
+  margin: 32px auto 64px;
+}
+
+.inl-logo {
+  width: min(196px, 40vw);
+  display: inline-block;
+  filter: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .pronghorn-card {
+    background-color: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  }
+
+  .landing-logo {
+    filter: brightness(1.3) invert(1);
+  }
+
+  .column-avatar {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  }
+
+  .coming-soon {
+    background: rgba(7, 9, 14, 0.9);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 12px 38px rgba(0, 0, 0, 0.7);
+  }
+
+  .inl-logo {
+    filter: invert(1) brightness(1.1);
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-belt__track {
+    transform: none !important;
+  }
 }
