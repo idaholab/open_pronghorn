@@ -27,6 +27,8 @@ Renderer:
     type: MooseDocs.base.MaterializeRenderer
     extra-css:
         - css/open_pronghorn.css
+    extra-js:
+        - logo_belt.js
 Extensions:
     MooseDocs.extensions.navigation:
         name: OpenPronghorn

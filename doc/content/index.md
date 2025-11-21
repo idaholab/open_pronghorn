@@ -11,7 +11,7 @@
 !style halign=center fontsize=120% color=0.35 0.35 0.35
 Engineering-scale thermal hydraulics built on the MOOSE framework.
 
-!style! class=logo-belt style=--logo-speed:18s;
+!style! class=logo-belt style=--logo-speed:50s;
 !style! class=logo-belt__track
 
 !media media/gallery/containment.png
@@ -34,6 +34,21 @@ Engineering-scale thermal hydraulics built on the MOOSE framework.
        link=media/gallery/subchannel.png
        alt=Subchannel flow solution visualization
 
+!media media/gallery/msr_pump.png
+       class=logo-belt__item
+       link=media/gallery/msr_pump.png
+       alt=MSRE pump operation
+
+!media media/gallery/msre.png
+       class=logo-belt__item
+       link=media/gallery/msre.png
+       alt=MSRE chemistry
+
+!media media/gallery/chemical_proc.png
+       class=logo-belt__item
+       link=media/gallery/chemical_proc.png
+       alt=Chemical processing
+
 !media media/gallery/containment.png
        class=logo-belt__item
        link=media/gallery/containment.png
@@ -53,6 +68,21 @@ Engineering-scale thermal hydraulics built on the MOOSE framework.
        class=logo-belt__item
        link=media/gallery/subchannel.png
        alt=Subchannel flow solution visualization
+
+!media media/gallery/msr_pump.png
+       class=logo-belt__item
+       link=media/gallery/msr_pump.png
+       alt=MSRE pump operation
+
+!media media/gallery/msre.png
+       class=logo-belt__item
+       link=media/gallery/msre.png
+       alt=MSRE chemistry
+
+!media media/gallery/chemical_proc.png
+       class=logo-belt__item
+       link=media/gallery/chemical_proc.png
+       alt=Chemical processing
 
 !style-end!
 !style-end!

@@ -141,7 +141,7 @@ a {
   align-items: center;
   gap: 36px;
   width: fit-content;
-  animation: belt-scroll var(--logo-speed) linear infinite;
+  will-change: transform;
 }
 
 .logo-belt__item {
@@ -153,13 +153,15 @@ a {
   object-fit: cover;
 }
 
-@keyframes belt-scroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
+.logo-belt--open {
+  mask-image: none;
+  -webkit-mask-image: none;
+  overflow: visible;
+}
+
+.logo-belt--open .logo-belt__item.materialboxed.active {
+  z-index: 5;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
 
 #home-button {
@@ -264,6 +266,6 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
   .logo-belt__track {
-    animation: none;
+    transform: none !important;
   }
 }
