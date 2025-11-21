@@ -3,8 +3,7 @@
 !tag name=Vortex Shedding Over Circle
      image=../../media/validation/free_flow/isothermal/vortex_shedding/cylinder/icon.png
      description=Vortex shedding behind a cylinder
-     pairs=flow_type:free-flow
-                       compressibility:incompressible
+     pairs=compressibility:incompressible
                        heattransfer:isothermal
                        convection_type:forced
                        transient:transient
