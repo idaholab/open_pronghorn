@@ -106,6 +106,23 @@ a {
   transition: filter 0.3s ease;
 }
 
+#home-button {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+}
+
+#home-button:before {
+  content: '';
+  display: inline-block;
+  width: 42px;
+  height: 42px;
+  background-image: url("../media/open_pronghorn_logo.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: brightness(1.3) invert(1);
+}
+
 .column-avatar-group {
   display: flex;
   justify-content: center;
@@ -144,4 +161,5 @@ a {
   .column-avatar {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
   }
+
 }

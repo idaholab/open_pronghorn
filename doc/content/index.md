@@ -1,14 +1,14 @@
 !config navigation breadcrumbs=False scrollspy=False
 
-# OpenPronghorn class=center style=font-weight:200;font-size:220%
-
 !media media/open_pronghorn_logo.png
        class=landing-logo
-       style=display:block;margin-left:auto;margin-right:auto;width:30%;
+       style=display:block;margin:0 auto 4px auto;width:30%;
        alt=OpenPronghorn logo
 
+# OpenPronghorn class=center style=font-weight:200;font-size:220%;margin-top:0;
+
 !style halign=center fontsize=120% color=0.35 0.35 0.35
-Coarse-mesh computational fluid dynamics built on the MOOSE framework.
+Engineering-scale thermal hydraulics built on the MOOSE framework.
 
 !row!
 !col! small=12 medium=4 large=4 icon=waves
