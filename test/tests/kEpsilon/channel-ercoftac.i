@@ -1,0 +1,491 @@
+##########################################################
+# ERCOFTAC test case for turbulent channel flow
+# Case Number: 032
+# Author: Dr. Mauricio Tano & Hailey Tran Kieu
+# Last Update: November, 2023 & 2025
+# Turbulent model using:
+# k-epsilon
+# Equilibrium + Newton wall treatment
+# SIMPLE solve
+##########################################################
+
+
+### Problem Parameters ###
+H = 1 # half-width of the channel
+L = 120
+Re = 14000
+rho = 1
+bulk_u = 1
+mu = '${fparse rho * bulk_u * 2 * H / Re}'
+
+advected_interp_method = 'upwind'
+
+### k-epsilon Closure Parameters ###
+sigma_k = 1.0
+sigma_eps = 1.3
+C1_eps = 1.44
+C2_eps = 1.92
+C_mu = 0.09
+
+### Initial and Boundary Conditions ###
+intensity = 0.01
+k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
+eps_init = '${fparse C_mu^0.75 * k_init^1.5 / (2*H)}'
+
+### Modeling parameters ###
+bulk_wall_treatment = false
+walls = 'bottom top'
+wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
+
+# Turbulence-model knobs (optional)
+k_epsilon_variant   = 'Standard'    # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
+two_layer_flavor    = 'Wolfstein'   # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+use_buoyancy        = false
+use_compressibility = false
+use_nonlinear       = false
+use_curvature       = false
+use_yap             = false
+use_low_re_Gprime   = false
+
+[Mesh]
+  [block_1]
+    type = CartesianMeshGenerator
+    dim = 2
+    dx = '${L}'
+    dy = '0.75 0.25'
+    ix = '50'
+    iy = '35 1'
+  []
+  [block_2_base]
+    type = CartesianMeshGenerator
+    dim = 2
+    dx = '${L}'
+    dy = '0.25 0.75'
+    ix = '50'
+    iy = '1 35'
+  []
+  [block_2]
+    type = TransformGenerator
+    input = block_2_base
+    transform = TRANSLATE
+    vector_value = '0 -1 0'
+  []
+  [smg]
+    type = StitchedMeshGenerator
+    inputs = 'block_1 block_2'
+    clear_stitched_boundary_ids = true
+    stitch_boundaries_pairs = 'bottom top'
+    merge_boundaries_with_same_name = true
+  []
+[]
+
+[Problem]
+  linear_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
+  previous_nl_solution_required = true
+[]
+
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+  advected_interp_method = ${advected_interp_method}
+[]
+
+[UserObjects]
+  [rc]
+    type = RhieChowMassFlux
+    u = vel_x
+    v = vel_y
+    pressure = pressure
+    rho = ${rho}
+    p_diffusion_kernel = p_diffusion
+    pressure_projection_method = 'consistent'
+  []
+[]
+
+[Variables]
+  [vel_x]
+    type = MooseLinearVariableFVReal
+    initial_condition = ${bulk_u}
+    solver_sys = u_system
+  []
+  [vel_y]
+    type = MooseLinearVariableFVReal
+    initial_condition = 0
+    solver_sys = v_system
+  []
+  [pressure]
+    type = MooseLinearVariableFVReal
+    initial_condition = 1e-8
+    solver_sys = pressure_system
+  []
+  [TKE]
+    type = MooseLinearVariableFVReal
+    solver_sys = TKE_system
+    initial_condition = ${k_init}
+  []
+  [TKED]
+    type = MooseLinearVariableFVReal
+    solver_sys = TKED_system
+    initial_condition = ${eps_init}
+  []
+[]
+
+[LinearFVKernels]
+  [u_advection_stress]
+    type = LinearWCNSFVMomentumFlux
+    variable = vel_x
+    advected_interp_method = ${advected_interp_method}
+    mu = 'mu_t'
+    u = vel_x
+    v = vel_y
+    momentum_component = 'x'
+    rhie_chow_user_object = 'rc'
+    use_nonorthogonal_correction = false
+    use_deviatoric_terms = no
+  []
+  [u_diffusion]
+    type = LinearFVDiffusion
+    variable = vel_x
+    diffusion_coeff = '${mu}'
+  []
+  [u_pressure]
+    type = LinearFVMomentumPressure
+    variable = vel_x
+    pressure = pressure
+    momentum_component = 'x'
+  []
+
+  [v_advection_stress]
+    type = LinearWCNSFVMomentumFlux
+    variable = vel_y
+    advected_interp_method = ${advected_interp_method}
+    mu = 'mu_t'
+    u = vel_x
+    v = vel_y
+    momentum_component = 'y'
+    rhie_chow_user_object = 'rc'
+    use_nonorthogonal_correction = false
+    use_deviatoric_terms = no
+  []
+  [v_diffusion]
+    type = LinearFVDiffusion
+    variable = vel_y
+    diffusion_coeff = '${mu}'
+  []
+  [v_pressure]
+    type = LinearFVMomentumPressure
+    variable = vel_y
+    pressure = pressure
+    momentum_component = 'y'
+  []
+
+  [p_diffusion]
+    type = LinearFVAnisotropicDiffusion
+    variable = pressure
+    diffusion_tensor = Ainv
+    use_nonorthogonal_correction = false
+  []
+  [HbyA_divergence]
+    type = LinearFVDivergence
+    variable = pressure
+    face_flux = HbyA
+    force_boundary_execution = true
+  []
+
+  [TKE_advection]
+    type = LinearFVTurbulentAdvection
+    variable = TKE
+  []
+  [TKE_diffusion]
+    type = LinearFVTurbulentDiffusion
+    variable = TKE
+    diffusion_coeff = ${mu}
+    use_nonorthogonal_correction = false
+  []
+  [TKE_turb_diffusion]
+    type = LinearFVTurbulentDiffusion
+    variable = TKE
+    diffusion_coeff = 'mu_t'
+    scaling_coeff = ${sigma_k}
+    use_nonorthogonal_correction = false
+  []
+  [TKE_source_sink]
+    type = kEpsilonTKESourceSink
+    variable = TKE
+
+    u = vel_x
+    v = vel_y
+    epsilon = TKED
+    rho = ${rho}
+    mu = ${mu}
+    mu_t = 'mu_t'
+    walls = ${walls}
+    wall_treatment = ${wall_treatment}
+    C_pl = 10.0
+
+    # NEW (optional)
+    k_epsilon_variant        = ${k_epsilon_variant}    # 'Standard', 'Realizable', etc.
+    use_buoyancy             = ${use_buoyancy}
+    use_compressibility      = ${use_compressibility}
+    use_nonlinear            = ${use_nonlinear}
+    use_curvature_correction = ${use_curvature}
+    Pr_t                     = 0.9
+    C_M                      = 1.0
+    gravity                  = '0 0 0'                 # leave 0 for BFS
+
+    # if/when you have these fields:
+    # temperature       = T
+    # beta              = beta
+    # speed_of_sound    = c
+    # nonlinear_production = Gnl
+    # curvature_factor  = fc
+  []
+
+  [TKED_advection]
+    type = LinearFVTurbulentAdvection
+    variable = TKED
+    walls = ${walls}
+  []
+  [TKED_diffusion]
+    type = LinearFVTurbulentDiffusion
+    variable = TKED
+    diffusion_coeff = ${mu}
+    use_nonorthogonal_correction = false
+    walls = ${walls}
+  []
+  [TKED_turb_diffusion]
+    type = LinearFVTurbulentDiffusion
+    variable = TKED
+    diffusion_coeff = 'mu_t'
+    scaling_coeff = ${sigma_eps}
+    use_nonorthogonal_correction = false
+    walls = ${walls}
+  []
+  [TKED_source_sink]
+    type = kEpsilonTKEDSourceSink
+    variable = TKED
+
+    u = vel_x
+    v = vel_y
+    tke = TKE
+    rho = ${rho}
+    mu = ${mu}
+    mu_t = 'mu_t'
+    C1_eps = ${C1_eps}
+    C2_eps = ${C2_eps}
+    walls = ${walls}
+    wall_treatment = ${wall_treatment}
+    C_pl = 10.0
+
+    # NEW (optional)
+    k_epsilon_variant   = ${k_epsilon_variant}
+    use_buoyancy        = ${use_buoyancy}
+    use_compressibility = ${use_compressibility}
+    use_nonlinear       = ${use_nonlinear}
+    use_curvature_correction = ${use_curvature}
+    use_yap             = ${use_yap}
+    use_low_re_Gprime   = ${use_low_re_Gprime}
+
+    Pr_t = 0.9
+    C_M  = 1.0
+    gravity = '0 -9.81 0'
+
+    # same functors as for TKE if you use them:
+    # temperature       = T
+    # beta              = beta
+    # speed_of_sound    = c
+    # nonlinear_production = Gnl
+    # curvature_factor  = fc
+    wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
+  []
+[]
+
+[LinearFVBCs]
+  [inlet-u]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'left'
+    variable = vel_x
+    functor = '${bulk_u}'
+  []
+  [inlet-v]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'left'
+    variable = vel_y
+    functor = '0.0'
+  []
+  [walls-u]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'top bottom'
+    variable = vel_x
+    functor = 0.0
+  []
+  [walls-v]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'top bottom'
+    variable = vel_y
+    functor = 0.0
+  []
+  [outlet_u]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    boundary = 'right'
+    variable = vel_x
+    use_two_term_expansion = false
+  []
+  [outlet_v]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    boundary = 'right'
+    variable = vel_y
+    use_two_term_expansion = false
+  []
+  [outlet_p]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'right'
+    variable = pressure
+    functor = 0.0
+  []
+
+  [inlet_TKE]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'left'
+    variable = TKE
+    functor = '${k_init}'
+  []
+  [outlet_TKE]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    boundary = 'right'
+    variable = TKE
+    use_two_term_expansion = false
+  []
+  [inlet_TKED]
+    type = LinearFVAdvectionDiffusionFunctorDirichletBC
+    boundary = 'left'
+    variable = TKED
+    functor = '${eps_init}'
+  []
+  [outlet_TKED]
+    type = LinearFVAdvectionDiffusionOutflowBC
+    boundary = 'right'
+    variable = TKED
+    use_two_term_expansion = false
+  []
+  [walls_mu_t]
+    type = LinearFVTurbulentViscosityWallFunctionBC
+    boundary = 'bottom top'
+    variable = 'mu_t'
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
+    mu = ${mu}
+    tke = TKE
+    wall_treatment = ${wall_treatment}
+  []
+[]
+
+[AuxVariables]
+  [wall_distance]
+    type = MooseVariableFVReal
+    initial_condition = 1.0
+  []
+  [mu_t]
+    type = MooseLinearVariableFVReal
+    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
+  []
+  [yplus]
+    type = MooseVariableFVReal
+        two_term_boundary_expansion = false
+  []
+[]
+
+[AuxKernels]
+  [compute_wall_distance]
+    type = WallDistanceAux
+    variable = wall_distance
+    walls = ${walls}
+    execute_on = 'INITIAL NONLINEAR'
+  []
+  [compute_mu_t]
+    type = kEpsilonViscosity
+    variable = mu_t
+
+    C_mu = ${C_mu}
+    tke = TKE
+    epsilon = TKED
+    mu = ${mu}
+    rho = ${rho}
+    u = vel_x
+    v = vel_y
+
+    bulk_wall_treatment = ${bulk_wall_treatment}
+    walls = ${walls}
+    wall_treatment = ${wall_treatment}
+    mu_t_ratio_max = 1e20
+    execute_on = 'NONLINEAR'
+
+    # NEW (optional) – choose model and options
+    k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
+    two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
+    Cd0 = 0.091      # defaults, can omit if you keep Standard
+    Cd1 = 0.0042
+    Cd2 = 0.00011
+    Ca0 = 0.667      # Realizable C_mu coefficients
+    Ca1 = 1.25
+    Ca2 = 1.0
+    Ca3 = 0.9
+    wall_distance = wall_distance   # only needed for LowRe/TwoLayer (see below)
+  []
+  [compute_y_plus]
+    type = RANSYPlusAux
+    variable = yplus
+    tke = TKE
+    mu = ${mu}
+    rho = ${rho}
+    u = vel_x
+    v = vel_y
+    walls = ${walls}
+    wall_treatment = ${wall_treatment}
+    execute_on = 'NONLINEAR'
+  []
+[]
+
+[Executioner]
+  type = SIMPLE
+
+  rhie_chow_user_object = 'rc'
+  momentum_systems = 'u_system v_system'
+  pressure_system = 'pressure_system'
+  turbulence_systems = 'TKE_system TKED_system'
+
+  momentum_l_abs_tol = 1e-14
+  pressure_l_abs_tol = 1e-14
+  turbulence_l_abs_tol = 1e-14
+  momentum_l_tol = 1e-14
+  pressure_l_tol = 1e-14
+  turbulence_l_tol = 1e-14
+
+  momentum_equation_relaxation = 0.7
+  pressure_variable_relaxation = 0.3
+  turbulence_equation_relaxation = '0.4 0.4'
+  turbulence_field_relaxation = '0.4 0.4'
+  num_iterations = 5000
+  pressure_absolute_tolerance = 1e-7
+  momentum_absolute_tolerance = 1e-7
+  turbulence_absolute_tolerance = '1e-7 1e-7'
+
+  momentum_petsc_options_iname = '-u_system_pc_type -u_system_pc_hypre_type -v_system_pc_type -v_system_pc_hypre_type'
+  momentum_petsc_options_value = 'hypre boomeramg hypre boomeramg'
+  pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
+  pressure_petsc_options_value = 'hypre boomeramg'
+  turbulence_petsc_options_iname = '-TKE_system_pc_type -TKE_system_pc_hypre_type -TKED_system_pc_type -TKED_system_pc_hypre_type'
+  turbulence_petsc_options_value = 'hypre boomeramg hypre boomeramg'
+
+  momentum_l_max_its = 300
+  pressure_l_max_its = 300
+  turbulence_l_max_its = 30
+
+  print_fields = false
+  continue_on_max_its = true
+[]
+
+[Outputs]
+  exodus = true
+  csv = false
+[]
