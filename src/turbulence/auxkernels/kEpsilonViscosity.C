@@ -304,7 +304,7 @@ kEpsilonViscosity::computeValue()
     {
       mooseAssert(_has_wall_distance, "StandardLowRe variant requires wall_distance functor.");
       const Real d = (*_wall_distance_functor)(elem_arg, state);
-      const Real Red = k * d / std::max(nu, 1e-12);
+      const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
       const Real fmu = NS::fmu_SKE_LRe(_Cd0, _Cd1, _Cd2, Red);
       Cmu_eff = _C_mu * fmu;
     }
@@ -324,7 +324,7 @@ kEpsilonViscosity::computeValue()
     {
       mooseAssert(_has_wall_distance, "Two-layer variants require wall_distance functor.");
       const Real d = (*_wall_distance_functor)(elem_arg, state);
-      const Real Red = k * d / std::max(nu, 1e-12);
+      const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
 
       // Two-layer mu ratio and epsilon length scale
       NS::TwoLayerLengths tl;
