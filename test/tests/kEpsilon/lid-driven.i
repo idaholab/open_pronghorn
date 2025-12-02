@@ -24,7 +24,7 @@ walls = 'left top right bottom'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 # Turbulence-model knobs (optional)
-k_epsilon_variant   = 'Standard'      # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
+k_epsilon_variant   = 'RealizableTwoLayer'      # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
 two_layer_flavor    = 'Wolfstein'     # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
 use_buoyancy        = false
 use_compressibility = false

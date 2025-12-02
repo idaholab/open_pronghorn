@@ -38,7 +38,7 @@ walls = 'bottom top'
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 # Turbulence-model knobs (optional)
-k_epsilon_variant   = 'Standard'    # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
+k_epsilon_variant   = 'RealizableTwoLayer'    # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
 two_layer_flavor    = 'Wolfstein'   # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
 use_buoyancy        = false
 use_compressibility = false
@@ -52,17 +52,17 @@ use_low_re_Gprime   = false
     type = CartesianMeshGenerator
     dim = 2
     dx = '${L}'
-    dy = '0.75 0.25'
+    dy = '1.0'
     ix = '50'
-    iy = '35 1'
+    iy = '10'
   []
   [block_2_base]
     type = CartesianMeshGenerator
     dim = 2
     dx = '${L}'
-    dy = '0.25 0.75'
+    dy = '1.0'
     ix = '50'
-    iy = '1 35'
+    iy = '10'
   []
   [block_2]
     type = TransformGenerator
@@ -220,7 +220,7 @@ use_low_re_Gprime   = false
     mu_t = 'mu_t'
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    C_pl = 10.0
+    C_pl = 1e10
 
     # NEW (optional)
     k_epsilon_variant        = ${k_epsilon_variant}    # 'Standard', 'Realizable', etc.
@@ -274,7 +274,7 @@ use_low_re_Gprime   = false
     C2_eps = ${C2_eps}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    C_pl = 10.0
+    C_pl = 1e10
 
     # NEW (optional)
     k_epsilon_variant   = ${k_epsilon_variant}
@@ -463,8 +463,8 @@ use_low_re_Gprime   = false
 
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.4 0.4'
-  turbulence_field_relaxation = '0.4 0.4'
+  turbulence_equation_relaxation = '0.2 0.2'
+  turbulence_field_relaxation = '0.2 0.2'
   num_iterations = 5000
   pressure_absolute_tolerance = 1e-7
   momentum_absolute_tolerance = 1e-7
