@@ -4,7 +4,6 @@
 
 # Modeling Parameters
 rho = 1.18415
-bulk_u = 44.2
 D = 0.1016
 mu = 1.8551e-5
 
@@ -18,11 +17,13 @@ C2_eps = 1.92
 C_mu = 0.09
 walls = 'wall'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
+bulk_wall_treatment = false
 
-### Initial and Boundary Conditions ###
-intensity = 0.01
-k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
-eps_init = '${fparse C_mu^0.75 * k_init^1.5 / D}'
+### Initial Conditions for Non-Developed Case ###
+# intensity = 0.01
+# bulk_u = 44.2
+# k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
+# eps_init = '${fparse C_mu^0.75 * k_init^1.5 / D}'
 
 ### Postprocessing
 y_first_cell_1 = 5e-4
@@ -51,241 +52,82 @@ bulk_wall_treatment = false
   previous_nl_solution_required = true
 []
 
-[GlobalParams]
-  rhie_chow_user_object = 'rc'
-[]
+[Physics]
+  [NavierStokes]
+    [FlowSegregated/flow]
+      velocity_variable = 'vel_x vel_y'
+      pressure_variable = 'pressure'
 
-[UserObjects]
-  [rc]
-    type = RhieChowMassFlux
-    u = vel_x
-    v = vel_y
-    pressure = pressure
-    rho = ${rho}
-    p_diffusion_kernel = p_diffusion
-    pressure_projection_method = 'consistent'
-  []
-[]
+      # Initial conditions
+      initial_velocity = 'fully_developed_velocity 0 0'
+      initial_pressure = '1e-8'
 
-[Variables]
-  [vel_x]
-    type = MooseLinearVariableFVReal
-    solver_sys = u_system
-  []
-  [vel_y]
-    type = MooseLinearVariableFVReal
-    solver_sys = v_system
-  []
-  [pressure]
-    type = MooseLinearVariableFVReal
-    solver_sys = pressure_system
-  []
-  [TKE]
-    type = MooseLinearVariableFVReal
-    solver_sys = TKE_system
-  []
-  [TKED]
-    type = MooseLinearVariableFVReal
-    solver_sys = TKED_system
-  []
-[]
+      # Material properties
+      density = ${rho}
+      dynamic_viscosity = ${mu}
 
-[FVICs]
-  [vel_x_ic]
-     type = FVFunctionIC
-     variable = 'vel_x'
-     function = fully_developed_velocity
-  []
-  [vel_y_ic]
-    type = FVFunctionIC
-    variable = 'vel_y'
-    function = 0
-  []
-  [pressure_ic]
-    type = FVFunctionIC
-    variable = 'pressure'
-    function = 0
-  []
-  [TKE_ic]
-    type = FVFunctionIC
-    variable = 'TKE'
-    function = fully_developed_tke
-  []
-  [TKED_ic]
-    type = FVFunctionIC
-    variable = 'TKED'
-    function = fully_developed_tked
-  []
-[]
+      # Boundary conditions
+      inlet_boundaries = 'inlet'
+      momentum_inlet_types = 'fixed-velocity'
+      momentum_inlet_functors = 'fully_developed_velocity 0'
 
-[FVInterpolationMethods]
-  [upwind]
-    type = FVAdvectedUpwind
-  []
-[]
+      wall_boundaries = ${walls}
+      momentum_wall_types = 'noslip'
 
-[LinearFVKernels]
-  [u_advection_stress]
-    type = LinearWCNSFVMomentumFlux
-    variable = vel_x
-    advected_interp_method_name = ${advected_interp_method}
-    mu = 'mu_t'
-    u = vel_x
-    v = vel_y
-    momentum_component = 'x'
-    rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
-    use_deviatoric_terms = true
-  []
-  [u_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_x
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
-  []
-  [u_pressure]
-    type = LinearFVMomentumPressure
-    variable = vel_x
-    pressure = pressure
-    momentum_component = 'x'
-  []
-  [v_advection_stress]
-    type = LinearWCNSFVMomentumFlux
-    variable = vel_y
-    advected_interp_method_name = ${advected_interp_method}
-    mu = 'mu_t'
-    u = vel_x
-    v = vel_y
-    momentum_component = 'y'
-    rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
-    use_deviatoric_terms = true
-  []
-  [v_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_y
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
-  []
-  [v_pressure]
-    type = LinearFVMomentumPressure
-    variable = vel_y
-    pressure = pressure
-    momentum_component = 'y'
-  []
-  [p_diffusion]
-    type = LinearFVPressureCorrectionDiffusion
-    variable = pressure
-    diffusion_tensor = Ainv
-    use_nonorthogonal_correction = false
-  []
-  [HbyA_divergence]
-    type = LinearFVDivergence
-    variable = pressure
-    face_flux = HbyA
-    force_boundary_execution = true
-  []
-  [TKE_advection]
-    type = LinearFVTurbulentAdvection
-    variable = TKE
-    advected_interp_method_name = ${advected_interp_method}
-  []
-  [TKE_diffusion]
-    type = LinearFVTurbulentDiffusion
-    variable = TKE
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
-  []
-  [TKE_turb_diffusion]
-    type = LinearFVTurbulentDiffusion
-    variable = TKE
-    diffusion_coeff = 'mu_t'
-    scaling_coeff = ${sigma_k}
-    use_nonorthogonal_correction = false
-  []
-  [TKE_source_sink]
-    type = kEpsilonTKESourceSink
-    variable = TKE
+      outlet_boundaries = 'outlet'
+      momentum_outlet_types = 'fixed-pressure'
+      pressure_functors = '0'
 
-    u = vel_x
-    v = vel_y
-    epsilon = TKED
-    rho = ${rho}
-    mu = ${mu}
-    mu_t = 'mu_t'
-    walls = ${walls}
-    wall_treatment = ${wall_treatment}
-    C_pl = 2
+      # Numerical parameters
+      include_deviatoric_stress = true
+      orthogonality_correction = false
+      pressure_two_term_bc_expansion = false
+      momentum_two_term_bc_expansion = false
+      momentum_advection_interpolation = ${advected_interp_method}
+      system_names = 'u_system v_system pressure_system'
+      # consistency with kernel syntax input, allows to use the same executioner block
+      rhie_chow_uo_name = 'rc'
+      pressure_projection_method = 'consistent'
+    []
+    [TurbulenceSegregated/k-epsilon]
+      # Model
+      turbulence_handling = 'k-epsilon'
+      tke_name = TKE
+      tked_name = TKED
+      system_names = 'TKE_system TKED_system'
 
-    # NEW (optional)
-    k_epsilon_variant        = ${k_epsilon_variant}    # 'Standard', 'Realizable', etc.
-    use_buoyancy             = ${use_buoyancy}
-    use_compressibility      = ${use_compressibility}
-    nonlinear_model          = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
-  []
-  [TKED_advection]
-    type = LinearFVTurbulentAdvection
-    variable = TKED
-    advected_interp_method_name = ${advected_interp_method}
-    walls = ${walls}
-  []
-  [TKED_diffusion]
-    type = LinearFVTurbulentDiffusion
-    variable = TKED
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
-    walls = ${walls}
-  []
-  [TKED_turb_diffusion]
-    type = LinearFVTurbulentDiffusion
-    variable = TKED
-    diffusion_coeff = 'mu_t'
-    scaling_coeff = ${sigma_eps}
-    use_nonorthogonal_correction = false
-    walls = ${walls}
-  []
-  [TKED_source_sink]
-    type = kEpsilonTKEDSourceSink
-    variable = TKED
+      # initialization
+      initial_tke = 'fully_developed_tke'
+      initial_tked = 'fully_developed_tked'
+      initial_mu_t = 'initial_mu_t'
 
-    u = vel_x
-    v = vel_y
-    tke = TKE
-    rho = ${rho}
-    mu = ${mu}
-    mu_t = 'mu_t'
-    C1_eps = ${C1_eps}
-    C2_eps = ${C2_eps}
-    walls = ${walls}
-    wall_treatment = ${wall_treatment}
-    C_pl = 2
+      # Model parameters
+      mu_t_ratio_max = 1e20
+      sigma_k = ${sigma_k}
+      sigma_eps = ${sigma_eps}
+      C_pl = 2
+      C1_eps = ${C1_eps}
+      C2_eps = ${C2_eps}
 
-    # NEW (optional)
-    k_epsilon_variant   = ${k_epsilon_variant}
-    use_buoyancy        = ${use_buoyancy}
-    use_compressibility = ${use_compressibility}
-    nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
-    use_yap             = ${use_yap}
-    use_low_re_Gprime   = ${use_low_re_Gprime}
-    wall_distance       = distance
+      # wall treatment
+      turbulence_walls = ${walls}
+      wall_treatment_eps = ${wall_treatment}
+      bulk_wall_treatment = ${bulk_wall_treatment}
+
+      # two-layer k-epsilon options
+      k_epsilon_variant   = ${k_epsilon_variant}
+      use_buoyancy        = ${use_buoyancy}
+      use_compressibility = ${use_compressibility}
+      nonlinear_model     = ${nonlinear_model}
+      curvature_model     = ${curvature_model}
+      use_yap             = ${use_yap}
+      use_low_re_Gprime   = ${use_low_re_Gprime}
+      wall_distance       = distance
+    []
   []
 []
 
 [LinearFVBCs]
-  [inlet_u]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'inlet'
-    variable = vel_x
-    functor = 'fully_developed_velocity'
-  []
-  [inlet-v]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'inlet'
-    variable = vel_y
-    functor = 0
-  []
   [inlet_TKE]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'inlet'
@@ -316,18 +158,6 @@ bulk_wall_treatment = false
   #   k = TKE
   #   characteristic_length = '${D}'
   # []
-  [outlet_u]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = 'outlet'
-    variable = vel_x
-    use_two_term_expansion = false
-  []
-  [outlet_v]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = 'outlet'
-    variable = vel_y
-    use_two_term_expansion = false
-  []
   [outlet_tke]
     type = LinearFVAdvectionDiffusionOutflowBC
     boundary = 'outlet'
@@ -340,52 +170,15 @@ bulk_wall_treatment = false
     variable = TKED
     use_two_term_expansion = false
   []
-  [outlet_p]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'outlet'
-    variable = pressure
-    functor = 0.0
-  []
-  [walls-u]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = ${walls}
-    variable = vel_x
-    functor = 0
-  []
-  [walls-v]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = ${walls}
-    variable = vel_y
-    functor = 0
-  []
-  [walls_mu_t]
-    type = LinearFVTurbulentViscosityWallFunctionBC
-    boundary = ${walls}
-    variable = 'mu_t'
-    u = vel_x
-    v = vel_y
-    rho = ${rho}
-    mu = ${mu}
-    tke = TKE
-    wall_treatment = ${wall_treatment}
-  []
 []
 
 [AuxVariables]
-  [mu_t]
-    type = MooseLinearVariableFVReal
-    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
-  []
   # For computing c_f
   [mu_t_wall]
     type = MooseLinearVariableFVReal
   []
   [yplus]
     type = MooseLinearVariableFVReal
-  []
-  [mu_eff]
-    type = MooseLinearVariableFVReal
-    initial_condition = '${fparse mu + rho * C_mu * ${k_init}^2 / eps_init}'
   []
   [distance]
     type = MooseVariableFVReal
@@ -413,7 +206,7 @@ bulk_wall_treatment = false
 
     # NEW (optional) – choose model and options
     k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
-    # two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
+    # two_layer_flavor  = ${two_layer_flavor}   # ignored unless *TwoLayer variants
     # Cd0 = 0.091      # defaults, can omit if you keep Standard
     # Cd1 = 0.0042
     # Cd2 = 0.00011
@@ -459,13 +252,6 @@ bulk_wall_treatment = false
     wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
   []
-  [compute_mu_eff]
-    type = ParsedAux
-    variable = 'mu_eff'
-    coupled_variables = 'mu_t'
-    expression = 'mu_t + ${mu}'
-    execute_on = 'NONLINEAR'
-  []
   [distance_aux]
     type = WallDistanceMixingLengthAux
     walls = 'wall'
@@ -504,6 +290,12 @@ bulk_wall_treatment = false
     read_prop_user_object = 'read_recycling'
     read_type = 'voronoi'
     column_number = '4'
+  []
+  [initial_mu_t]
+    type = ParsedFunction
+    expression = '${rho} * ${C_mu} * TKE_initial^2 / TKED_initial'
+    symbol_names = 'TKE_initial TKED_initial'
+    symbol_values = 'fully_developed_tke fully_developed_tked'
   []
 []
 
@@ -598,6 +390,7 @@ bulk_wall_treatment = false
     vel_y = vel_y
     advected_interp_method = ${advected_interp_method}
     advected_quantity = ${rho}
+    rhie_chow_user_object = 'rc'
     boundary = 'inlet'
     execute_on = 'TIMESTEP_END'
   []

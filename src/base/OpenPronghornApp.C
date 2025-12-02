@@ -44,6 +44,8 @@ OpenPronghornApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax)
   Registry::registerActionsTo(af, {"OpenPronghornApp"});
 
   /* register custom execute flags, action syntax, etc. here */
+  registerSyntax("KEpsilonVariantsTurbulencePhysics",
+                 "Physics/NavierStokes/TurbulenceSegregatedExtended/*");
 }
 
 void
