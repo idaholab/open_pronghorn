@@ -76,9 +76,8 @@ computeStrainRotationInvariants(const Moose::Functor<Real> & u,
   const Real Wyz = (v && w) ? 0.5 * (dvz - dwy) : 0.0;
 
   // Invariants (2 S_ij S_ij and 2 W_ij W_ij)
-  const Real S2 = 2.0 *
-                  (Sxx * Sxx + Syy * Syy + Szz * Szz +
-                   2.0 * (Sxy * Sxy + Sxz * Sxz + Syz * Syz));
+  const Real S2 =
+      2.0 * (Sxx * Sxx + Syy * Syy + Szz * Szz + 2.0 * (Sxy * Sxy + Sxz * Sxz + Syz * Syz));
 
   const Real W2 = 4.0 * (Wxy * Wxy + Wxz * Wxz + Wyz * Wyz);
 
@@ -101,8 +100,7 @@ twoLayerWolfstein(const Real Cmu, const Real d, const Real Re_d)
   const Real cl = cl_from_Cmu(Cmu);
   TwoLayerLengths out;
   out.l_eps = cl * d * (1.0 - std::exp(-Re_d / (2.0 * cl)));
-  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) *
-                 (1.0 - std::exp(-Re_d / 70.0));
+  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) * (1.0 - std::exp(-Re_d / 70.0));
   return out;
 }
 
@@ -112,8 +110,7 @@ twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d)
   const Real cl = cl_from_Cmu(Cmu);
   TwoLayerLengths out;
   out.l_eps = cl * d * Re_d / (Re_d + 5.3);
-  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) *
-                 (1.0 - std::exp(-Re_d / 50.5));
+  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) * (1.0 - std::exp(-Re_d / 50.5));
   return out;
 }
 
@@ -121,10 +118,8 @@ TwoLayerLengths
 twoLayerXu(const Real /*Cmu*/, const Real d, const Real /*Re_d*/, const Real yv_star)
 {
   TwoLayerLengths out;
-  out.l_eps = 8.8 * d /
-              (1.0 + 10.0 / yv_star + 5.15e-2 * yv_star);
-  out.mu_ratio = 0.544 * yv_star /
-                 (1.0 + 5.025e-4 * std::pow(yv_star, 1.65));
+  out.l_eps = 8.8 * d / (1.0 + 10.0 / yv_star + 5.15e-2 * yv_star);
+  out.mu_ratio = 0.544 * yv_star / (1.0 + 5.025e-4 * std::pow(yv_star, 1.65));
   return out;
 }
 
@@ -189,22 +184,14 @@ computeGb(const Real beta,
 }
 
 Real
-computeGammaM(const Real rho,
-              const Real C_M,
-              const Real k,
-              const Real eps,
-              const Real c)
+computeGammaM(const Real rho, const Real C_M, const Real k, const Real eps, const Real c)
 {
   // gamma_M = rho C_M k epsilon / c^2
   return rho * C_M * k * eps / (c * c);
 }
 
 Real
-computeGammaY(const Real C_w,
-              const Real eps,
-              const Real k,
-              const Real l,
-              const Real l_eps)
+computeGammaY(const Real C_w, const Real eps, const Real k, const Real l, const Real l_eps)
 {
   if (k <= 0.0)
     return 0.0;

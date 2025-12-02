@@ -204,7 +204,7 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
     const Real k = _k(elem_arg, state);
     const Real d = (*_wall_distance_functor)(elem_arg, state);
 
-    const Real Red = k * d / std::max(nu, 1e-12);
+    const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
 
     // Same wall-distance Reynolds threshold used in the two-layer μ_t blending
     const Real Rey_star = 60.0; // if you change this in kEpsilonViscosity, change it here too
@@ -270,7 +270,7 @@ kEpsilonTKEDSourceSink::computeRightHandSideContribution()
     const Real k = _k(elem_arg, state);
     const Real d = (*_wall_distance_functor)(elem_arg, state);
 
-    const Real Red = k * d / std::max(nu, 1e-12);
+    const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
 
     const Real Rey_star = 60.0; // must match the value used in computeMatrixContribution
 
@@ -459,7 +459,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
   {
     const Real d = (*_wall_distance_functor)(elem_arg, state);
     const Real nu = mu / rho;
-    const Real Re_d = k * d / std::max(nu, 1e-12);
+    const Real Re_d = std::sqrt(k) * d / std::max(nu, 1e-12);
     const Real Re_t = k * k / std::max(nu * eps, 1e-20);
     const Real f2_LRe = NS::f2_SKE_LRe(_C_lowRe, Re_t);
     Gprime = NS::computeGprime(_D_lowRe, _E_lowRe, f2_LRe, Gk, mu_t, k, d, Re_d);
@@ -474,7 +474,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
 
     // Simple turbulent length scale l and epsilon length scale l_eps
     const Real l = std::pow(k, 1.5) / std::max(eps, 1e-20);
-    const Real Re_d = k * d / std::max(nu, 1e-12);
+    const Real Re_d = std::sqrt(k) * d / std::max(nu, 1e-12);
     const Real cl = NS::cl_from_Cmu(_C_mu);
     const Real l_eps = cl * d;
 
