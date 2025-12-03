@@ -93,7 +93,7 @@ protected:
   const NS::KEpsilonVariant _variant;
 
   /// Switches controlling optional corrections in the production term
-  const NS::KEpsilonSwitches _switches;
+  NS::KEpsilonSwitches _switches;
 
   /// Turbulent Prandtl number for buoyancy (if used)
   const Real _Pr_t;
@@ -110,17 +110,17 @@ protected:
   const Moose::Functor<Real> * _beta_functor;
   /// Optional functor: speed of sound c
   const Moose::Functor<Real> * _c_functor;
-  /// Optional functor: additional non-linear production G_nl
-  const Moose::Functor<Real> * _Gnl_functor;
-  /// Optional functor: curvature correction factor f_c
-  const Moose::Functor<Real> * _fc_functor;
 
   /// Flags indicating whether the optional fields above are actually present
   const bool _has_T;
   const bool _has_beta;
   const bool _has_c;
-  const bool _has_Gnl;
-  const bool _has_fc;
+
+  /// Nonlinear constitutive model
+  NS::NonlinearConstitutiveRelation _nonlinear_model;
+
+  /// Curvature/rotation correction model for Realizable variants
+  NS::CurvatureCorrectionModel _curvature_model;
 
   /// Per-element flag: is this element adjacent to at least one wall?
   std::unordered_set<const Elem *> _wall_bounded;

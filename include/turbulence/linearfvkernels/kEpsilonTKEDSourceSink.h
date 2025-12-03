@@ -107,7 +107,7 @@ protected:
   const NS::KEpsilonVariant _variant;
 
   /// Switches for optional corrections
-  const NS::KEpsilonSwitches _switches;
+  NS::KEpsilonSwitches _switches;
 
   /// Turbulent Prandtl number for buoyancy (if used)
   const Real _Pr_t;
@@ -124,10 +124,6 @@ protected:
   const Moose::Functor<Real> * _beta_functor;
   /// Optional functor: speed of sound c
   const Moose::Functor<Real> * _c_functor;
-  /// Optional functor: extra non-linear production G_nl
-  const Moose::Functor<Real> * _Gnl_functor;
-  /// Optional functor: curvature correction factor f_c
-  const Moose::Functor<Real> * _fc_functor;
   /// Optional functor: wall distance d (used for Yap and low-Re G')
   const Moose::Functor<Real> * _wall_distance_functor;
 
@@ -135,9 +131,13 @@ protected:
   const bool _has_T;
   const bool _has_beta;
   const bool _has_c;
-  const bool _has_Gnl;
-  const bool _has_fc;
   const bool _has_wall_distance;
+
+  /// Nonlinear constitutive model
+  NS::NonlinearConstitutiveRelation _nonlinear_model;
+
+  /// Curvature/rotation correction model for Realizable variants
+  NS::CurvatureCorrectionModel _curvature_model;
 
   ///@{
   /// Maps for wall treatment

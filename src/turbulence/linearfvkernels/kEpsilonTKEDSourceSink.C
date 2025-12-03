@@ -58,7 +58,7 @@ kEpsilonTKEDSourceSink::validParams()
   params.addParam<Real>(
       "C_lowRe", 1.0, "Low-Re f2 constant C used in the standard low-Re k-epsilon model.");
   params.addParam<Real>("D_lowRe", 1.0, "Low-Re extra production coefficient D for G'.");
-  params.addParam<Real>("E_lowRe", 1.0, "Low-Re extra production coefficient E for G'.");
+  params.addParam<Real>("E_lowRe", 0.00375, "Low-Re extra production coefficient E for G'.");
   params.addParam<Real>("Cw", 0.83, "Yap correction constant Cw for epsilon equation.");
 
   // ---- Production limiter (to match old LinearFVTKEDSourceSink) ----
@@ -76,8 +76,6 @@ kEpsilonTKEDSourceSink::validParams()
                         false,
                         "Include compressibility correction gamma_M in the epsilon "
                         "formulation (mainly in the k-equation, kept for parity).");
-  params.addParam<bool>(
-      "use_nonlinear", false, "Add an extra non-linear production contribution G_nl.");
   params.addParam<bool>("use_curvature_correction",
                         false,
                         "Apply a curvature correction factor f_c to the shear production.");
@@ -98,12 +96,20 @@ kEpsilonTKEDSourceSink::validParams()
       "beta", "Thermal expansion coefficient functor used for buoyancy production (beta(T)).");
   params.addParam<MooseFunctorName>(
       "speed_of_sound", "Speed of sound functor used for compressibility correction gamma_M.");
-  params.addParam<MooseFunctorName>("nonlinear_production",
-                                    "Optional extra non-linear production term G_nl.");
-  params.addParam<MooseFunctorName>("curvature_factor",
-                                    "Optional curvature correction factor f_c.");
   params.addParam<MooseFunctorName>(
       "wall_distance", "Distance to the closest wall; used for Yap and low-Re corrections.");
+
+  MooseEnum nonlinear_model("none quadratic cubic", "none");
+  params.addParam<MooseEnum>("nonlinear_model",
+                             nonlinear_model,
+                             "Non-linear constitutive relation for standard k-epsilon: "
+                             "'none', 'quadratic', or 'cubic'.");
+
+  MooseEnum curvature_model("none standard", "none");
+  params.addParam<MooseEnum>("curvature_model",
+                             curvature_model,
+                             "Curvature / rotation correction model: "
+                             "'none' (default) or 'standard' (Spalart–Shur style).");
 
   return params;
 }
@@ -136,7 +142,7 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
               /*use_compressibility*/ getParam<bool>("use_compressibility"),
               /*use_yap*/ getParam<bool>("use_yap"),
               /*use_low_re_Gprime*/ getParam<bool>("use_low_re_Gprime"),
-              /*use_nonlinear*/ getParam<bool>("use_nonlinear"),
+              /*use_nonlinear*/ false,
               /*use_curvature_correction*/ getParam<bool>("use_curvature_correction")},
     _Pr_t(getParam<Real>("Pr_t")),
     _C_M(getParam<Real>("C_M")),
@@ -145,19 +151,14 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _beta_functor(params.isParamValid("beta") ? &(getFunctor<Real>("beta")) : nullptr),
     _c_functor(params.isParamValid("speed_of_sound") ? &(getFunctor<Real>("speed_of_sound"))
                                                      : nullptr),
-    _Gnl_functor(params.isParamValid("nonlinear_production")
-                     ? &(getFunctor<Real>("nonlinear_production"))
-                     : nullptr),
-    _fc_functor(params.isParamValid("curvature_factor") ? &(getFunctor<Real>("curvature_factor"))
-                                                        : nullptr),
     _wall_distance_functor(
         params.isParamValid("wall_distance") ? &(getFunctor<Real>("wall_distance")) : nullptr),
     _has_T(params.isParamValid("temperature")),
     _has_beta(params.isParamValid("beta")),
     _has_c(params.isParamValid("speed_of_sound")),
-    _has_Gnl(params.isParamValid("nonlinear_production")),
-    _has_fc(params.isParamValid("curvature_factor")),
-    _has_wall_distance(params.isParamValid("wall_distance"))
+    _has_wall_distance(params.isParamValid("wall_distance")),
+    _nonlinear_model(NS::NonlinearConstitutiveRelation::None),
+    _curvature_model(NS::CurvatureCorrectionModel::None)
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
@@ -171,6 +172,28 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     requestVariableCellGradient(getParam<MooseFunctorName>("v"));
   if (_w_var && dynamic_cast<const MooseLinearVariableFV<Real> *>(_w_var))
     requestVariableCellGradient(getParam<MooseFunctorName>("w"));
+
+  // Nonlinear model selection
+  const auto nl = getParam<MooseEnum>("nonlinear_model");
+  if (nl == "quadratic")
+    _nonlinear_model = NS::NonlinearConstitutiveRelation::Quadratic;
+  else if (nl == "cubic")
+    _nonlinear_model = NS::NonlinearConstitutiveRelation::Cubic;
+  else
+    _nonlinear_model = NS::NonlinearConstitutiveRelation::None;
+
+  // keep the switches struct up to date
+  _switches.use_nonlinear = (_nonlinear_model != NS::NonlinearConstitutiveRelation::None);
+
+  // Curvature model section
+  const auto cm = getParam<MooseEnum>("curvature_model");
+  if (cm == "standard")
+    _curvature_model = NS::CurvatureCorrectionModel::Standard;
+  else
+    _curvature_model = NS::CurvatureCorrectionModel::None;
+
+  // Keep switches in sync
+  _switches.use_curvature_correction = (_curvature_model != NS::CurvatureCorrectionModel::None);
 }
 
 void
@@ -443,15 +466,18 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     }
   }
 
-  // Optional extra non-linear production G_nl (only meaningful for Standard variants)
+  // Optional extra non-linear production G_nl from pre-coded turbulence methods
   Real Gnl = 0.0;
-  if (_switches.use_nonlinear && _has_Gnl)
-    Gnl = (*_Gnl_functor)(elem_arg, state);
+  if (_nonlinear_model != NS::NonlinearConstitutiveRelation::None)
+  {
+    auto grad_u = NS::computeVelocityGradient(_u_var, _v_var, _w_var, elem_arg, state);
+    Gnl = NS::computeGnl(_nonlinear_model, grad_u, inv, mu_t, k, eps);
+  }
 
-  // Curvature correction factor f_c
+  // Curvature / rotation correction factor f_c
   Real fc = 1.0;
-  if (_switches.use_curvature_correction && _has_fc)
-    fc = (*_fc_functor)(elem_arg, state);
+  if (_curvature_model != NS::CurvatureCorrectionModel::None)
+    fc = NS::computeCurvatureFactor(_curvature_model, inv);
 
   // Optional low-Re extra production G'
   Real Gprime = 0.0;
@@ -472,9 +498,18 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     const Real d = (*_wall_distance_functor)(elem_arg, state);
     const Real nu = mu / rho;
 
-    // Simple turbulent length scale l and epsilon length scale l_eps
-    const Real l = std::pow(k, 1.5) / std::max(eps, 1e-20);
+    // Limited turbulence time scale for Yap
+    const Real eps_safe = std::max(eps, 1e-20);
+    const Real T1 = k / eps_safe;
+    const Real T2 = 6.0 * nu / eps_safe;
+    const Real T3 = std::pow(T1, 1.625) * T2;
+    const Real Teff = std::pow(T3, 1.0 / (1.625 + 1.0));
+
+    // Yap length scale from Teff
+    const Real l = std::sqrt(std::max(Teff * eps_safe, 0.0));
+
     const Real Re_d = std::sqrt(k) * d / std::max(nu, 1e-12);
+
     const Real cl = NS::cl_from_Cmu(_C_mu);
     const Real l_eps = cl * d;
 
