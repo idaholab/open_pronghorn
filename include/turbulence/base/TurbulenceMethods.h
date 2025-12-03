@@ -16,6 +16,7 @@
 #include "metaphysicl/raw_type.h"
 #include "FEProblemBase.h"
 #include "SubProblem.h"
+#include "RankTwoTensor.h"
 
 namespace NS
 {
@@ -43,6 +44,22 @@ enum class TwoLayerFlavor
   Wolfstein,
   NorrisReynolds,
   Xu
+};
+
+/**
+ * Enumeration of the nonlinear closure options.
+ */
+enum class NonlinearConstitutiveRelation
+{
+  None,
+  Quadratic,
+  Cubic
+};
+
+enum class CurvatureCorrectionModel
+{
+  None,
+  Standard // Spalart–Shur-style rotation/curvature correction
 };
 
 /**
@@ -86,12 +103,11 @@ struct StrainRotationInvariants
  *  - w == nullptr and v != nullptr implies 2D,
  *  - v != nullptr and w != nullptr implies 3D.
  */
-StrainRotationInvariants
-computeStrainRotationInvariants(const Moose::Functor<Real> & u,
-                                const Moose::Functor<Real> * v,
-                                const Moose::Functor<Real> * w,
-                                const Moose::ElemArg & elem_arg,
-                                const Moose::StateArg & state);
+StrainRotationInvariants computeStrainRotationInvariants(const Moose::Functor<Real> & u,
+                                                         const Moose::Functor<Real> * v,
+                                                         const Moose::Functor<Real> * w,
+                                                         const Moose::ElemArg & elem_arg,
+                                                         const Moose::StateArg & state);
 
 /**
  * Small helper to compute the two-layer constant c_l from C_mu.
@@ -111,14 +127,12 @@ struct TwoLayerLengths
 /**
  * Wolfstein two-layer model for l_eps and (mu_t/mu)_2layer.
  */
-TwoLayerLengths
-twoLayerWolfstein(const Real Cmu, const Real d, const Real Re_d);
+TwoLayerLengths twoLayerWolfstein(const Real Cmu, const Real d, const Real Re_d);
 
 /**
  * Norris–Reynolds two-layer model for l_eps and (mu_t/mu)_2layer.
  */
-TwoLayerLengths
-twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d);
+TwoLayerLengths twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d);
 
 /**
  * Xu natural-convection two-layer model variant.
@@ -126,32 +140,28 @@ twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d);
  * yv_star is the dimensionless wall distance used in the Xu model.
  * The expressions follow the STAR-CCM+ documentation closely.
  */
-TwoLayerLengths
-twoLayerXu(const Real Cmu, const Real d, const Real Re_d, const Real yv_star);
+TwoLayerLengths twoLayerXu(const Real Cmu, const Real d, const Real Re_d, const Real yv_star);
 
 /**
  * Low-Re standard k-epsilon damping function f2.
  *
  * f2 = 1 - C exp(-Re_t^2)
  */
-Real
-f2_SKE_LRe(const Real C, const Real Re_t);
+Real f2_SKE_LRe(const Real C, const Real Re_t);
 
 /**
  * Low-Re standard k-epsilon damping function for the turbulent viscosity.
  *
  * fmu = 1 - exp( - (Cd0 sqrt(Re_d) + Cd1 Re_d + Cd2 Re_d^2) )
  */
-Real
-fmu_SKE_LRe(const Real Cd0, const Real Cd1, const Real Cd2, const Real Re_d);
+Real fmu_SKE_LRe(const Real Cd0, const Real Cd1, const Real Cd2, const Real Re_d);
 
 /**
  * Realizable k-epsilon f2 function.
  *
  * f2 = k / (k + sqrt(nu epsilon))
  */
-Real
-f2_RKE(const Real k, const Real nu, const Real eps);
+Real f2_RKE(const Real k, const Real nu, const Real eps);
 
 /**
  * Realizable k-epsilon C_mu expression based on invariants of S and W.
@@ -160,15 +170,29 @@ f2_RKE(const Real k, const Real nu, const Real eps);
  * where S_bar = (k/eps) sqrt(S2) and W_bar = (k/eps) sqrt(W2)
  * with S2 = 2 S_ij S_ij and W2 = 2 W_ij W_ij.
  */
-Real
-Cmu_realizable(const Real Ca0,
-               const Real Ca1,
-               const Real Ca2,
-               const Real Ca3,
-               const Real S2,
-               const Real W2,
-               const Real k,
-               const Real eps);
+Real Cmu_realizable(const Real Ca0,
+                    const Real Ca1,
+                    const Real Ca2,
+                    const Real Ca3,
+                    const Real S2,
+                    const Real W2,
+                    const Real k,
+                    const Real eps);
+
+/**
+ * Compute the variable C_mu used with non-linear constitutive relations.
+ *
+ *   C_mu = Ca0 / (Ca1 + Ca2 S_bar + Ca3 W_bar)
+ *   S_bar = (k/eps) sqrt(S2)
+ *   W_bar = (k/eps) sqrt(W2)
+ */
+Real Cmu_nonlinear(const Real Ca0,
+                   const Real Ca1,
+                   const Real Ca2,
+                   const Real Ca3,
+                   const StrainRotationInvariants & inv,
+                   const Real k,
+                   const Real eps);
 
 /**
  * Turbulent production G_k with optional compressibility terms.
@@ -177,63 +201,105 @@ Cmu_realizable(const Real Ca0,
  *    - 2/3 rho k div(u) (if include_compressibility_terms)
  *    - 2/3 mu_t (div(u))^2 (if include_compressibility_terms)
  */
-Real
-computeGk(const Real mu_t,
-          const Real S2,
-          const Real rho,
-          const Real k,
-          const Real div_u,
-          const bool include_compressibility_terms);
+Real computeGk(const Real mu_t,
+               const Real S2,
+               const Real rho,
+               const Real k,
+               const Real div_u,
+               const bool include_compressibility_terms);
 
 /**
  * Buoyancy production G_b.
  *
  * Gb = beta mu_t / Pr_t * (gradT · g)
  */
-Real
-computeGb(const Real beta,
-          const Real mu_t,
-          const Real Pr_t,
-          const libMesh::VectorValue<Real> & grad_T,
-          const libMesh::VectorValue<Real> & g);
+Real computeGb(const Real beta,
+               const Real mu_t,
+               const Real Pr_t,
+               const libMesh::VectorValue<Real> & grad_T,
+               const libMesh::VectorValue<Real> & g);
 
 /**
  * Compressibility modification gamma_M.
  *
  * gamma_M = rho C_M k epsilon / c^2
  */
-Real
-computeGammaM(const Real rho,
-              const Real C_M,
-              const Real k,
-              const Real eps,
-              const Real c);
+Real computeGammaM(const Real rho, const Real C_M, const Real k, const Real eps, const Real c);
 
 /**
  * Yap correction gamma_y.
  *
  * gamma_y = C_w epsilon^2 / k * max[(l / l_eps - 1) (l / l_eps)^2, 0]
  */
-Real
-computeGammaY(const Real C_w,
-              const Real eps,
-              const Real k,
-              const Real l,
-              const Real l_eps);
+Real computeGammaY(const Real C_w, const Real eps, const Real k, const Real l, const Real l_eps);
 
 /**
  * Low-Re additional production G' for the standard k-epsilon model.
  *
  * G' = D f2 (Gk + 2 mu_t k / d^2) exp(-E Re_d^2)
  */
-Real
-computeGprime(const Real D,
-              const Real E,
-              const Real f2,
-              const Real Gk,
-              const Real mu_t,
-              const Real k,
-              const Real d,
-              const Real Re_d);
+Real computeGprime(const Real D,
+                   const Real E,
+                   const Real f2,
+                   const Real Gk,
+                   const Real mu_t,
+                   const Real k,
+                   const Real d,
+                   const Real Re_d);
+
+/**
+ * Utility function to compute velocity gradient tensor in multiple dimensions.
+ *
+ * This function is dimension-agnostic:
+ *  - v == nullptr implies 1D,
+ *  - w == nullptr and v != nullptr implies 2D,
+ *  - v != nullptr and w != nullptr implies 3D.
+ */
+RankTwoTensor computeVelocityGradient(const Moose::Functor<Real> & u,
+                                      const Moose::Functor<Real> * v,
+                                      const Moose::Functor<Real> * w,
+                                      const Moose::ElemArg & elem_arg,
+                                      const Moose::StateArg & state);
+
+/**
+ * Build the non-linear Reynolds stress contribution T_RANS,NL for the
+ * Standard k-epsilon model using either the quadratic or cubic
+ * constitutive relation.
+ *
+ * S and W are built from grad_u:
+ *   S = 0.5 (grad_u + grad_u^T)
+ *   W = 0.5 (grad_u - grad_u^T)
+ */
+RankTwoTensor computeTRANS_NL(const NonlinearConstitutiveRelation model,
+                              const RankTwoTensor & grad_u,
+                              const StrainRotationInvariants & inv,
+                              const Real mu_t,
+                              const Real k,
+                              const Real eps);
+
+/**
+ * Convenience helper to turn T_RANS,NL into the scalar non-linear
+ * production term
+ *
+ *   G_nl = T_RANS,NL : grad(u)
+ */
+Real computeGnl(const NonlinearConstitutiveRelation model,
+                const RankTwoTensor & grad_u,
+                const StrainRotationInvariants & inv,
+                const Real mu_t,
+                const Real k,
+                const Real eps);
+
+/**
+ * Curvature / rotation correction factor f_c, based on the local
+ * strain- and rotation-rate invariants.
+ *
+ * This is used to scale the production in the Realizable k-epsilon
+ * variants:
+ *   P_k = f_c G_k
+ *   P_eps = f_c S_k
+ */
+Real computeCurvatureFactor(const CurvatureCorrectionModel model,
+                            const StrainRotationInvariants & inv);
 
 } // namespace NS
