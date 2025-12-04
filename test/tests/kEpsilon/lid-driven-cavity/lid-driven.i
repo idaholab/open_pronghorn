@@ -1,24 +1,15 @@
-##########################################################
-# ERCOFTAC test case for turbulent channel flow
-# Case Number: 032
-# Author: Dr. Mauricio Tano & Hailey Tran Kieu
-# Last Update: November, 2023 & 2025
-# Turbulent model using:
-# k-epsilon
-# Equilibrium + Newton wall treatment
-# SIMPLE solve
-##########################################################
+### Thermophysical Properties ###
+mu = 1e-3
+rho = 1.0
 
+### Operation Conditions ###
+lid_velocity = 1.0
+side_length = 0.1
 
-### Problem Parameters ###
-H = 1 # half-width of the channel
-L = 120
-Re = 14000
-rho = 1
-bulk_u = 1
-mu = '${fparse rho * bulk_u * 2 * H / Re}'
-
-advected_interp_method = 'upwind'
+### Initial Conditions ###
+intensity = 0.01
+k_init = '${fparse 1.5*(intensity * lid_velocity)^2}'
+eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
 
 ### k-epsilon Closure Parameters ###
 sigma_k = 1.0
@@ -27,19 +18,14 @@ C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
 
-### Initial and Boundary Conditions ###
-intensity = 0.01
-k_init = '${fparse 1.5*(intensity * bulk_u)^2}'
-eps_init = '${fparse C_mu^0.75 * k_init^1.5 / (2*H)}'
-
 ### Modeling parameters ###
 bulk_wall_treatment = false
-walls = 'bottom top'
-wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
+walls = 'left top right bottom'
+wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 # Turbulence-model knobs (optional)
-k_epsilon_variant   = 'RealizableTwoLayer'    # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-two_layer_flavor    = 'Wolfstein'   # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+k_epsilon_variant   = 'RealizableTwoLayer' # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
+two_layer_flavor    = 'Wolfstein'          # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
@@ -47,46 +33,29 @@ curvature_model     = 'none'
 use_yap             = false
 use_low_re_Gprime   = false
 
+[GlobalParams]
+  rhie_chow_user_object = 'rc'
+  advected_interp_method = 'upwind'
+[]
+
 [Mesh]
-  [block_1]
-    type = CartesianMeshGenerator
+  [gen]
+    type = GeneratedMeshGenerator
     dim = 2
-    dx = '${L}'
-    dy = '1.0'
-    ix = '50'
-    iy = '10'
+    xmin = 0
+    xmax = ${side_length}
+    ymin = 0
+    ymax = ${side_length}
+    nx = 12
+    ny = 12
   []
-  [block_2_base]
-    type = CartesianMeshGenerator
-    dim = 2
-    dx = '${L}'
-    dy = '1.0'
-    ix = '50'
-    iy = '10'
-  []
-  [block_2]
-    type = TransformGenerator
-    input = block_2_base
-    transform = TRANSLATE
-    vector_value = '0 -1 0'
-  []
-  [smg]
-    type = StitchedMeshGenerator
-    inputs = 'block_1 block_2'
-    clear_stitched_boundary_ids = true
-    stitch_boundaries_pairs = 'bottom top'
-    merge_boundaries_with_same_name = true
-  []
+  # Prevent test diffing on distributed parallel element numbering
+  allow_renumbering = false
 []
 
 [Problem]
   linear_sys_names = 'u_system v_system pressure_system TKE_system TKED_system'
   previous_nl_solution_required = true
-[]
-
-[GlobalParams]
-  rhie_chow_user_object = 'rc'
-  advected_interp_method = ${advected_interp_method}
 []
 
 [UserObjects]
@@ -97,14 +66,13 @@ use_low_re_Gprime   = false
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    pressure_projection_method = 'consistent'
   []
 []
 
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    initial_condition = ${bulk_u}
+    initial_condition = ${lid_velocity}
     solver_sys = u_system
   []
   [vel_y]
@@ -133,19 +101,19 @@ use_low_re_Gprime   = false
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
     mu = 'mu_t'
     u = vel_x
     v = vel_y
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [u_diffusion]
     type = LinearFVDiffusion
     variable = vel_x
-    diffusion_coeff = '${mu}'
+    diffusion_coeff = ${mu}
+    use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -157,19 +125,19 @@ use_low_re_Gprime   = false
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
     mu = 'mu_t'
     u = vel_x
     v = vel_y
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [v_diffusion]
     type = LinearFVDiffusion
     variable = vel_y
-    diffusion_coeff = '${mu}'
+    diffusion_coeff = ${mu}
+    use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -274,14 +242,14 @@ use_low_re_Gprime   = false
     C2_eps = ${C2_eps}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    C_pl = 1e10
+    # C_pl = 1e10
 
     # NEW (optional)
     k_epsilon_variant   = ${k_epsilon_variant}
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
-    nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
+    nonlinear_model       = ${nonlinear_model}
+    curvature_model          = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
 
@@ -300,72 +268,29 @@ use_low_re_Gprime   = false
 []
 
 [LinearFVBCs]
-  [inlet-u]
+  [top_x]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'left'
     variable = vel_x
-    functor = '${bulk_u}'
+    boundary = 'top'
+    functor = 1
   []
-  [inlet-v]
+  [no_slip_x]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'left'
-    variable = vel_y
-    functor = '0.0'
-  []
-  [walls-u]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
     variable = vel_x
-    functor = 0.0
+    boundary = 'left right bottom'
+    functor = 0
   []
-  [walls-v]
+  [no_slip_y]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
     variable = vel_y
-    functor = 0.0
+    boundary = 'left right top bottom'
+    functor = 0
   []
-  [outlet_u]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = 'right'
-    variable = vel_x
-    use_two_term_expansion = false
-  []
-  [outlet_v]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = 'right'
-    variable = vel_y
-    use_two_term_expansion = false
-  []
-  [outlet_p]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'right'
+  [pressure-extrapolation]
+    type = LinearFVExtrapolatedPressureBC
+    boundary = 'left right top bottom'
     variable = pressure
-    functor = 0.0
-  []
-
-  [inlet_TKE]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'left'
-    variable = TKE
-    functor = '${k_init}'
-  []
-  [outlet_TKE]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = 'right'
-    variable = TKE
-    use_two_term_expansion = false
-  []
-  [inlet_TKED]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'left'
-    variable = TKED
-    functor = '${eps_init}'
-  []
-  [outlet_TKED]
-    type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = 'right'
-    variable = TKED
-    use_two_term_expansion = false
+    use_two_term_expansion = true
   []
   [walls_mu_t]
     type = LinearFVTurbulentViscosityWallFunctionBC
@@ -390,8 +315,11 @@ use_low_re_Gprime   = false
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
   []
   [yplus]
-    type = MooseVariableFVReal
-        two_term_boundary_expansion = false
+    type = MooseLinearVariableFVReal
+  []
+  [mu_eff]
+    type = MooseLinearVariableFVReal
+    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
   []
 []
 
@@ -444,6 +372,13 @@ use_low_re_Gprime   = false
     wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
   []
+  [compute_mu_eff]
+    type = ParsedAux
+    variable = 'mu_eff'
+    coupled_variables = 'mu_t'
+    expression = 'mu_t + ${mu}'
+    execute_on = 'NONLINEAR'
+  []
 []
 
 [Executioner]
@@ -463,29 +398,79 @@ use_low_re_Gprime   = false
 
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.2 0.2'
-  turbulence_field_relaxation = '0.2 0.2'
-  num_iterations = 5000
-  pressure_absolute_tolerance = 1e-7
-  momentum_absolute_tolerance = 1e-7
-  turbulence_absolute_tolerance = '1e-7 1e-7'
-
-  momentum_petsc_options_iname = '-u_system_pc_type -u_system_pc_hypre_type -v_system_pc_type -v_system_pc_hypre_type'
-  momentum_petsc_options_value = 'hypre boomeramg hypre boomeramg'
+  turbulence_equation_relaxation = '0.5 0.5'
+  num_iterations = 1000
+  pressure_absolute_tolerance = 1e-10
+  momentum_absolute_tolerance = 1e-10
+  turbulence_absolute_tolerance = '1e-10 1e-10'
+  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
+  momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
-  turbulence_petsc_options_iname = '-TKE_system_pc_type -TKE_system_pc_hypre_type -TKED_system_pc_type -TKED_system_pc_hypre_type'
-  turbulence_petsc_options_value = 'hypre boomeramg hypre boomeramg'
-
-  momentum_l_max_its = 300
-  pressure_l_max_its = 300
-  turbulence_l_max_its = 30
+  turbulence_petsc_options_iname = '-pc_type -pc_hypre_type'
+  turbulence_petsc_options_value = 'hypre boomeramg'
 
   print_fields = false
   continue_on_max_its = true
+
+  pin_pressure = true
+  pressure_pin_value = 0.0
+  pressure_pin_point = '0.01 0.099 0.0'
 []
 
 [Outputs]
-  exodus = true
-  csv = false
+  exodus = false
+  [csv]
+    type = CSV
+    execute_on = FINAL
+  []
+[]
+
+[VectorPostprocessors]
+  [side_bottom]
+    type = SideValueSampler
+    boundary = 'bottom'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_top]
+    type = SideValueSampler
+    boundary = 'top'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [side_left]
+    type = SideValueSampler
+    boundary = 'left'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
+  [side_right]
+    type = SideValueSampler
+    boundary = 'right'
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
+  [horizontal_center]
+    type = LineValueSampler
+    start_point = '${fparse 0.01 * side_length} ${fparse 0.499 * side_length} 0'
+    end_point = '${fparse 0.99 * side_length} ${fparse 0.499 * side_length} 0'
+    num_points = ${Mesh/gen/nx}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'x'
+    execute_on = 'timestep_end'
+  []
+  [vertical_center]
+    type = LineValueSampler
+    start_point = '${fparse 0.499 * side_length} ${fparse 0.01 * side_length} 0'
+    end_point = '${fparse 0.499 * side_length} ${fparse 0.99 * side_length} 0'
+    num_points =  ${Mesh/gen/ny}
+    variable = 'vel_x vel_y pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'timestep_end'
+  []
 []
