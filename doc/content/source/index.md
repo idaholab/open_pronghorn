@@ -1,7 +1,6 @@
-!config navigation collapsible-sections=[None, 'open', 'open', 'open', 'open', 'open']
+## Source documentation for OpenPronghorn objects
 
-# Source Documentation
-
-The following is a complete list of documented C++ source.
+The API reference for OpenPronghorn-only classes lives alongside the input file syntax.
+Use the listing below to navigate directly to each documented object.
 
 !content location=source
