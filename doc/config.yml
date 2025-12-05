@@ -41,6 +41,8 @@ Extensions:
             Software Quality:
                 Software Quality Assurance (SQA) Information: /sqa/index.md
                 Code Standards: sqa/open_pronghorn_scs.md
+            Theory:
+                Introduction: theory/introduction.md
     MooseDocs.extensions.appsyntax:
         executable: ${ROOT_DIR}
         remove: !include ${MOOSE_DIR}/framework/doc/remove.yml
