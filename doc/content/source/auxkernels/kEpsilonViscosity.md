@@ -1,14 +1,14 @@
 # kEpsilonViscosity
 
 `kEpsilonViscosity` is an auxiliary kernel that computes the **turbulent dynamic viscosity**
-\(\mu_t\) used in the k–$\epsilon$ family of turbulence models.
+$\mu_t$ used in the k–$\epsilon$ family of turbulence models.
 It forms the closure term for the Reynolds stresses in the momentum equations:
 
 \begin{equation}
 \mu_t = \rho\, C_\mu\, k\, T,
 \end{equation}
 
-where the *turbulent time scale* \(T\) and the *effective coefficient* \(C_\mu\) depend on the
+where the *turbulent time scale* $T$ and the *effective coefficient* $C_\mu$ depend on the
 selected k–$\epsilon$ variant and the local flow state.
 
 This object implements:
@@ -17,7 +17,7 @@ This object implements:
 - Several wall treatments (Newton, incremental, linearized, non-equilibrium),
 - Two-layer near-wall blending methods (Wolfstein, Norris–Reynolds, Xu),
 - Low-Re damping functions for the StandardLowRe model,
-- Realizable variable \(C_\mu\),
+- Realizable variable $C_\mu$,
 - Optional scale limiting for the time scale,
 - Bulk and near-wall formulations that match STAR‑CCM+ and Menter-type corrections.
 
@@ -32,10 +32,10 @@ Away from walls (or when `[bulk_wall_treatment=false]`), the turbulent viscosity
 
 where:
 
-- \(k\) is the turbulent kinetic energy,
-- \(\rho\) is the fluid density,
-- \(C_\mu^{\mathrm{eff}}\) depends on the k–$\epsilon$ variant,
-- \(T\) is the turbulent time scale (possibly limited).
+- $k$ is the turbulent kinetic energy,
+- $\rho$ is the fluid density,
+- $C_\mu^{\mathrm{eff}}$ depends on the k–$\epsilon$ variant,
+- $T$ is the turbulent time scale (possibly limited).
 
 ### Turbulent time scale
 
@@ -53,15 +53,15 @@ T = \max\left( T_e, \; C_t\sqrt{\frac{\nu}{\epsilon}} \right),
 
 where:
 
-- \(\nu = \mu/\rho\) is the molecular kinematic viscosity,
-- \(C_t\) is a model constant,
-- The second term becomes important near walls or when \(k/\epsilon\) becomes too large.
+- $\nu = \mu/\rho$ is the molecular kinematic viscosity,
+- $C_t$ is a model constant,
+- The second term becomes important near walls or when $k/\epsilon$ becomes too large.
 
-If `[scale_limiter=none]`, then \(T=T_e\).
+If `[scale_limiter=none]`, then $T=T_e$.
 
-### Effective coefficient \(C_\mu^{\mathrm{eff}}\)
+### Effective coefficient $C_\mu^{\mathrm{eff}}$
 
-The meaning of \(C_\mu\) varies based on the selected turbulence variant:
+The meaning of $C_\mu$ varies based on the selected turbulence variant:
 
 #### Standard k–$\epsilon$
 
@@ -71,13 +71,13 @@ C_\mu^{\mathrm{eff}} = C_\mu.
 
 #### StandardLowRe
 
-Low-Re models use a damping function \(f_\mu\):
+Low-Re models use a damping function $f_\mu$:
 
 \begin{equation}
 C_\mu^{\mathrm{eff}} = C_\mu\, f_\mu,
 \end{equation}
 
-where \(f_\mu\) is computed as:
+where $f_\mu$ is computed as:
 
 \begin{equation}
 f_\mu = 1 - \exp\!\Big[-(C_{d0}\sqrt{Re_d} + C_{d1}Re_d + C_{d2}Re_d^2)\Big],
@@ -89,26 +89,26 @@ with:
 Re_d = \frac{\sqrt{k}\,d}{\nu},
 \end{equation}
 
-and \(d\) is the wall distance (supplied via a functor).
+and $d$ is the wall distance (supplied via a functor).
 
 #### Realizable k–$\epsilon$
 
-The realizable model computes \(C_\mu\) dynamically as a function of strain and rotation:
+The realizable model computes $C_\mu$ dynamically as a function of strain and rotation:
 
 \begin{equation}
 C_\mu^{\mathrm{eff}}
 = \frac{C_{a0}}
-        {C_{a1} + C_{a2} S^\* + C_{a3} W^\*},
+        {C_{a1} + C_{a2} S^* + C_{a3} W^*},
 \end{equation}
 
 where:
 
-- \(S^\* = (k/\epsilon)\sqrt{S^2}\),
-- \(W^\* = (k/\epsilon)\sqrt{W^2}\),
-- \(S^2\) and \(W^2\) are invariants of the strain and rotation tensors computed in
+- $S^* = (k/\epsilon)\sqrt{S^2}$,
+- $W^* = (k/\epsilon)\sqrt{W^2}$,
+- $S^2$ and $W^2$ are invariants of the strain and rotation tensors computed in
   `TurbulenceMethods::computeStrainRotationInvariants`.
 
-This value replaces the standard constant \(C_\mu\) everywhere in the model.
+This value replaces the standard constant $C_\mu$ everywhere in the model.
 
 #### Two-layer models (StandardTwoLayer and RealizableTwoLayer)
 
@@ -119,21 +119,21 @@ Two-layer models blend between:
 
 Let:
 
-- \( \mu_{t,k\epsilon} = \rho C_\mu^{\mathrm{eff}} k T\),
-- \( \mu_{2L} \) = near-wall turbulent viscosity from the chosen flavor
+- $\mu_{t,k\epsilon} = \rho C_\mu^{\mathrm{eff}} k T$,
+- $\mu_{2L}$ = near-wall turbulent viscosity from the chosen flavor
   (Wolfstein, Norris–Reynolds, or Xu).
 
-Using the wall-distance Reynolds number \(Re_d = \sqrt{k} d / \nu\),
+Using the wall-distance Reynolds number $Re_d = \sqrt{k} d / \nu$,
 the two-layer blending function is:
 
 \begin{equation}
-\lambda = \tfrac12\left[1 + \tanh\!\left(\frac{Re_d - Re^\*}{A}\right)\right],
+\lambda = \tfrac12\left[1 + \tanh\!\left(\frac{Re_d - Re^*}{A}\right)\right],
 \end{equation}
 
 with:
 
-- \(Re^\* = 60\),
-- \(A\) chosen such that \(\lambda \approx 0.98\) at \(Re^\* + 10\).
+- $Re^* = 60$,
+- $A$ chosen such that $\lambda \approx 0.98$ at $Re^* + 10$.
 
 The final viscosity is:
 
@@ -144,13 +144,13 @@ The final viscosity is:
 
 ## Near-wall bulk treatment
 
-When `[bulk_wall_treatment=true]`, the kernel applies wall functions to compute \(\mu_t\) in
+When `[bulk_wall_treatment=true]`, the kernel applies wall functions to compute $\mu_t$ in
 wall-bounded cells.
 
 The procedure:
 
 1. Identify the minimum wall distance in the cell.
-2. Compute the tangential velocity and friction velocity \(u_\tau\).
+2. Compute the tangential velocity and friction velocity $u_\tau$.
 3. Compute the nondimensional wall distance:
 
 \begin{equation}
@@ -159,8 +159,8 @@ y^+ = \frac{\rho u_\tau y}{\mu}.
 
 4. Classify into:
 
-- **Viscous sublayer**: \(y^+ \le 5\) → \(\mu_t = 0\),
-- **Log‑layer**: \(y^+ \ge 30\) → \(\mu_t = \mu_\mathrm{log}(y^+)\),
+- **Viscous sublayer**: $y^+ \le 5$ → $\mu_t = 0$,
+- **Log‑layer**: $y^+ \ge 30$ → $\mu_t = \mu_\mathrm{log}(y^+)$,
 - **Buffer layer**: linear blending between the two regimes.
 
 Four wall-function types are supported:
@@ -168,9 +168,9 @@ Four wall-function types are supported:
 - `eq_newton`
 - `eq_incremental`
 - `eq_linearized`
-- `neq` (non-equilibrium using local \(k\))
+- `neq` (non-equilibrium using local $k$)
 
-Each provides a different method for computing \(u_\tau\) and the corresponding \(\mu_{wall}\).
+Each provides a different method for computing $u_\tau$ and the corresponding $\mu_{wall}$.
 
 This wall-function implementation is fully consistent with the finite-volume INSFVTurbulentViscosity
 models used in the Navier–Stokes FV physics.
@@ -191,8 +191,8 @@ If a required functor is missing, the kernel throws an error during construction
 
 `kEpsilonViscosity` is tightly coupled with the k and $\epsilon$ kernels:
 
-- It uses `k` and `$\epsilon$` to compute viscosity.
-- The k and $\epsilon$ kernels require \(\mu_t\) to compute production and destruction terms.
+- It uses `k` and $\epsilon$ to compute viscosity.
+- The k and $\epsilon$ kernels require $\mu_t$ to compute production and destruction terms.
 - Realizable and nonlinear models require strain/rotation invariants also used by k and $\epsilon$ kernels.
 - Two-layer models require consistency between:
   - $\epsilon$-equation two-layer region,
