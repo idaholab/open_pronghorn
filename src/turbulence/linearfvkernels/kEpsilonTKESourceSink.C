@@ -321,7 +321,6 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
                                              const Moose::StateArg & state) const
 {
   const Real rho = _rho(elem_arg, state);
-  const Real mu = _mu(elem_arg, state);
   const Real mu_t = _mu_t(elem_arg, state);
   const Real k = _var.getElemValue(*_current_elem_info, state);
   const Real eps = _epsilon(elem_arg, state);

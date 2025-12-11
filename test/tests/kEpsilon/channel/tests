@@ -1,4 +1,6 @@
 [Tests]
+  design = 'kEpsilonViscosity.md kEpsilonTKEDSourceSink.md kEpsilonTKESourceSink.md WallDistanceAux.md'
+  issues = '#50'
   [channel_ERCOFTAC_k_epsilon_standard]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
@@ -153,17 +155,6 @@
     cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, NorrisReynolds two-layer flavor'
   []
-  [channel_ERCOFTAC_k_epsilon_standardtwolayer_xu]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=Xu use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, Xu two-layer flavor'
-  []
   [channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_yap]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
@@ -185,17 +176,6 @@
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=NorrisReynolds use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_yap'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, NorrisReynolds two-layer flavor, YAP correction'
-  []
-  [channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=Xu use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, Xu two-layer flavor, YAP correction'
   []
   [channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic]
     type = 'CSVDiff'
@@ -219,17 +199,6 @@
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, NorrisReynolds two-layer flavor, quadratic non-linear model'
   []
-  [channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=Xu use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, Xu two-layer flavor, quadratic non-linear model'
-  []
   [channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_yap]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
@@ -251,17 +220,6 @@
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=NorrisReynolds use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_yap'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, NorrisReynolds two-layer flavor, quadratic non-linear model, YAP correction'
-  []
-  [channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=Xu use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, Xu two-layer flavor, quadratic non-linear model, YAP correction'
   []
   [channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic]
     type = 'CSVDiff'
@@ -285,17 +243,6 @@
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, NorrisReynolds two-layer flavor, cubic non-linear model'
   []
-  [channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=Xu use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, Xu two-layer flavor, cubic non-linear model'
-  []
   [channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_yap]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
@@ -317,17 +264,6 @@
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=NorrisReynolds use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_yap'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, NorrisReynolds two-layer flavor, cubic non-linear model, YAP correction'
-  []
-  [channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=Xu use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers. using StandardTwoLayer, Xu two-layer flavor, cubic non-linear model, YAP correction'
   []
   [channel_ERCOFTAC_k_epsilon_realizable]
     type = 'CSVDiff'

@@ -182,6 +182,13 @@ def make_csvdiff_list(file_base: str) -> str:
 
 def main():
     print("[Tests]")
+    print(
+        "  design = 'kEpsilonViscosity.md "
+        "kEpsilonTKEDSourceSink.md "
+        "kEpsilonTKESourceSink.md "
+        "WallDistanceAux.md'"
+    )
+    print("  issues = '#50'")
 
     for p in iter_permutations():
         file_base = build_file_base(p)

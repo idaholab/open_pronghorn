@@ -1,4 +1,6 @@
 [Tests]
+  design = 'kEpsilonViscosity.md kEpsilonTKEDSourceSink.md kEpsilonTKESourceSink.md WallDistanceAux.md'
+  issues = '#50'
   [lid-driven_k_epsilon_standard]
     type = 'CSVDiff'
     input = 'lid-driven.i'
