@@ -60,6 +60,7 @@ BASE_REQUIREMENT = (
 # HELPERS
 # ---------------------------------------------------------------------------
 
+
 def variant_token(variant: str) -> str:
     """
     Map the k_epsilon_variant to the token used in filenames.
@@ -94,7 +95,11 @@ def is_skipped_permutation(p) -> bool:
 
     if variant == "RealizableTwoLayer":
         # NorrisReynolds, quadratic/cubic, with YAP
-        if flavor == "NorrisReynolds" and use_yap and nonlinear in ("quadratic", "cubic"):
+        if (
+            flavor == "NorrisReynolds"
+            and use_yap
+            and nonlinear in ("quadratic", "cubic")
+        ):
             return True
 
         # Xu, cubic (with or without YAP)
@@ -228,6 +233,7 @@ def make_csvdiff_list(file_base: str) -> str:
 # MAIN
 # ---------------------------------------------------------------------------
 
+
 def main():
     print("[Tests]")
 
@@ -254,5 +260,5 @@ def main():
     print("[]")  # close [Tests]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
