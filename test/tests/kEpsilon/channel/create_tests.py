@@ -93,6 +93,10 @@ def is_skipped_permutation(p) -> bool:
     nonlinear = p["nonlinear_model"]
     use_yap = p["use_yap"]
 
+    # Skip StandardTwoLayer + Xu flavor (all nonlinear/YAP combos)
+    if variant == "StandardTwoLayer" and flavor == "Xu":
+        return True
+
     if variant == "RealizableTwoLayer":
         # NorrisReynolds, quadratic/cubic, with YAP
         if (
@@ -236,6 +240,13 @@ def make_csvdiff_list(file_base: str) -> str:
 
 def main():
     print("[Tests]")
+    print(
+        "  design = 'kEpsilonViscosity.md "
+        "kEpsilonTKEDSourceSink.md "
+        "kEpsilonTKESourceSink.md "
+        "WallDistanceAux.md'"
+    )
+    print("  issues = '#50'")
 
     for p in iter_permutations():
         file_base = build_file_base(p)
