@@ -72,6 +72,7 @@ SAMPLER_NAMES = [
 # HELPERS
 # ---------------------------------------------------------------------------
 
+
 def variant_token(variant: str) -> str:
     """
     Map k_epsilon_variant to a token for filenames.
@@ -178,6 +179,7 @@ def make_csvdiff_list(file_base: str) -> str:
 # MAIN
 # ---------------------------------------------------------------------------
 
+
 def main():
     print("[Tests]")
 
@@ -204,5 +206,5 @@ def main():
     print("[]")  # close [Tests]
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

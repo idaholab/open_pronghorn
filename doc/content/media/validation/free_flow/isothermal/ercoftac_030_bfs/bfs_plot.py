@@ -269,6 +269,7 @@ fig.savefig("plots_cf_main.png", dpi=300, bbox_inches="tight")
 # Read the y_grid values
 y_grid = pd.read_csv(validation_folder + "reference_csv/u+1.csv")["y/h"].to_numpy()
 
+
 # MOOSE Reference: Function to interpolate vel_x to y_grid
 def interpolate_vel_x(y_values, vel_x_values, y_grid):
     return np.interp(y_grid, y_values, vel_x_values)
@@ -285,9 +286,7 @@ for m in k_eps_variants:
         df_linear = pd.read_csv(validation_folder + file)
         y_linear = (df_linear["y"].to_numpy() + H) / H  # Normalize y-values to y/H
         vel_x_linear = df_linear["vel_x"].to_numpy() / U_ref  # Normalize velocities
-        vel_profiles[m["key"]][xh] = interpolate_vel_x(
-            y_linear, vel_x_linear, y_grid
-        )
+        vel_profiles[m["key"]][xh] = interpolate_vel_x(y_linear, vel_x_linear, y_grid)
 
 # Read and process each linear CSV for the current run
 sim_vel_profiles = {}
@@ -300,17 +299,13 @@ if plot_current_results:
         sim_df_linear = pd.read_csv(validation_folder + file)
         sim_y_linear = (sim_df_linear["y"].to_numpy() + H) / H
         sim_vel_x_linear = sim_df_linear["vel_x"].to_numpy() / U_ref
-        sim_vel_profiles[xh] = interpolate_vel_x(
-            sim_y_linear, sim_vel_x_linear, y_grid
-        )
+        sim_vel_profiles[xh] = interpolate_vel_x(sim_y_linear, sim_vel_x_linear, y_grid)
 
 # Read u profiles
 u_exp = pd.read_csv(validation_folder + "reference_csv/u_profiles_exp.csv")
 
 # Create subplots
-fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(
-    2, 2, figsize=(10, 10)
-)
+fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 10))
 fig.suptitle("Vertical X-Velocity Profiles", fontsize="14")
 
 # Map x/H to exp column
