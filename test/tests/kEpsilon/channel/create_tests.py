@@ -265,6 +265,7 @@ def main():
         print("    rel_err = 1e-3")
         print("    recover = false")
         print("    max_threads = 1")
+        print("    mesh_mode = 'replicated'")
         print(f"    cli_args = '{cli_args}'")
         print(f"    requirement = '{BASE_REQUIREMENT}{req_suffix}'")
         print("  []")
