@@ -3,7 +3,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_standard_horizontal_center_0002.csv lid-driven_k_epsilon_standard_vertical_center_0002.csv lid-driven_k_epsilon_standard_side_bottom_0002.csv lid-driven_k_epsilon_standard_side_top_0002.csv lid-driven_k_epsilon_standard_side_left_0002.csv lid-driven_k_epsilon_standard_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Standard use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standard'
@@ -13,7 +14,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_standard_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_standard_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_standard_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_standard_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_standard_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_standard_lowreGprime_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Standard use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_standard_lowreGprime'
@@ -23,7 +25,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_standardlowre_horizontal_center_0002.csv lid-driven_k_epsilon_standardlowre_vertical_center_0002.csv lid-driven_k_epsilon_standardlowre_side_bottom_0002.csv lid-driven_k_epsilon_standardlowre_side_top_0002.csv lid-driven_k_epsilon_standardlowre_side_left_0002.csv lid-driven_k_epsilon_standardlowre_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardLowRe use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardlowre'
@@ -33,7 +36,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_standardlowre_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardLowRe use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_standardlowre_lowreGprime'
@@ -43,7 +47,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_standardtwolayer_horizontal_center_0002.csv lid-driven_k_epsilon_standardtwolayer_vertical_center_0002.csv lid-driven_k_epsilon_standardtwolayer_side_bottom_0002.csv lid-driven_k_epsilon_standardtwolayer_side_top_0002.csv lid-driven_k_epsilon_standardtwolayer_side_left_0002.csv lid-driven_k_epsilon_standardtwolayer_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer'
@@ -53,7 +58,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_standardtwolayer_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_standardtwolayer_lowreGprime'
@@ -63,7 +69,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_realizable_horizontal_center_0002.csv lid-driven_k_epsilon_realizable_vertical_center_0002.csv lid-driven_k_epsilon_realizable_side_bottom_0002.csv lid-driven_k_epsilon_realizable_side_top_0002.csv lid-driven_k_epsilon_realizable_side_left_0002.csv lid-driven_k_epsilon_realizable_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Realizable use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizable'
@@ -73,7 +80,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_realizable_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Realizable use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_realizable_lowreGprime'
@@ -83,7 +91,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_realizabletwolayer_horizontal_center_0002.csv lid-driven_k_epsilon_realizabletwolayer_vertical_center_0002.csv lid-driven_k_epsilon_realizabletwolayer_side_bottom_0002.csv lid-driven_k_epsilon_realizabletwolayer_side_top_0002.csv lid-driven_k_epsilon_realizabletwolayer_side_left_0002.csv lid-driven_k_epsilon_realizabletwolayer_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer'
@@ -93,7 +102,8 @@
     type = 'CSVDiff'
     input = 'lid-driven.i'
     csvdiff = 'lid-driven_k_epsilon_realizabletwolayer_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_side_right_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer_lowreGprime'

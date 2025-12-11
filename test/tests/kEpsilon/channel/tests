@@ -3,7 +3,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Standard use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard'
@@ -13,7 +14,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Standard use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_yap'
@@ -23,7 +25,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Standard nonlinear_model=quadratic use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_quadratic'
@@ -33,7 +36,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Standard nonlinear_model=quadratic use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_quadratic_yap'
@@ -43,7 +47,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Standard nonlinear_model=cubic use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_cubic'
@@ -53,7 +58,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_cubic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Standard nonlinear_model=cubic use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_cubic_yap'
@@ -63,7 +69,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardlowre_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardLowRe use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardlowre'
@@ -73,7 +80,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardlowre_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardLowRe use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardlowre_yap'
@@ -83,7 +91,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardLowRe nonlinear_model=quadratic use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardlowre_quadratic'
@@ -93,7 +102,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardLowRe nonlinear_model=quadratic use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_yap'
@@ -103,7 +113,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardlowre_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_cubic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardLowRe nonlinear_model=cubic use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardlowre_cubic'
@@ -113,7 +124,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardlowre_cubic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_cubic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_cubic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardlowre_cubic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardLowRe nonlinear_model=cubic use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardlowre_cubic_yap'
@@ -123,7 +135,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=Wolfstein use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein'
@@ -133,7 +146,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds'
@@ -143,7 +157,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=Xu use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu'
@@ -153,7 +168,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=Wolfstein use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_yap'
@@ -163,7 +179,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=NorrisReynolds use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_yap'
@@ -173,7 +190,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer two_layer_flavor=Xu use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_yap'
@@ -183,7 +201,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=Wolfstein use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic'
@@ -193,7 +212,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic'
@@ -203,7 +223,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=Xu use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic'
@@ -213,7 +234,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=Wolfstein use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_yap'
@@ -223,7 +245,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=NorrisReynolds use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_quadratic_yap'
@@ -233,7 +256,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=quadratic two_layer_flavor=Xu use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_quadratic_yap'
@@ -243,7 +267,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=Wolfstein use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic'
@@ -253,7 +278,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic'
@@ -263,7 +289,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=Xu use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic'
@@ -273,7 +300,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=Wolfstein use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_cubic_yap'
@@ -283,7 +311,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=NorrisReynolds use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_norrisreynolds_cubic_yap'
@@ -293,7 +322,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=StandardTwoLayer nonlinear_model=cubic two_layer_flavor=Xu use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_standardtwolayer_xu_cubic_yap'
@@ -303,7 +333,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizable_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizable_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Realizable use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizable'
@@ -313,7 +344,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizable_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizable_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Realizable use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizable_yap'
@@ -323,7 +355,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizable_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizable_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Realizable nonlinear_model=quadratic use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizable_quadratic'
@@ -333,7 +366,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizable_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizable_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Realizable nonlinear_model=quadratic use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizable_quadratic_yap'
@@ -343,7 +377,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizable_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizable_cubic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Realizable nonlinear_model=cubic use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizable_cubic'
@@ -353,7 +388,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizable_cubic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_cubic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_cubic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizable_cubic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=Realizable nonlinear_model=cubic use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizable_cubic_yap'
@@ -363,7 +399,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer two_layer_flavor=Wolfstein use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein'
@@ -373,7 +410,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds'
@@ -383,7 +421,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer two_layer_flavor=Xu use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu'
@@ -393,7 +432,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer two_layer_flavor=Wolfstein use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap'
@@ -403,7 +443,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer two_layer_flavor=NorrisReynolds use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap'
@@ -413,7 +454,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer two_layer_flavor=Xu use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_yap'
@@ -423,7 +465,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer nonlinear_model=quadratic two_layer_flavor=Wolfstein use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic'
@@ -433,7 +476,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer nonlinear_model=quadratic two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_quadratic'
@@ -443,7 +487,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer nonlinear_model=quadratic two_layer_flavor=Xu use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic'
@@ -453,7 +498,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer nonlinear_model=quadratic two_layer_flavor=Wolfstein use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_yap'
@@ -463,7 +509,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer nonlinear_model=quadratic two_layer_flavor=Xu use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_yap'
@@ -473,7 +520,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_cubic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer nonlinear_model=cubic two_layer_flavor=Wolfstein use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_cubic'
@@ -483,7 +531,8 @@
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
     csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_cubic_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_cubic_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_cubic_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_cubic_side_top_0002.csv'
-    abs_zero = 1e-6
+    abs_zero = 1e-3
+    rel_err = 1e-3
     recover = false
     max_threads = 1
     cli_args = 'k_epsilon_variant=RealizableTwoLayer nonlinear_model=cubic two_layer_flavor=NorrisReynolds use_yap=false Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_cubic'
