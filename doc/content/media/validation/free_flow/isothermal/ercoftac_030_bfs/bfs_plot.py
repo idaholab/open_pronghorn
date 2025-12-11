@@ -167,7 +167,7 @@ if plot_reference_results:
         ax1.plot(
             x / H,
             cp_model,
-            label=f"MOOSE-FV {m['label']}{ref_suffix}",
+            label=f"OpenPronghorn {m['label']}{ref_suffix}",
         )
 
 if plot_current_results:
@@ -175,7 +175,7 @@ if plot_current_results:
         sim_x / H,
         sim_pressure / cp_factor + 0.125,
         "b",
-        label="MOOSE-FV k-epsilon current",
+        label="OpenPronghorn k-epsilon current",
     )
 
 ax1.set_xlabel(r"$\mathrm{x/h}$", fontsize=14)
@@ -241,7 +241,7 @@ if plot_reference_results:
             cf_model,
             linestyle="-",
             marker=None,
-            label=f"MOOSE-FV {m['label']}{ref_suffix}",
+            label=f"OpenPronghorn {m['label']}{ref_suffix}",
         )
 
 if plot_current_results:
@@ -249,7 +249,7 @@ if plot_current_results:
         sim_x / H,
         ((sim_mu_t + mu) * sim_vel_x / sim_distance) / cf_factor,
         "b",
-        label="MOOSE-FV k-epsilon current",
+        label="OpenPronghorn k-epsilon current",
     )
 
 ax1.set_xlabel(r"$\mathrm{x/h}$", fontsize=14)
@@ -329,7 +329,7 @@ for xh in x_locations:
             ax.plot(
                 u_model,
                 y_grid,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
 
     if plot_current_results and xh in sim_vel_profiles:
@@ -337,7 +337,7 @@ for xh in x_locations:
             sim_vel_profiles[xh],
             y_grid,
             "b",
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 
     ax.set_title(f"Vertical x-Velocity Profile for x/h = {xh}", fontsize=14)
@@ -425,7 +425,7 @@ if not plot_errors:
                 linestyle="--",
                 marker="o",
                 markersize=3,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results:
         ax5.plot(
@@ -435,7 +435,7 @@ if not plot_errors:
             linestyle="--",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
     ax5.set_ylabel(r"$\mathrm{c_p}$", fontsize=14)
     ax5.set_title("Pressure Coefficient with Error Bars")
@@ -458,7 +458,7 @@ if not plot_errors:
                 linestyle="--",
                 marker="o",
                 markersize=3,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results:
         ax6.plot(
@@ -468,7 +468,7 @@ if not plot_errors:
             linestyle="--",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
     ax6.set_ylabel(r"$\mathrm{c_f}$", fontsize=14)
     ax6.set_title("Wall-Skin Friction Coefficient with Error Bars")
@@ -483,7 +483,7 @@ else:
                 linestyle="--",
                 marker="o",
                 markersize=3,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
             ax6.plot(
                 ercoftac_x_cf,
@@ -491,7 +491,7 @@ else:
                 linestyle="--",
                 marker="o",
                 markersize=3,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
 
     if plot_current_results:
@@ -502,7 +502,7 @@ else:
             linestyle="--",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
         ax6.plot(
             ercoftac_x_cf,
@@ -511,7 +511,7 @@ else:
             linestyle="--",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 
     ax5.set_ylabel(r"$\mathrm{c_p - c_{p,exp}}$", fontsize=14)
@@ -614,7 +614,7 @@ if not plot_errors:
                 linestyle="--",
                 marker="o",
                 markersize=4,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results and 1 in sim_vel_profiles:
         sim_u = sim_vel_profiles[1][: len(u_exp_1_cleaned)]
@@ -625,7 +625,7 @@ if not plot_errors:
             color="b",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 else:
     if plot_reference_results:
@@ -637,7 +637,7 @@ else:
                 linestyle="--",
                 marker="o",
                 markersize=4,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results and 1 in sim_vel_profiles:
         sim_u = sim_vel_profiles[1][: len(u_exp_1_cleaned)]
@@ -648,7 +648,7 @@ else:
             color="b",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 ax1.set_xlabel(x_label, fontsize=14)
 ax1.set_ylabel(r"$\mathrm{y/h}$", fontsize=14)
@@ -683,7 +683,7 @@ if not plot_errors:
                 linestyle="--",
                 marker="o",
                 markersize=4,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results and 4 in sim_vel_profiles:
         sim_u = sim_vel_profiles[4][: len(u_exp_4_cleaned)]
@@ -694,7 +694,7 @@ if not plot_errors:
             color="b",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 else:
     if plot_reference_results:
@@ -706,7 +706,7 @@ else:
                 linestyle="--",
                 marker="o",
                 markersize=4,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results and 4 in sim_vel_profiles:
         sim_u = sim_vel_profiles[4][: len(u_exp_4_cleaned)]
@@ -717,7 +717,7 @@ else:
             color="b",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 ax2.set_xlabel(x_label, fontsize=14)
 ax2.set_ylabel(r"$\mathrm{y/h}$", fontsize=14)
@@ -773,7 +773,7 @@ if not plot_errors:
                 linestyle="--",
                 marker="o",
                 markersize=4,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results and 6 in sim_vel_profiles:
         sim_u = sim_vel_profiles[6][: len(u_exp_6_cleaned)]
@@ -784,7 +784,7 @@ if not plot_errors:
             color="b",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 else:
     if plot_reference_results:
@@ -796,7 +796,7 @@ else:
                 linestyle="--",
                 marker="o",
                 markersize=4,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results and 6 in sim_vel_profiles:
         sim_u = sim_vel_profiles[6][: len(u_exp_6_cleaned)]
@@ -807,7 +807,7 @@ else:
             color="b",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 ax3.set_xlabel(x_label, fontsize=14)
 ax3.set_ylabel(r"$\mathrm{y/h}$", fontsize=14)
@@ -842,7 +842,7 @@ if not plot_errors:
                 linestyle="--",
                 marker="o",
                 markersize=4,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results and 10 in sim_vel_profiles:
         sim_u = sim_vel_profiles[10][: len(u_exp_10_cleaned)]
@@ -853,7 +853,7 @@ if not plot_errors:
             color="b",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 else:
     if plot_reference_results:
@@ -865,7 +865,7 @@ else:
                 linestyle="--",
                 marker="o",
                 markersize=4,
-                label=f"MOOSE-FV {m['label']}{ref_suffix}",
+                label=f"OpenPronghorn {m['label']}{ref_suffix}",
             )
     if plot_current_results and 10 in sim_vel_profiles:
         sim_u = sim_vel_profiles[10][: len(u_exp_10_cleaned)]
@@ -876,7 +876,7 @@ else:
             color="b",
             marker="o",
             markersize=4,
-            label="MOOSE-FV k-epsilon current",
+            label="OpenPronghorn k-epsilon current",
         )
 ax4.set_xlabel(x_label, fontsize=14)
 ax4.set_ylabel(r"$\mathrm{y/h}$", fontsize=14)
