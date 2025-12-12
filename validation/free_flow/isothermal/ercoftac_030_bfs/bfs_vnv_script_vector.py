@@ -1,8 +1,9 @@
 from TestHarness.validation import ValidationCase
 
-import pandas as pd
-import numpy as np
+import glob
 import os
+import numpy as np
+import pandas as pd
 
 
 class TestCase(ValidationCase):
@@ -15,11 +16,25 @@ class TestCase(ValidationCase):
 
         ### REFERENCE FILES: Please do not modify, unless updating reference data
         ### Load .csv files for MOOSE and ERCOFTAC, respectively
+
+        # The base name of the current simulation outputs (e.g. k_epsilon_standard)
+        # is inferred from the generated sampler CSV file. The validation harness
+        # runs each turbulence variant separately so there should only be a single
+        # match.
+        try:
+            sim_base = os.path.basename(
+                glob.glob("*_inlet_channel_wall_sampler_0002.csv")[0]
+            ).split("_inlet_channel_wall_sampler_0002.csv")[0]
+        except IndexError as exc:
+            raise RuntimeError(
+                "Unable to locate inlet sampler output to determine file base"
+            ) from exc
+
         moose_inlet_csv = pd.read_csv(
-            "gold/bfs_input_csv_inlet_channel_wall_sampler_0002.csv"
+            f"gold/{sim_base}_inlet_channel_wall_sampler_0002.csv"
         )
         moose_outlet_csv = pd.read_csv(
-            "gold/bfs_input_csv_outlet_channel_wall_sampler_0002.csv"
+            f"gold/{sim_base}_outlet_channel_wall_sampler_0002.csv"
         )
 
         ercoftac_csv = pd.read_csv("reference_csv/cp.csv")
@@ -57,10 +72,8 @@ class TestCase(ValidationCase):
         ### Setting Up Simulation Data
         ### Modify with respective .csv files from OpenPronghorn simulations
 
-        sim_inlet_csv = pd.read_csv("bfs_input_csv_inlet_channel_wall_sampler_0002.csv")
-        sim_outlet_csv = pd.read_csv(
-            "bfs_input_csv_outlet_channel_wall_sampler_0002.csv"
-        )
+        sim_inlet_csv = pd.read_csv(f"{sim_base}_inlet_channel_wall_sampler_0002.csv")
+        sim_outlet_csv = pd.read_csv(f"{sim_base}_outlet_channel_wall_sampler_0002.csv")
 
         sim_x = np.concatenate([sim_inlet_csv["x"], sim_outlet_csv["x"]])
         sim_x_norm = sim_x / H
@@ -130,10 +143,10 @@ class TestCase(ValidationCase):
 
         # MOOSE Reference: Read and process each linear CSV
         linear_files = [
-            "gold/bfs_input_csv_vel_x_xoH_1_sampler_0002.csv",
-            "gold/bfs_input_csv_vel_x_xoH_4_sampler_0002.csv",
-            "gold/bfs_input_csv_vel_x_xoH_6_sampler_0002.csv",
-            "gold/bfs_input_csv_vel_x_xoH_10_sampler_0002.csv",
+            f"gold/{sim_base}_vel_x_xoH_1_sampler_0002.csv",
+            f"gold/{sim_base}_vel_x_xoH_4_sampler_0002.csv",
+            f"gold/{sim_base}_vel_x_xoH_6_sampler_0002.csv",
+            f"gold/{sim_base}_vel_x_xoH_10_sampler_0002.csv",
         ]
 
         interpolated_results = {}
@@ -153,10 +166,10 @@ class TestCase(ValidationCase):
 
         # Read and process each linear CSV
         sim_linear_files = [
-            "bfs_input_csv_vel_x_xoH_1_sampler_0002.csv",
-            "bfs_input_csv_vel_x_xoH_4_sampler_0002.csv",
-            "bfs_input_csv_vel_x_xoH_6_sampler_0002.csv",
-            "bfs_input_csv_vel_x_xoH_10_sampler_0002.csv",
+            f"{sim_base}_vel_x_xoH_1_sampler_0002.csv",
+            f"{sim_base}_vel_x_xoH_4_sampler_0002.csv",
+            f"{sim_base}_vel_x_xoH_6_sampler_0002.csv",
+            f"{sim_base}_vel_x_xoH_10_sampler_0002.csv",
         ]
 
         sim_interpolated_results = {}
@@ -192,30 +205,30 @@ class TestCase(ValidationCase):
 
         # MOOSE Reference Data
         u_moose_1 = interpolated_results[
-            "gold/bfs_input_csv_vel_x_xoH_1_sampler_0002.csv"
+            f"gold/{sim_base}_vel_x_xoH_1_sampler_0002.csv"
         ]
         u_moose_4 = interpolated_results[
-            "gold/bfs_input_csv_vel_x_xoH_4_sampler_0002.csv"
+            f"gold/{sim_base}_vel_x_xoH_4_sampler_0002.csv"
         ]
         u_moose_6 = interpolated_results[
-            "gold/bfs_input_csv_vel_x_xoH_6_sampler_0002.csv"
+            f"gold/{sim_base}_vel_x_xoH_6_sampler_0002.csv"
         ]
         u_moose_10 = interpolated_results[
-            "gold/bfs_input_csv_vel_x_xoH_10_sampler_0002.csv"
+            f"gold/{sim_base}_vel_x_xoH_10_sampler_0002.csv"
         ]
 
         # MOOSE Current Data
         self.sim_u_moose_1 = sim_interpolated_results[
-            "bfs_input_csv_vel_x_xoH_1_sampler_0002.csv"
+            f"{sim_base}_vel_x_xoH_1_sampler_0002.csv"
         ]
         self.sim_u_moose_4 = sim_interpolated_results[
-            "bfs_input_csv_vel_x_xoH_4_sampler_0002.csv"
+            f"{sim_base}_vel_x_xoH_4_sampler_0002.csv"
         ]
         self.sim_u_moose_6 = sim_interpolated_results[
-            "bfs_input_csv_vel_x_xoH_6_sampler_0002.csv"
+            f"{sim_base}_vel_x_xoH_6_sampler_0002.csv"
         ]
         self.sim_u_moose_10 = sim_interpolated_results[
-            "bfs_input_csv_vel_x_xoH_10_sampler_0002.csv"
+            f"{sim_base}_vel_x_xoH_10_sampler_0002.csv"
         ]
 
         ### Error calculations based on (ERCOFTAC - MOOSE: Reference)
