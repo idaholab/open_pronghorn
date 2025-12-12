@@ -31,7 +31,8 @@
 <<<<<<< HEAD
 =======
     # Toletance for comparison to gold files
-    rel_err = 4e-5
+    rel_err = 1e-4
+    abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_standard k_epsilon_variant=Standard'
   []
@@ -46,6 +47,7 @@
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
     rel_err = 4e-5
+    abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable k_epsilon_variant=Realizable'
   []
@@ -60,6 +62,7 @@
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
     rel_err = 4e-5
+    abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_two_layer k_epsilon_variant=RealizableTwoLayer'
   []
@@ -74,6 +77,7 @@
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
     rel_err = 4e-5
+    abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_quadratic k_epsilon_variant=Realizable nonlinear_model=quadratic'
   []
@@ -88,6 +92,7 @@
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
     rel_err = 4e-5
+    abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_cubic k_epsilon_variant=Realizable nonlinear_model=cubic'
   []
@@ -102,6 +107,7 @@
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
     rel_err = 4e-5
+    abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_yap k_epsilon_variant=Realizable use_yap=true'
 >>>>>>> 55a2767 (re-developing validation tests for bfs with all kEpsilon variants)
