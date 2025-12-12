@@ -208,6 +208,7 @@ def main():
         print("    recover = false")
         print("    max_threads = 1")
         print("    mesh_mode = 'replicated'")
+        print("    heavy = true")
         print(f"    cli_args = '{cli_args}'")
         print(f"    requirement = '{BASE_REQUIREMENT}{req_suffix}'")
         print("  []")
