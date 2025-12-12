@@ -38,6 +38,8 @@ Extensions:
             Documentation:
                 OpenPronghorn-only Syntax: syntax/open_pronghorn_only.md
                 Complete Code Syntax: syntax/index.md
+            Theory:
+                Turbulence Modeling: theory/turbulenceModeling.md
             Software Quality:
                 Software Quality Assurance (SQA) Information: /sqa/index.md
                 Code Standards: sqa/open_pronghorn_scs.md
