@@ -508,8 +508,6 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     // Yap length scale from Teff
     const Real l = std::sqrt(std::max(Teff * eps_safe, 0.0));
 
-    const Real Re_d = std::sqrt(k) * d / std::max(nu, 1e-12);
-
     const Real cl = NS::cl_from_Cmu(_C_mu);
     const Real l_eps = cl * d;
 
