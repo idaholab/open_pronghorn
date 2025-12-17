@@ -156,8 +156,6 @@ LinearFVAerosolDriftFlux::computeGravitationalDrift(const Moose::FaceArg & /*fac
                                                     Real mu_face,
                                                     Real /*rho_face*/) const
 {
-  const auto state = determineState();
-
   // Cunningham slip correction factor
   const Real Kn_ratio = _d_p > 0.0 ? _lambda_mfp / _d_p : 0.0;
   const Real C_mu = 1.0 + Kn_ratio * (2.34 + 1.05 * std::exp(-0.39 * _d_p / _lambda_mfp));
