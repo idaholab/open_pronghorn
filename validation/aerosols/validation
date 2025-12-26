@@ -1,0 +1,23 @@
+[Tests]
+  [chen_aerosol_channel]
+    type = CSVDiff
+    input = 'chen_steady.i'
+    cli_args = 'Outputs/file_base=chen_steady'
+
+    # LineValueSampler output files produced by the input (one per x-location)
+    # NOTE: CSVDiff accepts a whitespace-separated list.
+    csvdiff = 'chen_steady_csv_sampler_line_x_0d2_0002.csv chen_steady_csv_sampler_line_x_0d4_0002.csv chen_steady_csv_sampler_line_x_0d6_0002.csv'
+
+    requirement = 'The system should reproduce Chen (drift-flux) aerosol deposition/channel benchmark: axial velocity and aerosol concentration profiles at x=0.2, 0.4, 0.6 m.'
+
+    min_parallel = 10
+    max_time = 1500
+
+    validation_test = 'chen_profiles_vnv.py'
+
+    # Default: 2% envelope around the *reference* (gold) error-to-experiment.
+    # Adjust as needed once gold/reference data are in place.
+    validation_lower_bound = -0.02
+    validation_upper_bound = 0.02
+  []
+[]
