@@ -41,9 +41,9 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     dx   = '0.8'
     dy   = '0.18 0.04 0.18'
     dz   = '0.02 0.04 0.28 0.04 0.02'
-    ix   = '80'
-    iy   = '18 4 18'
-    iz   = '10 4 28 4 10'
+    ix   = '30'
+    iy   = '8 4 8'
+    iz   = '5 3 10 3 5'
     subdomain_id = '0 0 0
                     0 1 0
                     0 0 0
@@ -658,8 +658,6 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     particle_diameter = ${fparse d_p}
     mean_free_path = ${lambda_mfp}
     Sc_t = ${Sc_t_aero}
-    output_properties = 'D_eff'
-    outputs = 'exodus'
   []
 []
 
@@ -669,7 +667,7 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
 [Executioner]
   type = SIMPLE
 
-  num_iterations = 2000
+  num_iterations = 1000
   print_fields = false
 
   momentum_l_max_its = 100
@@ -713,7 +711,7 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
 # OUTPUTS
 #===============================================================================
 [Outputs]
-  exodus = true
+  exodus = false
   print_linear_converged_reason = false
   print_linear_residuals = false
   print_nonlinear_converged_reason = false
@@ -730,7 +728,8 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     start_point = '0.2 0.2 ${fparse 0.0 + 0.02}'
     end_point   = '0.2 0.2 ${fparse 0.4 - 0.02}'
     sort_by = 'z'
-    num_points = 40
+    num_points = 16
+    warn_discontinuous_face_values = false
   []
   [sampler_line_x_0d4]
     type = LineValueSampler
@@ -738,7 +737,8 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     start_point = '0.4 0.2 ${fparse 0.0 + 0.02}'
     end_point   = '0.4 0.2 ${fparse 0.4 - 0.02}'
     sort_by = 'z'
-    num_points = 40
+    num_points = 16
+    warn_discontinuous_face_values = false
   []
   [sampler_line_x_0d6]
     type = LineValueSampler
@@ -746,6 +746,7 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     start_point = '0.6 0.2 ${fparse 0.0 + 0.02}'
     end_point   = '0.6 0.2 ${fparse 0.4 - 0.02}'
     sort_by = 'z'
-    num_points = 40
+    num_points = 16
+    warn_discontinuous_face_values = false
   []
 []
