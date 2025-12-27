@@ -121,7 +121,16 @@ def add_exp_with_errorbars(ax, dep, z, label, color, marker, fixed=False):
 
 
 def add_sim_line(ax, dep_nd, z_m, label, color, linestyle="-"):
-    ax.plot(dep_nd, z_m, linestyle=linestyle, marker='o', color=color, linewidth=0.5, label=label, zorder=2)
+    ax.plot(
+        dep_nd,
+        z_m,
+        linestyle=linestyle,
+        marker="o",
+        color=color,
+        linewidth=0.5,
+        label=label,
+        zorder=2,
+    )
 
 
 def main():
@@ -137,7 +146,11 @@ def main():
         help="Output PNG filename (saved next to this script unless absolute).",
     )
     parser.add_argument("--dpi", type=int, default=600, help="PNG DPI (default: 600).")
-    parser.add_argument("--no-show", action="store_true", help="Do not call plt.show() (useful for MOOSE batch).")
+    parser.add_argument(
+        "--no-show",
+        action="store_true",
+        help="Do not call plt.show() (useful for MOOSE batch).",
+    )
     args = parser.parse_args()
 
     _set_publication_style()
@@ -164,13 +177,25 @@ def main():
     c_exp_0d6, z_c_0d6 = load_exp_two_column_csv(val_dir / "data_c_x_0d6.csv")
 
     # ---- Simulation sampler output (gold or current-run location you choose) ----
-    u_sim_0d2, z_sim_0d2 = load_sim_profile_from_sampler(val_dir / "chen_steady_csv_sampler_line_x_0d2_0002.csv", "vel_x", U_REF)
-    u_sim_0d4, z_sim_0d4 = load_sim_profile_from_sampler(val_dir / "chen_steady_csv_sampler_line_x_0d4_0002.csv", "vel_x", U_REF)
-    u_sim_0d6, z_sim_0d6 = load_sim_profile_from_sampler(val_dir / "chen_steady_csv_sampler_line_x_0d6_0002.csv", "vel_x", U_REF)
+    u_sim_0d2, z_sim_0d2 = load_sim_profile_from_sampler(
+        val_dir / "chen_steady_csv_sampler_line_x_0d2_0002.csv", "vel_x", U_REF
+    )
+    u_sim_0d4, z_sim_0d4 = load_sim_profile_from_sampler(
+        val_dir / "chen_steady_csv_sampler_line_x_0d4_0002.csv", "vel_x", U_REF
+    )
+    u_sim_0d6, z_sim_0d6 = load_sim_profile_from_sampler(
+        val_dir / "chen_steady_csv_sampler_line_x_0d6_0002.csv", "vel_x", U_REF
+    )
 
-    c_sim_0d2, zc_sim_0d2 = load_sim_profile_from_sampler(val_dir / "chen_steady_csv_sampler_line_x_0d2_0002.csv", "aerosol", C_REF)
-    c_sim_0d4, zc_sim_0d4 = load_sim_profile_from_sampler(val_dir / "chen_steady_csv_sampler_line_x_0d4_0002.csv", "aerosol", C_REF)
-    c_sim_0d6, zc_sim_0d6 = load_sim_profile_from_sampler(val_dir / "chen_steady_csv_sampler_line_x_0d6_0002.csv", "aerosol", C_REF)
+    c_sim_0d2, zc_sim_0d2 = load_sim_profile_from_sampler(
+        val_dir / "chen_steady_csv_sampler_line_x_0d2_0002.csv", "aerosol", C_REF
+    )
+    c_sim_0d4, zc_sim_0d4 = load_sim_profile_from_sampler(
+        val_dir / "chen_steady_csv_sampler_line_x_0d4_0002.csv", "aerosol", C_REF
+    )
+    c_sim_0d6, zc_sim_0d6 = load_sim_profile_from_sampler(
+        val_dir / "chen_steady_csv_sampler_line_x_0d6_0002.csv", "aerosol", C_REF
+    )
 
     # ---- Figure ----
     fig, axes = plt.subplots(2, 3, figsize=(11.2, 6.8), sharey=True)
@@ -179,8 +204,16 @@ def main():
     # Panel labels
     panel_labels = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
     for ax, lab in zip(axes.ravel(), panel_labels):
-        ax.text(0.02, 0.98, lab, transform=ax.transAxes, va="top", ha="left",
-                fontsize=11, fontweight="bold")
+        ax.text(
+            0.02,
+            0.98,
+            lab,
+            transform=ax.transAxes,
+            va="top",
+            ha="left",
+            fontsize=11,
+            fontweight="bold",
+        )
 
     # ---- Velocity row (LIKE YOUR OLD SCRIPT) ----
     add_exp_with_errorbars(ax_u_0d2, u_exp_0d2, z_u_0d2, "Exp", "black", "o")
@@ -200,20 +233,26 @@ def main():
     ax_u_0d6.set_title(r"Axial velocity, $x = 0.6$ m", loc="center")
 
     # ---- Concentration row (LIKE YOUR OLD SCRIPT) ----
-    add_exp_with_errorbars(ax_c_0d2, c_exp_0d2, z_c_0d2, "Exp", "black", "^", fixed=True)
+    add_exp_with_errorbars(
+        ax_c_0d2, c_exp_0d2, z_c_0d2, "Exp", "black", "^", fixed=True
+    )
     add_sim_line(ax_c_0d2, c_sim_0d2, zc_sim_0d2, "Sim", "tab:red")
     ax_c_0d2.set_xlabel(r"$C / C_{\mathrm{ref}} [-]$")
     ax_c_0d2.set_ylabel(r"$z$ [m]")
     ax_c_0d2.set_title(r"Aerosol conc., $x = 0.2$ m", loc="center")
     ax_c_0d2.set_xlim(0.0, 1.0)
 
-    add_exp_with_errorbars(ax_c_0d4, c_exp_0d4, z_c_0d4, "Exp", "black", "^", fixed=True)
+    add_exp_with_errorbars(
+        ax_c_0d4, c_exp_0d4, z_c_0d4, "Exp", "black", "^", fixed=True
+    )
     add_sim_line(ax_c_0d4, c_sim_0d4, zc_sim_0d4, "Sim", "tab:red")
     ax_c_0d4.set_xlabel(r"$C / C_{\mathrm{ref}} [-]$")
     ax_c_0d4.set_title(r"Aerosol conc., $x = 0.4$ m", loc="center")
     ax_c_0d4.set_xlim(0.0, 1.0)
 
-    add_exp_with_errorbars(ax_c_0d6, c_exp_0d6, z_c_0d6, "Exp", "black", "v", fixed=True)
+    add_exp_with_errorbars(
+        ax_c_0d6, c_exp_0d6, z_c_0d6, "Exp", "black", "v", fixed=True
+    )
     add_sim_line(ax_c_0d6, c_sim_0d6, zc_sim_0d6, "Sim", "tab:red")
     ax_c_0d6.set_xlabel(r"$C / C_{\mathrm{ref}} [-]$")
     ax_c_0d6.set_title(r"Aerosol conc., $x = 0.6$ m", loc="center")

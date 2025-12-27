@@ -57,7 +57,9 @@ class TestCase(ValidationCase):
         for tag, _xloc in cases:
             # Current and reference sampler outputs
             cur = self._load_sampler(f"chen_steady_csv_sampler_line_x_{tag}_0002.csv")
-            ref = self._load_sampler(f"gold/chen_steady_csv_sampler_line_x_{tag}_0002.csv")
+            ref = self._load_sampler(
+                f"gold/chen_steady_csv_sampler_line_x_{tag}_0002.csv"
+            )
 
             # Experimental digitized data
             exp_u = self._load_exp_two_col(f"gold/data_u_x_{tag}.csv")
@@ -182,7 +184,9 @@ class TestCase(ValidationCase):
         required = {"vel_x", "aerosol", "z"}
         missing = required.difference(df.columns)
         if missing:
-            raise RuntimeError(f"Sampler CSV '{path}' missing columns: {sorted(missing)}")
+            raise RuntimeError(
+                f"Sampler CSV '{path}' missing columns: {sorted(missing)}"
+            )
         df = df.sort_values("z")
         return {
             "vel_x": df["vel_x"].to_numpy(dtype=float),
