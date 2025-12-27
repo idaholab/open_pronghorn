@@ -83,7 +83,7 @@ AerosolDiffusivityFunctorMaterial::AerosolDiffusivityFunctorMaterial(
             Real(1.0) +
             Kn_ratio * (Real(2.34) + Real(1.05) * exp(Real(-0.39) * _d_p / _lambda_mfp));
 
-        const Real D_B_raw = k_B * T * C_c / (Real(3.0) * libMesh::pi * mu * _d_p * _d_p);
+        const Real D_B_raw = k_B * T * C_c / (Real(3.0) * libMesh::pi * mu * _d_p);
 
         return max(D_B_low_limit, D_B_raw);
       });
