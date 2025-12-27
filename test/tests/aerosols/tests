@@ -6,7 +6,7 @@
     requirement = 'The system shall be able to run aerosol transport in a cavity with forced convection.'
     input = 'chen_steady_test.i'
     csvdiff = 'chen_steady_test_csv_sampler_line_x_0d2_0002.csv chen_steady_test_csv_sampler_line_x_0d4_0002.csv chen_steady_test_csv_sampler_line_x_0d6_0002.csv'
-    abs_zero = 1e-3
+    rel_err = 1e-2
     ignore_columns = 'id'
     heavy = true
     recover = false # we don't support recovery for SIMPLE yet

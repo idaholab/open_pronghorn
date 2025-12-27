@@ -286,7 +286,6 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     mu_t = 'mu_t'
     walls = 'wall'
     wall_treatment = ${wall_treatment}
-    # C_pl = 2.0
   []
 
   [TKED_time]
@@ -323,8 +322,7 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     walls = 'wall'
     wall_treatment = ${wall_treatment}
     C1_eps = ${C1_eps}
-    C2_eps = 'C2_eps_functor'
-    # C_pl = 2.0
+    C2_eps = ${C2_eps}
   []
 
   #---------------------------------------------------------------------------
@@ -349,14 +347,12 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
 
     rho = rho        # functors defined in [FunctorMaterials]
     mu  = mu
-    T   = T_fluid    # constant 293 K here (isothermal)
+    T   = 'T_constructed'
 
     particle_diameter = ${d_p}
     particle_density  = ${rho_p}
     mean_free_path    = ${lambda_mfp}
     gravity           = ${g}
-
-    # thermophoresis is effectively off because grad(T)=0
   []
 
   # Diffusion: Brownian + turbulent, D_eff = D_B + mu_t/(rho*Sc_t_aero)
@@ -487,7 +483,7 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
 
     rho = rho
     mu  = mu
-    T   = T_fluid
+    T   = 'T_constructed'
     u_star = u_star
 
     particle_diameter = ${d_p}
@@ -496,13 +492,6 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     gravity           = ${g}
     diffusion_coeff   = D_eff
   []
-
-  # [walls_aerosol_dep]
-  #   type = LinearFVAdvectionDiffusionFunctorDirichletBC
-  #   boundary = 'wall'
-  #   variable = aerosol
-  #   functor = 0
-  # []
 
   [outlet_aerosol]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -528,26 +517,8 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     type = MooseVariableFVReal
   []
 
-  [u_var_FV]
-    type = INSFVVelocityVariable
-  []
-  [v_var_FV]
-    type = INSFVVelocityVariable
-  []
-  [w_var_FV]
-    type = INSFVVelocityVariable
-  []
-
-  [S2]
-    type = MooseVariableFVReal
-  []
-
-  [eta]
-    type = MooseVariableFVReal
-  []
-
-  [C2_eps_functor]
-    type = MooseVariableFVReal
+  [T_constructed]
+    type = MooseLinearVariableFVReal
   []
 []
 
@@ -589,52 +560,12 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     execute_on = 'NONLINEAR'
   []
 
-  [u_var_FV]
+  [compute_T_constructed]
     type = ParsedAux
-    variable = u_var_FV
-    expression = 'vel_x'
-    coupled_variables = 'vel_x'
-    execute_on = 'NONLINEAR'
-  []
-  [v_var_FV]
-    type = ParsedAux
-    variable = v_var_FV
-    expression = 'vel_y'
-    coupled_variables = 'vel_y'
-    execute_on = 'NONLINEAR'
-  []
-  [w_var_FV]
-    type = ParsedAux
-    variable = w_var_FV
-    expression = 'vel_z'
-    coupled_variables = 'vel_z'
-    execute_on = 'NONLINEAR'
-  []
-
-  [compute_S2]
-    type = INSFVMixingLengthTurbulentViscosityAux
-    variable = S2
-    mixing_length = 1.0
-    u = u_var_FV
-    v = v_var_FV
-    w = w_var_FV
-    execute_on = 'NONLINEAR'
-  []
-
-  [compute_eta]
-    type = ParsedAux
-    variable = eta
-    expression = 'sqrt(S2)*TKE/TKED'
-    coupled_variables = 'S2 TKE TKED'
-    execute_on = 'NONLINEAR'
-  []
-
-  [compute_C2_eps_functor]
-    type = ParsedAux
-    variable = C2_eps_functor
-    expression = '${C2_eps} + ${C_mu}*(eta^3)*(1-eta/4.38)/(1.0 + 0.012*(eta^3))'
-    coupled_variables = 'eta'
-    execute_on = 'NONLINEAR'
+    variable = T_constructed
+    use_xyzt = true
+    expression = '273.15 + 10*z'
+    execute_on = 'INITIAL'
   []
 []
 
@@ -645,15 +576,15 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
   # Constant fluid properties and temperature (air, isothermal)
   [fluid_properties]
     type = ADGenericFunctorMaterial
-    prop_names = 'rho mu T_fluid'
-    prop_values = '${rho} ${mu} 293.0'
+    prop_names = 'rho mu'
+    prop_values = '${rho} ${mu}'
   []
 
   [diffusion_coefficient]
     type = AerosolDiffusivityFunctorMaterial
     rho = ${rho}
     mu = ${mu}
-    T_fluid = 293.0
+    T_fluid = 'T_constructed'
     mu_t = 'mu_t'
     particle_diameter = ${fparse d_p}
     mean_free_path = ${lambda_mfp}
