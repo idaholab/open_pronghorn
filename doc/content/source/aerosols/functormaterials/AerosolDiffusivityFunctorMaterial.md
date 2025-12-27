@@ -11,7 +11,7 @@ It computes and exposes three scalar functors:
 - `D_B` — Brownian (molecular) aerosol diffusivity,
 - `D_t` — turbulent aerosol diffusivity,
 - `D_eff` — effective diffusivity, defined as
-  \(D_\text{eff} = D_B + D_t\).
+  $D_\text{eff} = D_B + D_t$.
 
 These functors can be used, for example, by
 
@@ -39,12 +39,12 @@ D_B \propto \frac{k_B T \, C_c}{\mu \, d_p},
 
 where
 
-- \(k_B\) is the Boltzmann constant,
-- \(T\) is the local gas temperature,
-- \(\mu\) is the local dynamic viscosity,
-- \(d_p\) is the particle diameter (`particle_diameter`),
-- \(C_c\) is the Cunningham slip correction, a function of \(d_p\) and
-  the gas mean free path \(\lambda\) (`mean_free_path`).
+- $k_B$ is the Boltzmann constant,
+- $T$ is the local gas temperature,
+- $\mu$ is the local dynamic viscosity,
+- $d_p$ is the particle diameter (`particle_diameter`),
+- $C_c$ is the Cunningham slip correction, a function of $d_p$ and
+  the gas mean free path $\lambda$ (`mean_free_path`).
 
 The Cunningham correction factor takes the form
 
@@ -57,8 +57,8 @@ which increases the diffusivity for small particles as their size approaches
 the gas mean free path.
 
 To ensure numerical robustness, a small positive lower bound
-\(D_{B,\min} > 0\) is applied so that `D_B` never becomes exactly zero.
-If any of the required inputs (e.g. \(T\), \(\mu\), or \(d_p\)) are
+$D_{B,\min} > 0$ is applied so that `D_B` never becomes exactly zero.
+If any of the required inputs (e.g. $T$, $\mu$, or $d_p$) are
 non-physical (non-positive), the material falls back to this minimum value.
 
 ### Turbulent diffusion `D_t`
@@ -72,16 +72,16 @@ D_t = \frac{\mu_t}{\rho \; Sc_t},
 
 where
 
-- \(\mu_t\) is the turbulent (eddy) viscosity, provided via the functor
+- $\mu_t$ is the turbulent (eddy) viscosity, provided via the functor
   `mu_t`,
-- \(\rho\) is the local fluid density, provided via the functor `rho`,
-- \(Sc_t\) is the turbulent Schmidt number (`Sc_t`).
+- $\rho$ is the local fluid density, provided via the functor `rho`,
+- $Sc_t$ is the turbulent Schmidt number (`Sc_t`).
 
-If \(\rho \le 0\) or \(Sc_t \le 0\), the model deactivates turbulent
-diffusion and returns a small positive lower bound \(D_{t,\min}\) to keep
+If $\rho \le 0$ or $Sc_t \le 0$, the model deactivates turbulent
+diffusion and returns a small positive lower bound $D_{t,\min}$ to keep
 the coefficient non-zero and numerically stable.
 
-Choosing \(Sc_t \approx 1\) is common in near-neutral flows, but other
+Choosing $Sc_t \approx 1$ is common in near-neutral flows, but other
 values can be set depending on the turbulence model and calibration data.
 
 ### Effective diffusivity `D_eff`
@@ -108,39 +108,39 @@ interface. The most relevant parameters are summarized below.
 ### Required parameters
 
 - `rho` (`MooseFunctorName`)
-  Functor providing the carrier-gas density \(\rho\) [kg/m\(^3\)]. This is
+  Functor providing the carrier-gas density $\rho$ [kg/m$^3$]. This is
   used in the turbulent diffusion model.
 
 - `mu` (`MooseFunctorName`)
-  Functor providing the carrier-gas dynamic viscosity \(\mu\) [Pa·s]. This is
+  Functor providing the carrier-gas dynamic viscosity $\mu$ [Pa·s]. This is
   used in the Brownian diffusion model and in forming the kinematic viscosity.
 
 - `T` (`MooseFunctorName`)
-  Functor providing the carrier-gas temperature \(T\) [K]. This is used in the
+  Functor providing the carrier-gas temperature $T$ [K]. This is used in the
   Brownian diffusion model.
 
 - `mu_t` (`MooseFunctorName`)
-  Functor providing the turbulent (eddy) viscosity \(\mu_t\) [Pa·s]. This is
+  Functor providing the turbulent (eddy) viscosity $\mu_t$ [Pa·s]. This is
   used in the turbulent diffusion model. If you do not wish to include turbulent
   diffusion, you can supply a functor that returns zero or choose a very large
-  `Sc_t` to effectively suppress \(D_t\).
+  `Sc_t` to effectively suppress $D_t$.
 
 - `particle_diameter` (`Real`)
-  Particle diameter \(d_p\) [m] used in both the Brownian model and the
+  Particle diameter $d_p$ [m] used in both the Brownian model and the
   Cunningham slip correction. The material assumes monodisperse particles of
   this size.
 
 ### Optional parameters
 
 - `mean_free_path` (`Real`)
-  Gas mean free path \(\lambda\) [m] used in the Cunningham correction for
-  Brownian diffusion. For air at standard conditions, \(\lambda\) is typically
-  \(\mathcal{O}(10^{-7})\) m (tens of nanometers). The default value in the
+  Gas mean free path $\lambda$ [m] used in the Cunningham correction for
+  Brownian diffusion. For air at standard conditions, $\lambda$ is typically
+  $\mathcal{O}(10^{-7})$ m (tens of nanometers). The default value in the
   input syntax table reflects a typical choice for air.
 
 - `Sc_t` (`Real`)
-  Turbulent Schmidt number \(Sc_t\) used in the turbulent diffusion model
-  \(D_t = \mu_t / (\rho Sc_t)\). The default is typically of order unity;
+  Turbulent Schmidt number $Sc_t$ used in the turbulent diffusion model
+  $D_t = \mu_t / (\rho Sc_t)$. The default is typically of order unity;
   see the syntax table below for the exact default value.
 
 All other standard `FunctorMaterial` parameters (e.g. `block`, `execute_on`)

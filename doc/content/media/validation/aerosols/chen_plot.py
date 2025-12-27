@@ -185,37 +185,37 @@ def main():
     # ---- Velocity row (LIKE YOUR OLD SCRIPT) ----
     add_exp_with_errorbars(ax_u_0d2, u_exp_0d2, z_u_0d2, "Exp", "black", "o")
     add_sim_line(ax_u_0d2, u_sim_0d2, z_sim_0d2, "Sim", "tab:blue")
-    ax_u_0d2.set_xlabel(r"$u / U_{\mathrm{ref}}$")
+    ax_u_0d2.set_xlabel(r"$u [m.s^{-1}]$")
     ax_u_0d2.set_ylabel(r"$z$ [m]")
     ax_u_0d2.set_title(r"Axial velocity, $x = 0.2$ m", loc="center")
 
     add_exp_with_errorbars(ax_u_0d4, u_exp_0d4, z_u_0d4, "Exp", "black", "o")
     add_sim_line(ax_u_0d4, u_sim_0d4, z_sim_0d4, "Sim", "tab:blue")
-    ax_u_0d4.set_xlabel(r"$u / U_{\mathrm{ref}}$")
+    ax_u_0d4.set_xlabel(r"$u [m.s^{-1}]$")
     ax_u_0d4.set_title(r"Axial velocity, $x = 0.4$ m", loc="center")
 
     add_exp_with_errorbars(ax_u_0d6, u_exp_0d6, z_u_0d6, "Exp", "black", "s")
     add_sim_line(ax_u_0d6, u_sim_0d6, z_sim_0d6, "Sim", "tab:blue")
-    ax_u_0d6.set_xlabel(r"$u / U_{\mathrm{ref}}$")
+    ax_u_0d6.set_xlabel(r"$u [m.s^{-1}]$")
     ax_u_0d6.set_title(r"Axial velocity, $x = 0.6$ m", loc="center")
 
     # ---- Concentration row (LIKE YOUR OLD SCRIPT) ----
     add_exp_with_errorbars(ax_c_0d2, c_exp_0d2, z_c_0d2, "Exp", "black", "^", fixed=True)
     add_sim_line(ax_c_0d2, c_sim_0d2, zc_sim_0d2, "Sim", "tab:red")
-    ax_c_0d2.set_xlabel(r"$C / C_{\mathrm{ref}}$")
+    ax_c_0d2.set_xlabel(r"$C / C_{\mathrm{ref}} [-]$")
     ax_c_0d2.set_ylabel(r"$z$ [m]")
     ax_c_0d2.set_title(r"Aerosol conc., $x = 0.2$ m", loc="center")
     ax_c_0d2.set_xlim(0.0, 1.0)
 
     add_exp_with_errorbars(ax_c_0d4, c_exp_0d4, z_c_0d4, "Exp", "black", "^", fixed=True)
     add_sim_line(ax_c_0d4, c_sim_0d4, zc_sim_0d4, "Sim", "tab:red")
-    ax_c_0d4.set_xlabel(r"$C / C_{\mathrm{ref}}$")
+    ax_c_0d4.set_xlabel(r"$C / C_{\mathrm{ref}} [-]$")
     ax_c_0d4.set_title(r"Aerosol conc., $x = 0.4$ m", loc="center")
     ax_c_0d4.set_xlim(0.0, 1.0)
 
     add_exp_with_errorbars(ax_c_0d6, c_exp_0d6, z_c_0d6, "Exp", "black", "v", fixed=True)
     add_sim_line(ax_c_0d6, c_sim_0d6, zc_sim_0d6, "Sim", "tab:red")
-    ax_c_0d6.set_xlabel(r"$C / C_{\mathrm{ref}}$")
+    ax_c_0d6.set_xlabel(r"$C / C_{\mathrm{ref}} [-]$")
     ax_c_0d6.set_title(r"Aerosol conc., $x = 0.6$ m", loc="center")
     ax_c_0d6.set_xlim(0.0, 1.0)
 
