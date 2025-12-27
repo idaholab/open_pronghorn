@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#51'
+  design = 'chen.md'
+  [chen_aerosol_channel]
+    type = CSVDiff
+    input = 'chen_steady.i'
+    csvdiff = 'chen_steady_csv_sampler_line_x_0d2_0002.csv chen_steady_csv_sampler_line_x_0d4_0002.csv chen_steady_csv_sampler_line_x_0d6_0002.csv'
+    requirement = 'The system should reproduce Chen (drift-flux) aerosol deposition/channel benchmark: axial velocity and aerosol concentration profiles at x=0.2, 0.4, 0.6 m.'
+    min_parallel = 24
+    max_time = 1500
+    validation_test = 'chen_profiles_vnv.py'
+    validation_lower_bound = -0.02
+    validation_upper_bound = 0.02
+  []
+[]
