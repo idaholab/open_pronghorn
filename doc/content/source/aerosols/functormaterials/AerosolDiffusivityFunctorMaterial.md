@@ -108,32 +108,32 @@ interface. The most relevant parameters are summarized below.
 ### Required parameters
 
 - `rho` (`MooseFunctorName`)
-  Functor providing the carrier-gas density $\rho$ [kg/m$^3$]. This is
+  Functor providing the carrier-gas density $\rho$. This is
   used in the turbulent diffusion model.
 
 - `mu` (`MooseFunctorName`)
-  Functor providing the carrier-gas dynamic viscosity $\mu$ [Pa·s]. This is
+  Functor providing the carrier-gas dynamic viscosity $\mu$. This is
   used in the Brownian diffusion model and in forming the kinematic viscosity.
 
 - `T` (`MooseFunctorName`)
-  Functor providing the carrier-gas temperature $T$ [K]. This is used in the
+  Functor providing the carrier-gas temperature $T$. This is used in the
   Brownian diffusion model.
 
 - `mu_t` (`MooseFunctorName`)
-  Functor providing the turbulent (eddy) viscosity $\mu_t$ [Pa·s]. This is
+  Functor providing the turbulent (eddy) viscosity $\mu_t$. This is
   used in the turbulent diffusion model. If you do not wish to include turbulent
   diffusion, you can supply a functor that returns zero or choose a very large
   `Sc_t` to effectively suppress $D_t$.
 
 - `particle_diameter` (`Real`)
-  Particle diameter $d_p$ [m] used in both the Brownian model and the
+  Particle diameter $d_p$ used in both the Brownian model and the
   Cunningham slip correction. The material assumes monodisperse particles of
   this size.
 
 ### Optional parameters
 
 - `mean_free_path` (`Real`)
-  Gas mean free path $\lambda$ [m] used in the Cunningham correction for
+  Gas mean free path $\lambda$ used in the Cunningham correction for
   Brownian diffusion. For air at standard conditions, $\lambda$ is typically
   $\mathcal{O}(10^{-7})$ m (tens of nanometers). The default value in the
   input syntax table reflects a typical choice for air.
