@@ -28,6 +28,17 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / D}'
 y_first_cell_1 = 5e-4
 y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
 
+# Turbulence-model knobs (optional)
+k_epsilon_variant   = 'Standard'  # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
+two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+use_buoyancy        = false
+use_compressibility = false
+nonlinear_model     = 'none'
+curvature_model     = 'none'
+use_yap             = false
+use_low_re_Gprime   = false
+bulk_wall_treatment = false
+
 [Mesh]
   [load_mesh]
     type = FileMeshGenerator
@@ -187,8 +198,9 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
     use_nonorthogonal_correction = false
   []
   [TKE_source_sink]
-    type = LinearFVTKESourceSink
+    type = kEpsilonTKESourceSink
     variable = TKE
+
     u = vel_x
     v = vel_y
     epsilon = TKED
@@ -198,6 +210,15 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
     C_pl = 2
+
+    # NEW (optional)
+    k_epsilon_variant        = ${k_epsilon_variant}    # 'Standard', 'Realizable', etc.
+    use_buoyancy             = ${use_buoyancy}
+    use_compressibility      = ${use_compressibility}
+    nonlinear_model          = ${nonlinear_model}
+    curvature_model          = ${curvature_model}
+    Pr_t                     = 0.9
+    C_M                      = 1.0
   []
   [TKED_advection]
     type = LinearFVTurbulentAdvection
@@ -220,8 +241,9 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
     walls = ${walls}
   []
   [TKED_source_sink]
-    type = LinearFVTKEDSourceSink
+    type = kEpsilonTKEDSourceSink
     variable = TKED
+
     u = vel_x
     v = vel_y
     tke = TKE
@@ -233,6 +255,18 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
     C_pl = 2
+
+    # NEW (optional)
+    k_epsilon_variant   = ${k_epsilon_variant}
+    use_buoyancy        = ${use_buoyancy}
+    use_compressibility = ${use_compressibility}
+    nonlinear_model       = ${nonlinear_model}
+    curvature_model          = ${curvature_model}
+    use_yap             = ${use_yap}
+    use_low_re_Gprime   = ${use_low_re_Gprime}
+
+    Pr_t = 0.9
+    C_M  = 1.0
   []
 []
 
@@ -357,8 +391,9 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
 
 [AuxKernels]
   [compute_mu_t]
-    type = kEpsilonViscosityAux
+    type = kEpsilonViscosity
     variable = mu_t
+
     C_mu = ${C_mu}
     tke = TKE
     epsilon = TKED
@@ -366,11 +401,24 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
     rho = ${rho}
     u = vel_x
     v = vel_y
-    bulk_wall_treatment = false
+
+    bulk_wall_treatment = ${bulk_wall_treatment}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    execute_on = 'INITIAL NONLINEAR TIMESTEP_END'
     mu_t_ratio_max = 1e20
+    execute_on = 'NONLINEAR'
+
+    # NEW (optional) – choose model and options
+    k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
+    two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
+    Cd0 = 0.091      # defaults, can omit if you keep Standard
+    Cd1 = 0.0042
+    Cd2 = 0.00011
+    Ca0 = 0.667      # Realizable C_mu coefficients
+    Ca1 = 1.25
+    Ca2 = 1.0
+    Ca3 = 0.9
+    wall_distance = distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_mu_t_wall_neq]
     type = ParsedAux
