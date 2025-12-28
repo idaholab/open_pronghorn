@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <random>
 
 registerMooseObject("OpenPronghornApp", TorchParticleCloudUserObject);
 
@@ -34,7 +35,7 @@ TorchParticleCloudUserObject::validParams()
   params.addRequiredParam<MooseFunctorName>("mu", "fluid dynamic viscosity functor");
 
   // Particles (GLOBAL)
-  params.addRequiredParam<unsigned int>("num_particles", "GLOBAL number of computational particles/parcels.");
+  params.addParam<unsigned int>("num_particles", 0, "Initial GLOBAL number of computational particles/parcels (0 allowed when using injection).");
   params.addRequiredParam<Real>("particle_density", "Particle density (kg/m^3)");
   params.addRequiredParam<Real>("particle_diameter", "Particle diameter (m)");
   params.addParam<Real>("parcel_weight", 1.0, "Physical particles represented per computational particle.");
@@ -42,6 +43,18 @@ TorchParticleCloudUserObject::validParams()
   params.addParam<Point>("init_box_min", Point(0,0,0), "Min corner of uniform seeding box");
   params.addParam<Point>("init_box_max", Point(0,0,0), "Max corner of uniform seeding box");
   params.addParam<RealVectorValue>("init_velocity", RealVectorValue(0,0,0), "Initial particle velocity (m/s)");
+
+
+  // Injection (optional)
+  params.addParam<Real>("injection_rate", 0.0,
+                      "Physical particle injection rate [#/s] (global). Converted to parcels using parcel_weight.");
+  params.addParam<Real>("injection_rate_parcels", 0.0,
+                      "Computational parcel injection rate [parcels/s] (global). If >0, overrides injection_rate.");
+  params.addParam<Real>("injection_start_time", 0.0, "Injection start time [s]");
+  params.addParam<Real>("injection_end_time", -1.0, "Injection end time [s]. <0 => no end.");
+  params.addParam<Point>("injection_box_min", Point(0,0,0), "Min corner of uniform injection box");
+  params.addParam<Point>("injection_box_max", Point(0,0,0), "Max corner of uniform injection box");
+  params.addParam<RealVectorValue>("injection_velocity", RealVectorValue(0,0,0), "Initial velocity of injected parcels (m/s)");
 
   params.addParam<RealVectorValue>("gravity", RealVectorValue(0,0,-9.81), "Gravity acceleration (m/s^2)");
 
@@ -69,6 +82,13 @@ TorchParticleCloudUserObject::validParams()
   params.addParam<Real>("k_max", 1e9, "Maximum drag rate (1/s) used in exponential update");
   params.addParam<Real>("v_max", 1e3, "Maximum particle speed magnitude (m/s) safeguard");
 
+
+  // Wall deposition (optional)
+  params.addParam<Real>("wall_deposition_velocity", 0.0,
+                      "Effective wall deposition velocity Vd [m/s]. 0 disables wall deposition sink.");
+  params.addParam<bool>("include_settling_in_vd", false,
+                      "If true, add an approximate Stokes settling velocity to Vd (rough, isotropic).");
+
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
 
   return params;
@@ -80,7 +100,7 @@ TorchParticleCloudUserObject::TorchParticleCloudUserObject(const InputParameters
 
     _mesh_dim(_subproblem.mesh().dimension()),
 
-    _num_particles_global(getParam<unsigned int>("num_particles")),
+    _num_particles_initial(getParam<unsigned int>("num_particles")),
     _particle_density(getParam<Real>("particle_density")),
     _particle_diameter(getParam<Real>("particle_diameter")),
     _parcel_weight(getParam<Real>("parcel_weight")),
@@ -88,6 +108,19 @@ TorchParticleCloudUserObject::TorchParticleCloudUserObject(const InputParameters
     _init_box_min(getParam<Point>("init_box_min")),
     _init_box_max(getParam<Point>("init_box_max")),
     _init_velocity(getParam<RealVectorValue>("init_velocity")),
+    _enable_injection((getParam<Real>("injection_rate_parcels") > 0.0) || (getParam<Real>("injection_rate") > 0.0)),
+    _injection_rate_parcels((getParam<Real>("injection_rate_parcels") > 0.0)
+                          ? getParam<Real>("injection_rate_parcels")
+                          : (getParam<Real>("injection_rate") / std::max(getParam<Real>("parcel_weight"), 1e-30))),
+    _injection_start_time(getParam<Real>("injection_start_time")),
+    _injection_end_time(getParam<Real>("injection_end_time")),
+    _injection_box_min(getParam<Point>("injection_box_min")),
+    _injection_box_max(getParam<Point>("injection_box_max")),
+    _injection_velocity(getParam<RealVectorValue>("injection_velocity")),
+
+    _wall_deposition_velocity(getParam<Real>("wall_deposition_velocity")),
+    _include_settling_in_vd(getParam<bool>("include_settling_in_vd")),
+
 
     _gravity(getParam<RealVectorValue>("gravity")),
     _max_substeps(getParam<unsigned int>("max_substeps")),
@@ -123,8 +156,20 @@ TorchParticleCloudUserObject::TorchParticleCloudUserObject(const InputParameters
   if (_mesh_dim > 2 && !_w)
     mooseError("TorchParticleCloudUserObject: mesh_dim > 2 but no 'w' functor provided.");
 
-  if (_num_particles_global == 0)
-    mooseError("TorchParticleCloudUserObject: num_particles must be > 0.");
+
+  // Require either an initial population or an injection source
+  if (_num_particles_initial == 0 && (!_enable_injection || _injection_rate_parcels <= 0.0))
+    mooseError("TorchParticleCloudUserObject: either set 'num_particles' > 0 or enable injection via 'injection_rate'/'injection_rate_parcels'.");
+
+  if (_injection_rate_parcels < 0.0)
+    mooseError("TorchParticleCloudUserObject: injection_rate/injection_rate_parcels must be >= 0.");
+
+  if (_injection_end_time >= 0.0 && _injection_end_time < _injection_start_time)
+    mooseError("TorchParticleCloudUserObject: injection_end_time must be >= injection_start_time (or <0 to disable end time).");
+
+  if (_wall_deposition_velocity < 0.0)
+    mooseError("TorchParticleCloudUserObject: wall_deposition_velocity must be >= 0.");
+
   if (_particle_density <= 0.0 || _particle_diameter <= 0.0 || _parcel_weight <= 0.0)
     mooseError("TorchParticleCloudUserObject: particle_density/particle_diameter/parcel_weight must be > 0.");
   if (_mu_min <= 0.0 || _re_max <= 0.0 || _cd_max <= 0.0 || _k_max <= 0.0 || _v_max <= 0.0)
@@ -139,8 +184,8 @@ TorchParticleCloudUserObject::TorchParticleCloudUserObject(const InputParameters
     mooseError("TorchParticleCloudUserObject: root_rank must be < n_processors.");
 
   // Local particle count by simple block distribution (global deterministic)
-  const unsigned int base = _num_particles_global / _n_procs;
-  const unsigned int rem  = _num_particles_global % _n_procs;
+  const unsigned int base = _num_particles_initial / _n_procs;
+  const unsigned int rem  = _num_particles_initial % _n_procs;
   _n_local = static_cast<long>(base + ((_rank < rem) ? 1u : 0u));
 
   // Rank-unique deterministic seed
@@ -197,6 +242,8 @@ TorchParticleCloudUserObject::execute()
   if (!_cache_built)
     buildCellCache();
 
+  ++_step_counter;
+
   auto & comm = _subproblem.mesh().getMesh().comm();
   if (_mpi_barriers && _n_procs > 1)
     comm.barrier();
@@ -212,6 +259,9 @@ TorchParticleCloudUserObject::execute()
   std::fill(_cell_mass_conc.begin(), _cell_mass_conc.end(), 0.0);
 
   sampleFluidToCells();
+
+  // Optional rate-based injection (global deterministic count, locally seeded positions)
+  injectParticles();
 
   if (_mpi_barriers && _n_procs > 1)
     comm.barrier();
@@ -238,9 +288,7 @@ TorchParticleCloudUserObject::execute()
   if (_mpi_barriers && _n_procs > 1)
     comm.barrier();
 
-  computeCellConcentrations();
-
-  // Accumulate reaction forces on local owned cells
+// Accumulate reaction forces on local owned cells (drag coupling)
   if (_n_local > 0 && _f_drag.defined() && _f_drag.numel() > 0)
   {
     auto f_cpu = _f_drag.to(torch::kCPU).contiguous();
@@ -275,7 +323,13 @@ TorchParticleCloudUserObject::execute()
     }
   }
 
-  // Debug reductions MUST be executed by all ranks if enabled
+// Optional wall deposition sink: remove a fraction of parcels in wall-adjacent cells
+applyWallDeposition();
+
+// Concentrations are computed after deposition so they reflect the "end-of-step" cloud state
+computeCellConcentrations();
+
+// Debug reductions MUST be executed by all ranks if enabled
   if (_debug && (!(_last_debug_time == _t)))
   {
     _last_debug_time = _t;
@@ -314,6 +368,14 @@ TorchParticleCloudUserObject::execute()
     int64_t n_valid_global = n_valid_local;
     comm.sum(n_valid_global);
 
+    int64_t n_total_global = static_cast<int64_t>(_n_local);
+    comm.sum(n_total_global);
+
+    unsigned long long dep_step_global = _n_deposited_step;
+    unsigned long long dep_total_global = _n_deposited_total;
+    comm.sum(dep_step_global);
+    comm.sum(dep_total_global);
+
     Real max_n = max_n_local, max_m = max_m_local, vmax = vmax_local;
     comm.max(max_n);
     comm.max(max_m);
@@ -323,9 +385,10 @@ TorchParticleCloudUserObject::execute()
     comm.sum(bad_global);
 
     if (_rank == _root_rank)
-      mooseInfoRepeated("TorchParticleCloudUserObject(MPI): mapped=", n_valid_global, "/", _num_particles_global,
+      mooseInfoRepeated("TorchParticleCloudUserObject(MPI): mapped=", n_valid_global, "/", n_total_global,
                         " | max nconc=", max_n, " [#/m^3], max mconc=", max_m, " [kg/m^3]",
-                        " | vmax=", vmax, " [m/s] | nonfinite(x)=", bad_global);
+                        " | vmax=", vmax, " [m/s] | nonfinite(x)=", bad_global,
+                        " | deposited(step/total)=", dep_step_global, "/", dep_total_global);
   }
 
   if (_mpi_barriers && _n_procs > 1)
@@ -399,6 +462,7 @@ TorchParticleCloudUserObject::buildCellCache()
   _local_elems.clear();
   _cell_centroid.clear();
   _cell_volume.clear();
+  _cell_wall_area.clear();
   _cell_vel.clear();
   _cell_rho.clear();
   _cell_mu.clear();
@@ -421,6 +485,19 @@ TorchParticleCloudUserObject::buildCellCache()
     const Real V = elem->volume();
     _cell_volume.push_back(V);
 
+    // Boundary measure for simple wall-deposition models
+    Real A_wall = 0.0;
+    for (unsigned int s = 0; s < elem->n_sides(); ++s)
+    {
+      if (elem->neighbor_ptr(s) == nullptr)
+      {
+        auto side = elem->side_ptr(s);
+        if (side)
+          A_wall += side->volume(); // area in 3D, edge length in 2D
+      }
+    }
+    _cell_wall_area.push_back(A_wall);
+
     const Real h = std::pow(std::max(V, 1e-30), 1.0 / std::max(1u, _mesh_dim));
     _min_cell_h = std::min(_min_cell_h, h);
 
@@ -437,12 +514,24 @@ TorchParticleCloudUserObject::buildCellCache()
 
   if (!_cell_volume.empty())
   {
-    const long Nc = static_cast<long>(_cell_volume.size());
-    auto cpu = torch::TensorOptions().dtype(torch::kFloat64).device(torch::kCPU);
-    _cell_volume_t = torch::from_blob(_cell_volume.data(), {Nc}, cpu).clone().to(_device);
+      const long Nc = static_cast<long>(_cell_volume.size());
+      auto cpu = torch::TensorOptions().dtype(torch::kFloat64).device(torch::kCPU);
+
+      _cell_volume_t = torch::from_blob(_cell_volume.data(), {Nc}, cpu).clone().to(_device);
+
+      // Precompute (A_wall / V_cell) on device for deposition models
+      std::vector<double> aov(static_cast<std::size_t>(Nc), 0.0);
+      for (long c = 0; c < Nc; ++c)
+        aov[static_cast<std::size_t>(c)] = static_cast<double>(_cell_wall_area[static_cast<std::size_t>(c)]) /
+                                           (static_cast<double>(_cell_volume[static_cast<std::size_t>(c)]) + 1e-30);
+
+      _cell_aw_over_v_t = torch::from_blob(aov.data(), {Nc}, cpu).clone().to(_device);
   }
   else
-    _cell_volume_t = torch::Tensor();
+  {
+      _cell_volume_t = torch::Tensor();
+      _cell_aw_over_v_t = torch::Tensor();
+  }
 
   _cache_built = true;
 }
@@ -886,6 +975,282 @@ TorchParticleCloudUserObject::chooseSubstepping(const Real dt_step, unsigned int
   n_sub = std::max(1u, n_sub);
   dt_sub = dt_step / static_cast<Real>(n_sub);
 }
+
+long
+TorchParticleCloudUserObject::injectedTotalParcels(const Real time) const
+{
+  if (!_enable_injection || _injection_rate_parcels <= 0.0)
+    return 0;
+
+  const Real t0 = _injection_start_time;
+
+  if (!std::isfinite(time) || time <= t0)
+    return 0;
+
+  Real t1 = time;
+  if (_injection_end_time >= 0.0)
+    t1 = std::min(t1, _injection_end_time);
+
+  if (t1 <= t0)
+    return 0;
+
+  const Real s = t1 - t0;
+  const Real n_real = _injection_rate_parcels * s;
+
+  const long n = static_cast<long>(std::floor(n_real + 1e-12));
+  return std::max(0L, n);
+}
+
+void
+TorchParticleCloudUserObject::appendParticles(const long n_add,
+                                             const Point & box_min,
+                                             const Point & box_max,
+                                             const RealVectorValue & vel0)
+{
+  if (n_add <= 0)
+    return;
+
+  // Ensure tensors exist (even if empty)
+  auto opts = torch::TensorOptions().dtype(torch::kFloat64).device(_device);
+  if (!_x.defined())
+    _x = torch::zeros({0, 3}, opts);
+  if (!_v_p.defined())
+    _v_p = torch::zeros({0, 3}, opts);
+  if (!_omega.defined())
+    _omega = torch::zeros({0, 3}, opts);
+  if (!_mass.defined())
+    _mass = torch::zeros({0, 1}, opts);
+  if (!_f_drag.defined())
+    _f_drag = torch::zeros({0, 3}, opts);
+  if (!_cell_idx.defined())
+    _cell_idx = torch::full({0}, -1, torch::TensorOptions().dtype(torch::kInt64).device(_device));
+  if (!_dest_rank.defined())
+    _dest_rank = torch::full({0}, -1, torch::TensorOptions().dtype(torch::kInt64).device(_device));
+
+  auto almost_equal = [](Real a, Real b) { return std::abs(a - b) < 1e-14; };
+
+  // Deterministic per-rank, per-step host RNG (does not touch torch RNG state)
+  const uint64_t seed =
+      static_cast<uint64_t>(_rng_seed) ^
+      (0x9e3779b97f4a7c15ULL + static_cast<uint64_t>(_rank) * 0xBF58476D1CE4E5B9ULL +
+       static_cast<uint64_t>(_step_counter) * 0x94D049BB133111EBULL);
+  std::mt19937_64 rng(seed);
+
+  std::uniform_real_distribution<double> dist01(0.0, 1.0);
+
+  std::vector<double> x_add(static_cast<std::size_t>(n_add) * 3, 0.0);
+  std::vector<double> v_add(static_cast<std::size_t>(n_add) * 3, 0.0);
+  std::vector<double> o_add(static_cast<std::size_t>(n_add) * 3, 0.0);
+  std::vector<double> f_add(static_cast<std::size_t>(n_add) * 3, 0.0);
+  std::vector<double> m_add(static_cast<std::size_t>(n_add) * 1, 0.0);
+
+  const Real volume = (libMesh::pi / 6.0) * std::pow(_particle_diameter, 3);
+  const Real m = _particle_density * volume;
+
+  for (long i = 0; i < n_add; ++i)
+  {
+    for (int d = 0; d < 3; ++d)
+    {
+      const double lo = box_min(d);
+      const double hi = box_max(d);
+
+      // If box is degenerate in this direction, keep at lo
+      const double r = dist01(rng);
+      x_add[3 * i + d] = (almost_equal(lo, hi) ? lo : lo + (hi - lo) * r);
+    }
+
+    v_add[3 * i + 0] = vel0(0);
+    v_add[3 * i + 1] = vel0(1);
+    v_add[3 * i + 2] = vel0(2);
+
+    // omega, f_drag already zero
+    m_add[i] = m;
+  }
+
+  auto cpu = torch::TensorOptions().dtype(torch::kFloat64).device(torch::kCPU);
+  auto x_t = torch::from_blob(x_add.data(), {n_add, 3}, cpu).clone().to(_device);
+  auto v_t = torch::from_blob(v_add.data(), {n_add, 3}, cpu).clone().to(_device);
+  auto o_t = torch::from_blob(o_add.data(), {n_add, 3}, cpu).clone().to(_device);
+  auto f_t = torch::from_blob(f_add.data(), {n_add, 3}, cpu).clone().to(_device);
+  auto m_t = torch::from_blob(m_add.data(), {n_add, 1}, cpu).clone().to(_device);
+
+  auto idx_t = torch::full({n_add}, -1, torch::TensorOptions().dtype(torch::kInt64).device(_device));
+  auto dst_t = torch::full({n_add}, -1, torch::TensorOptions().dtype(torch::kInt64).device(_device));
+
+  // Append
+  _x     = torch::cat({_x, x_t}, 0);
+  _v_p   = torch::cat({_v_p, v_t}, 0);
+  _omega = torch::cat({_omega, o_t}, 0);
+  _f_drag= torch::cat({_f_drag, f_t}, 0);
+  _mass  = torch::cat({_mass, m_t}, 0);
+
+  _cell_idx  = torch::cat({_cell_idx, idx_t}, 0);
+  _dest_rank = torch::cat({_dest_rank, dst_t}, 0);
+
+  _n_local += n_add;
+}
+
+void
+TorchParticleCloudUserObject::injectParticles()
+{
+  if (!_enable_injection || _injection_rate_parcels <= 0.0)
+    return;
+
+  const Real t_prev = _t - _dt;
+
+  const long n_prev = injectedTotalParcels(t_prev);
+  const long n_now  = injectedTotalParcels(_t);
+  const long n_add_global = std::max(0L, n_now - n_prev);
+
+  if (n_add_global <= 0)
+    return;
+
+  const long base = n_add_global / static_cast<long>(_n_procs);
+  const long rem  = n_add_global % static_cast<long>(_n_procs);
+  const long n_add_local = base + ((static_cast<long>(_rank) < rem) ? 1 : 0);
+
+  if (n_add_local <= 0)
+    return;
+
+  // Use injection box if provided; otherwise fall back to init_box (common use case)
+  Point bmin = _injection_box_min;
+  Point bmax = _injection_box_max;
+
+  auto box_degenerate = [&](const Point & a, const Point & b)
+  {
+    for (int d = 0; d < 3; ++d)
+      if (std::abs(a(d) - b(d)) > 1e-14)
+        return false;
+    return true;
+  };
+
+  if (box_degenerate(bmin, bmax) && !box_degenerate(_init_box_min, _init_box_max))
+  {
+    bmin = _init_box_min;
+    bmax = _init_box_max;
+  }
+
+  if (box_degenerate(bmin, bmax))
+    mooseError("TorchParticleCloudUserObject: injection is enabled but injection_box is degenerate (set injection_box_min/max or init_box_min/max).");
+
+  RealVectorValue v0 = _injection_velocity;
+  if (std::abs(v0(0)) < 1e-14 && std::abs(v0(1)) < 1e-14 && std::abs(v0(2)) < 1e-14 &&
+      (std::abs(_init_velocity(0)) > 1e-14 || std::abs(_init_velocity(1)) > 1e-14 || std::abs(_init_velocity(2)) > 1e-14))
+    v0 = _init_velocity;
+
+  appendParticles(n_add_local, bmin, bmax, v0);
+}
+
+void
+TorchParticleCloudUserObject::compressParticles(const torch::Tensor & keep_mask)
+{
+  if (_n_local <= 0)
+    return;
+
+  if (!keep_mask.defined() || keep_mask.numel() != _n_local)
+    mooseError("TorchParticleCloudUserObject: compressParticles keep_mask size mismatch.");
+
+  auto idx = torch::nonzero(keep_mask).view({-1});
+  const long n_keep = idx.numel();
+
+  if (n_keep == _n_local)
+    return;
+
+  auto ix = idx.to(_device);
+
+  _x     = _x.index_select(0, ix);
+  _v_p   = _v_p.index_select(0, ix);
+  _omega = _omega.index_select(0, ix);
+  _mass  = _mass.index_select(0, ix);
+  _f_drag= _f_drag.index_select(0, ix);
+
+  _cell_idx  = _cell_idx.index_select(0, ix);
+  _dest_rank = _dest_rank.index_select(0, ix);
+
+  _n_local = n_keep;
+}
+
+void
+TorchParticleCloudUserObject::applyWallDeposition()
+{
+  _n_deposited_step = 0;
+
+  if (_wall_deposition_velocity <= 0.0)
+    return;
+
+  const Real dt_step = _dt;
+  if (!std::isfinite(dt_step) || dt_step <= 0.0)
+    return;
+
+  if (_n_local <= 0)
+    return;
+
+  const long n_cells = static_cast<long>(_local_elems.size());
+  if (n_cells <= 0)
+    return;
+
+  if (!_cell_aw_over_v_t.defined() || _cell_aw_over_v_t.numel() != n_cells)
+    return;
+
+  // Only boundary-adjacent cells can deposit; if there are none, exit early
+  if (_cell_aw_over_v_t.max().item<double>() <= 0.0)
+    return;
+
+  auto opts = torch::TensorOptions().dtype(torch::kFloat64).device(_device);
+
+  // Per-cell effective deposition velocity
+  torch::Tensor vd_cell = torch::full({n_cells}, _wall_deposition_velocity, opts);
+
+  if (_include_settling_in_vd)
+  {
+    const Real gmag = std::sqrt(_gravity(0) * _gravity(0) + _gravity(1) * _gravity(1) + _gravity(2) * _gravity(2));
+    const Real d = _particle_diameter;
+
+    std::vector<double> vs_host(static_cast<std::size_t>(n_cells), 0.0);
+    for (long c = 0; c < n_cells; ++c)
+    {
+      const Real rho_f = std::max(_cell_rho[static_cast<std::size_t>(c)], 1e-30);
+      const Real mu_f  = std::max(_cell_mu[static_cast<std::size_t>(c)], _mu_min);
+
+      // Stokes settling speed (no slip correction); clamp to [0, v_max]
+      Real vs = ((_particle_density - rho_f) * gmag * d * d) / (18.0 * mu_f + 1e-30);
+      vs = std::max(0.0, std::min(vs, _v_max));
+      vs_host[static_cast<std::size_t>(c)] = static_cast<double>(vs);
+    }
+
+    auto cpu = torch::TensorOptions().dtype(torch::kFloat64).device(torch::kCPU);
+    auto vs_t = torch::from_blob(vs_host.data(), {n_cells}, cpu).clone().to(_device);
+    vd_cell = vd_cell + vs_t;
+  }
+
+  // k_dep = Vd * (A_wall/V_cell) [1/s]
+  auto k_cell = vd_cell * _cell_aw_over_v_t;
+  auto valid = _cell_idx.ge(0);
+
+  auto idx_safe = _cell_idx.clamp(0, n_cells - 1);
+  auto k_p = k_cell.index_select(0, idx_safe).view({-1, 1});
+
+  auto p = 1.0 - torch::exp(-k_p * dt_step);
+  p = torch::clamp(p, 0.0, 1.0) * valid.to(torch::kFloat64).view({-1, 1});
+
+  if (p.max().item<double>() <= 0.0)
+    return;
+
+  // Stochastic deposition
+  auto r = torch::rand({_n_local, 1}, opts);
+  auto dep = r.lt(p).view({-1});
+
+  const long long n_dep = dep.sum().item<int64_t>();
+  if (n_dep <= 0)
+    return;
+
+  _n_deposited_step = static_cast<unsigned long long>(n_dep);
+  _n_deposited_total += _n_deposited_step;
+
+  auto keep = dep.logical_not();
+  compressParticles(keep);
+}
+
 
 void
 TorchParticleCloudUserObject::advanceParticlesExplicit()

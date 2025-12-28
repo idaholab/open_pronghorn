@@ -128,8 +128,15 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     mu  = mu
 
     # Particle properties
-    parcel_weight = 1.0
-    num_particles = 50000
+    # parcel_weight = 1.0
+    num_particles = 0 # initial particles
+
+    # Injection: either physical #/s...
+    injection_rate = 1e9
+    parcel_weight = 1e6   # => 1e3 parcels/s
+    injection_start_time = 0.0
+    injection_end_time   = 100.0
+
     particle_density  = ${rho_p}
     particle_diameter = ${d_p}
 
@@ -149,6 +156,9 @@ eps_in = ${fparse C_mu^(3/4) * k_in^(3/2) / L_in}
     root_rank = 0                # router rank
     mpi_barriers = true          # optional; turn on while debugging deadlocks
     migration_tag_base = 33000   # IMPORTANT: pick a unique tag range to avoid collisions
+
+    wall_deposition_velocity = '${U_in}'
+    include_settling_in_vd = true
   []
 []
 

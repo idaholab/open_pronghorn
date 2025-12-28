@@ -77,12 +77,26 @@ protected:
   void chooseSubstepping(const Real dt_step, unsigned int & n_sub, Real & dt_sub) const;
   void advanceParticlesExplicit();
 
+
+  // Injection (optional)
+  long injectedTotalParcels(const Real time) const;
+  void injectParticles();
+  void appendParticles(const long n_add,
+                     const Point & box_min,
+                     const Point & box_max,
+                     const RealVectorValue & vel0);
+
+
+  // Wall deposition (optional)
+  void applyWallDeposition();
+  void compressParticles(const torch::Tensor & keep_mask);
+
   // -----------------------------
   // Parameters
   // -----------------------------
   const unsigned int _mesh_dim;
 
-  const unsigned int _num_particles_global;
+  const unsigned int _num_particles_initial;
   const Real _particle_density;
   const Real _particle_diameter;
   const Real _parcel_weight;
@@ -90,6 +104,21 @@ protected:
   const Point _init_box_min;
   const Point _init_box_max;
   const RealVectorValue _init_velocity;
+
+
+  // Injection (optional)
+  const bool _enable_injection;
+  const Real _injection_rate_parcels; // GLOBAL computational parcels per second
+  const Real _injection_start_time;
+  const Real _injection_end_time; // <0 => no end time (inject forever)
+  const Point _injection_box_min;
+  const Point _injection_box_max;
+  const RealVectorValue _injection_velocity;
+
+
+  // Wall deposition (optional)
+  const Real _wall_deposition_velocity; // [m/s] effective deposition velocity
+  const bool _include_settling_in_vd;
 
   const RealVectorValue _gravity;
 
@@ -131,6 +160,13 @@ protected:
   libMesh::processor_id_type _rank = 0;
   libMesh::processor_id_type _n_procs = 1;
 
+  // Bookkeeping (no MPI needed)
+  unsigned long long _step_counter = 0;
+  mutable unsigned long long _n_deposited_total = 0;
+  mutable unsigned long long _n_deposited_step = 0;
+  mutable unsigned long long _n_dropped_total = 0;
+  mutable unsigned long long _n_dropped_step = 0;
+
   bool _proc_bbox_built = false;
   std::vector<libMesh::Point> _proc_bbox_min;
   std::vector<libMesh::Point> _proc_bbox_max;
@@ -144,6 +180,7 @@ protected:
   std::vector<const libMesh::Elem *> _local_elems;
   std::vector<Point> _cell_centroid;
   std::vector<Real> _cell_volume;
+  std::vector<Real> _cell_wall_area; // sum of boundary side measure (area in 3D, length in 2D)
 
   std::vector<RealVectorValue> _cell_vel;
   std::vector<Real> _cell_rho;
@@ -156,6 +193,7 @@ protected:
   std::vector<Real> _cell_mass_conc;
 
   torch::Tensor _cell_volume_t; // [Nc] float64 on device
+  torch::Tensor _cell_aw_over_v_t; // [Nc] (A_wall/V_cell) on device
 
   // -----------------------------
   // Particle state (torch, local only)
