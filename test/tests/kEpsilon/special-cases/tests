@@ -1,0 +1,51 @@
+[Tests]
+  design = 'kEpsilonViscosity.md kEpsilonTKEDSourceSink.md kEpsilonTKESourceSink.md WallDistanceAux.md'
+  issues = '#50'
+  [channel_ERCOFTAC_bulk_treatment]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC_bulk_treatment.i'
+    csvdiff = 'channel_ERCOFTAC_bulk_treatment_csv_line_center_channel_0002.csv channel_ERCOFTAC_bulk_treatment_csv_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_bulk_treatment_csv_side_bottom_0002.csv channel_ERCOFTAC_bulk_treatment_csv_side_top_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with bulk wall treatment.'
+  []
+  [channel_ERCOFTAC_buoyant]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC_buoyant.i'
+    csvdiff = 'channel_ERCOFTAC_buoyant_csv_line_center_channel_0002.csv channel_ERCOFTAC_buoyant_csv_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_buoyant_csv_side_bottom_0002.csv channel_ERCOFTAC_buoyant_csv_side_top_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = true
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with turbulent buoyance and compressibility corrections.'
+  []
+  [channel_ERCOFTAC_low_Re]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC_low_Re.i'
+    csvdiff = 'channel_ERCOFTAC_low_Re_csv_line_center_channel_0002.csv channel_ERCOFTAC_low_Re_csv_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_low_Re_csv_side_bottom_0002.csv channel_ERCOFTAC_low_Re_csv_side_top_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = true
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel using low-Reynolds number production corrections.'
+  []
+  [lid-driven-curvature-corrected]
+    type = 'CSVDiff'
+    input = 'lid-driven-curvature-corrected.i'
+    csvdiff = 'lid-driven-curvature-corrected_csv_horizontal_center_0002.csv lid-driven-curvature-corrected_csv_vertical_center_0002.csv lid-driven-curvature-corrected_csv_side_bottom_0002.csv lid-driven-curvature-corrected_csv_side_top_0002.csv lid-driven-curvature-corrected_csv_side_left_0002.csv lid-driven-curvature-corrected_csv_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = true
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers with curvature corrections for production.'
+  []
+[]

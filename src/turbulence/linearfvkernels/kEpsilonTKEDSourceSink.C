@@ -420,13 +420,13 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
   // Invariants of strain, rotation and divergence
   auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
 
-  // Shear production G_k (compressibility terms handled in k-equation via gamma_M)
+  // Shear production G_k
   Real Gk = NS::computeGk(mu_t,
                           inv.S2,
                           rho,
                           k,
                           inv.div_u,
-                          /*include_compressibility_terms*/ false);
+                          /*include_compressibility_terms*/ _switches.use_compressibility);
 
   // For Realizable Pe we also need the pure shear production S_k = mu_t S^2
   const Real Sk = mu_t * inv.S2;

@@ -124,7 +124,6 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
     _bulk_wall_treatment(getParam<bool>("bulk_wall_treatment")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _scale_limiter(getParam<MooseEnum>("scale_limiter")),
-    _newton_solve(getParam<bool>("newton_solve")),
     _variant(getParam<MooseEnum>("k_epsilon_variant").getEnum<NS::KEpsilonVariant>()),
     _two_layer_flavor(getParam<MooseEnum>("two_layer_flavor").getEnum<NS::TwoLayerFlavor>()),
     _Cd0(getParam<Real>("Cd0")),
@@ -278,12 +277,7 @@ kEpsilonViscosity::computeValue()
   else
   {
     const Real k = _k(elem_arg, state);
-    const Real eps_raw = _epsilon(elem_arg, state);
-
-    // Epsilon lower bound for Newton solves
-    Real eps = eps_raw;
-    if (_newton_solve)
-      eps = std::max(NS::epsilon_low_limit, eps_raw);
+    const Real eps = _epsilon(elem_arg, state);
 
     // Large-eddy time scale T_e = k / epsilon
     const Real Te = k / std::max(eps, 1e-20);
@@ -351,8 +345,7 @@ kEpsilonViscosity::computeValue()
     else
       mu_t = mu_t_ke;
 
-    if (_newton_solve)
-      mu_t = std::max(mu_t, NS::mu_t_low_limit);
+    mu_t = std::max(mu_t, NS::mu_t_low_limit);
   }
 
   // Turbulent viscosity limiter

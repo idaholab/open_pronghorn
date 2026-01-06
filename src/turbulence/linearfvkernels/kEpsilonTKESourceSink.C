@@ -329,7 +329,7 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
   auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
 
   // Baseline shear production G_k
-  Real Gk = NS::computeGk(mu_t, inv.S2, rho, k, inv.div_u, /*include_compressibility_terms*/ false);
+  Real Gk = NS::computeGk(mu_t, inv.S2, rho, k, inv.div_u, /*include_compressibility_terms*/ _switches.use_compressibility);
 
   // Buoyancy production Gb
   Real Gb = 0.0;

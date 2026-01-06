@@ -78,9 +78,6 @@ protected:
   /// Method used to limit the k-e time scale: "none" or "standard"
   const MooseEnum _scale_limiter;
 
-  /// Whether we are using a newton solve
-  const bool _newton_solve;
-
   // ---- Extended k-epsilon modeling options ----
 
   /// Selected k-epsilon model variant
