@@ -99,7 +99,7 @@ where
   \end{equation}
 
 In OpenPronghorn, $\mu_t$ is provided by the $k$–$\epsilon$ models via
-`kEpsilonViscosity`. The Boussinesq hypothesis is reasonably accurate for many wall-bounded
+[`kEpsilonViscosity`](kEpsilonViscosity.md). The Boussinesq hypothesis is reasonably accurate for many wall-bounded
 shear flows, but is known to underperform in strongly anisotropic, rotating, or
 curvature-dominated flows [!cite](pope2000turbulent,wilcox2006turbulence). To mitigate these
 limitations OpenPronghorn includes:
@@ -121,27 +121,28 @@ Launder and Spalding [!cite](launder1974numerical). In conservative form the tra
 equations for $k$ and $\epsilon$ are
 
 \begin{equation}
-\frac{\partial k}{\partial t} + \nabla \cdot (\mathbf{u} k)
-= \nabla \cdot \left[
+\frac{\partial \rho k}{\partial t} + \nabla \cdot (\rho \mathbf{u} k)
+=  \nabla \cdot \left[ \rho
     \left( \nu + \frac{\nu_t}{\sigma_k} \right) \nabla k
   \right]
- + P_k + G_b - \epsilon + S_k,
+ + \rho P_k + \rho G_b - \rho \epsilon + \rho S_k,
 \end{equation}
 
 \begin{equation}
-\frac{\partial \epsilon}{\partial t} + \nabla \cdot (\mathbf{u} \epsilon)
-= \nabla \cdot \left[
+\frac{\partial \rho \epsilon}{\partial t} + \nabla \cdot (\rho \mathbf{u} \epsilon)
+=  \nabla \cdot \left[ \rho
     \left( \nu + \frac{\nu_t}{\sigma_\epsilon} \right) \nabla \epsilon
   \right]
- + C_{1\epsilon} f_1 \frac{\epsilon}{k} (P_k + C_3 G_b)
- - C_{2\epsilon} f_2 \frac{\epsilon^2}{k}
- + S_\epsilon,
+ + \rho C_{1\epsilon} f_1 \frac{\epsilon}{k} (P_k + C_{3\epsilon} G_b)
+ - \rho C_{2\epsilon} f_2 \frac{\epsilon^2}{k}
+ + \rho S_\epsilon,
 \end{equation}
 
 where
 
 - $\nu = \mu/\rho$ and $\nu_t = \mu_t/\rho$ are the molecular and turbulent kinematic
   viscosities;
+- $\rho$ is the density, which may have a functional dependency with temperature and pressure;
 - $P_k$ is shear production of turbulent kinetic energy;
 - $G_b$ is production (or destruction) of turbulence by buoyancy;
 - $S_k$ and $S_\epsilon$ collect additional user- or model-specific source terms, including
@@ -228,7 +229,7 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
   one of the two-layer prescriptions:
 - `twoLayerWolfstein` [!cite](wolfstein1969velocity),
 - `twoLayerNorrisReynolds` [!cite](norris1975oneequation),
-- `twoLayerXu` (Xu-type transitional correlation).
+- `twoLayerXu` [!cite](xu1998new).
 - Away from the wall, the model reverts to the standard high-Re form.
 - A blending function based on wall-distance Reynolds numbers provides a smooth transition.
 
@@ -266,7 +267,8 @@ $\nabla \cdot \mathbf{u}$.
 
 1. It first obtains the gradient of the streamwise component $u$:
    \begin{equation}
-   \nabla u = \left( \frac{\partial u}{\partial x},
+   \nabla u = \frac{\partial u}{\partial x_j}
+            = \left( \frac{\partial u}{\partial x},
                       \frac{\partial u}{\partial y},
                       \frac{\partial u}{\partial z} \right).
    \end{equation}
@@ -275,6 +277,7 @@ $\nabla \cdot \mathbf{u}$.
 
 2. The code then defines the *velocity-gradient components* as
    \begin{equation}
+   \nabla u = \frac{\partial u_i}{\partial x_j}
    \begin{aligned}
    &\text{du}_x = \frac{\partial u}{\partial x}, \quad
     \text{du}_y = \frac{\partial u}{\partial y}, \quad
@@ -290,14 +293,15 @@ $\nabla \cdot \mathbf{u}$.
 
 3. The *divergence* of the velocity is computed as
    \begin{equation}
-   \nabla \cdot \mathbf{u} = \frac{\partial u}{\partial x}
+   \nabla \cdot \mathbf{u} = \frac{\partial u_i}{\partial x_j}
+                           = \frac{\partial u}{\partial x}
                            + \frac{\partial v}{\partial y}
                            + \frac{\partial w}{\partial z},
    \end{equation}
    with terms omitted in lower dimensions. In code this is
    `div_u = dux + dvy + dwz` where the absent components default to zero.
 
-4. The *symmetric strain-rate tensor* $S_{ij}$ is constructed as
+4. The *symmetric strain-rate tensor* $S_{ij} = \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i} \right)$ is constructed as
    \begin{equation}
    S_{xx} = \frac{\partial u}{\partial x}, \quad
    S_{yy} = \frac{\partial v}{\partial y}, \quad
@@ -316,7 +320,7 @@ $\nabla \cdot \mathbf{u}$.
    \left( \frac{\partial v}{\partial z} + \frac{\partial w}{\partial y} \right).
    \end{equation}
 
-5. The *antisymmetric rotation tensor* $W_{ij}$ is
+5. The *antisymmetric rotation tensor* $W_{ij} = \frac{1}{2} \left( \frac{\partial u_i}{\partial x_j} - \frac{\partial u_j}{\partial x_i} \right)$ is
    \begin{equation}
    W_{xy} = -W_{yx} = \frac{1}{2}
    \left( \frac{\partial u}{\partial y} - \frac{\partial v}{\partial x} \right),
@@ -433,7 +437,7 @@ f_\mu(\mathrm{Re}_d) &= 1 - e^{-\text{arg}}.
 \end{aligned}
 \end{equation}
 
-This is used to modify $\mu_t$ as $\mu_t \gets f_\mu \mu_t$ near the wall.
+This is used to modify $\mu_t$ as $\mu_t \gets f_\mu \mu_t$ for the first cell near the wall.
 
 
 ## 8. `f2_RKE`
@@ -466,6 +470,9 @@ invariants $S^2$ and $W^2$:
    C_\mu^\text{real} =
    \frac{C_{a0}}{C_{a1} + C_{a2} \bar{S} + C_{a3} \bar{W}}.
    \end{equation}
+
+with the constants pre-defined realizability constants
+$C_{a0} = 0.667$, $C_{a1} = 1.25$, $C_{a2} = 1.0$, and $C_{a3} = 0.9$.
 
 This quantity is used in realizable $k\text{–}\epsilon$ models to define $\mu_t$.
 
@@ -518,6 +525,9 @@ G_k = \mu_t S^2
 \quad\text{(if compressibility included)}.
 \end{equation}
 
+Note, however, that for incompressible flows $\nabla \cdot \mathbf{u} = 0$.
+So, `include_compressibility_terms` should have no effect on the shear-production term.
+
 
 ## 12. `computeGb`
 
@@ -559,7 +569,7 @@ equation.
    \quad
    \text{tmp} = (r - 1) r^2,
    \end{equation}
-   then take
+   where $\ell = \frac{k^{3/2}}{\epsilon}$ is the bulk eddy lenght scale, then take
    \begin{equation}
    \text{val} = \max(\text{tmp}, 0).
    \end{equation}
@@ -877,7 +887,7 @@ This section explains the available corrections, their motivation, and how they 
   (a) `computeGb` provides $G_b$ using gravity, temperature gradient, and
     expansion coefficient $\beta$,
   (b) $G_b$ is added to the $k$ equation and appears in the $\epsilon$ equation multiplied
-    by $C_3$.
+    by $C_{3\epsilon}$.
 - *Activation*:
   (a) `use_buoyancy = true`,
   (b) `gravity`, `T_fluid`, `beta`, and `Pr_t` set appropriately.

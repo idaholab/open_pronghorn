@@ -12,7 +12,8 @@
 #include "AuxKernel.h"
 
 /*
- *Computes the mixing length for the mixing length turbulence model.
+ *Computes the distance from cell centers to the walls
+ *that are named in wall_boundary_names
  */
 class WallDistanceAux : public AuxKernel
 {
@@ -24,5 +25,6 @@ public:
 protected:
   virtual Real computeValue();
 
+  /// Name of the boundaries to which the wall distance will be computed
   const std::vector<BoundaryName> & _wall_boundary_names;
 };

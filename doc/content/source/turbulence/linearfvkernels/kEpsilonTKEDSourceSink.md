@@ -6,11 +6,15 @@ and sink terms for the $\epsilon$-equation** in the k–$\epsilon$ family of mod
 it forms the full set of transport and closure relations for the k–$\epsilon$ turbulence models implemented
 in OpenPronghorn.
 
+!alert note
+The explanations in this kernel documentation are straightforward.
+The reader is referred to the [theory](theory/turbulenceModeling.md) for more details if needed.
+
 The $\epsilon$-equation is written in conservative form as
 
 \begin{equation}
-\frac{\partial \epsilon}{\partial t} + \nabla \cdot (\mathbf{u} \epsilon)
-= P_\epsilon - D_\epsilon + S_\epsilon,
+\frac{\partial \rho \epsilon}{\partial t} + \nabla \cdot (\rho \mathbf{u} \epsilon)
+= \rho (P_\epsilon - D_\epsilon + S_\epsilon),
 \end{equation}
 
 where
@@ -30,7 +34,7 @@ where $C_{\epsilon2}$ and $f_2$ depend on the selected k–$\epsilon$ variant an
 
 ## Model variants
 
-The kernel supports the same k–$\epsilon$ variants as `kEpsilonTKESourceSink` via the
+The kernel supports the same k–$\epsilon$ variants as [kEpsilonTKESourceSink.md] via the
 [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/k_epsilon_variant) parameter:
 
 - `Standard` — classical high-Reynolds-number k–$\epsilon$ model.
@@ -54,8 +58,8 @@ tensors:
 - $W^2 = 2 W_{ij} W_{ij}$,
 - $\nabla \cdot \mathbf{u}$,
 
-obtained by calling `NS::computeStrainRotationInvariants(u, v, w, elem_arg, state)` in
-`TurbulenceMethods`. These invariants are used to construct:
+See the [theory](theory/turbulenceModeling.md) section for the definition of these ones.
+These invariants are used to construct:
 
 - the shear production of k,
   \begin{equation}
@@ -290,7 +294,7 @@ For the **StandardLowRe** model, an additional low-Re production term $G'$ is in
 $P_\epsilon$ when [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_low_re_Gprime) is `true`
 and a wall-distance functor is provided.
 
-The term $G'$ is defined in `TurbulenceMethods::computeGprime` as
+The term $G'$ is defined as
 
 \begin{equation}
 G' = D f_2 \left(G_k + 2 \mu_t \frac{k}{d^2}\right) \exp(-E \mathrm{Re}_d^2),

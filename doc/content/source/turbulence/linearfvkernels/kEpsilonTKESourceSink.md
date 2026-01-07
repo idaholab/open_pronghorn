@@ -1,15 +1,17 @@
 # kEpsilonTKESourceSink
 
 `kEpsilonTKESourceSink` is a finite volume elemental kernel that computes the **turbulent source
-and sink term for the turbulent kinetic energy equation** in the k–$\epsilon$ family of models. It is the
-finite-volume analogue of [`LinearFVTKESourceSink`](LinearFVTKESourceSink.md), but designed for the
-nonlinear FV formulation and the extended set of k–$\epsilon$ models implemented in OpenPronghorn.
+and sink term for the turbulent kinetic energy equation** in the k–$\epsilon$ family of models.
+
+!alert note
+The explanations in this kernel documentation are straightforward.
+The reader is referred to the [theory](theory/turbulenceModeling.md) for more details if needed.
 
 The turbulent kinetic energy (TKE) equation is written in conservative form as
 
 \begin{equation}
-\frac{\partial k}{\partial t} + \nabla \cdot (\mathbf{u} k)
-= P_k + G_b + G_{\text{nl}} - \gamma_M - \epsilon,
+\frac{\partial \rho k}{\partial t} + \nabla \cdot (\rho \mathbf{u} k)
+= \rho (P_k + G_b + G_{\text{nl}} - \gamma_M - \epsilon),
 \end{equation}
 
 where:

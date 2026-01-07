@@ -1,6 +1,6 @@
 # kEpsilonViscosity
 
-`kEpsilonViscosity` is an auxiliary kernel that computes the **turbulent dynamic viscosity**
+`kEpsilonViscosity` is an auxiliary kernel that computes the *turbulent dynamic viscosity*
 $\mu_t$ used in the k–$\epsilon$ family of turbulence models.
 It forms the closure term for the Reynolds stresses in the momentum equations:
 
@@ -15,11 +15,11 @@ This object implements:
 
 - Standard, Low-Re, Two-Layer, and Realizable viscosity formulations,
 - Several wall treatments (Newton, incremental, linearized, non-equilibrium),
-- Two-layer near-wall blending methods (Wolfstein, Norris–Reynolds, Xu),
+- Two-layer near-wall blending methods ([!cite](wolfstein1969velocity), [!cite](norris1975oneequation), [!cite](xu1998new)),
 - Low-Re damping functions for the StandardLowRe model,
 - Realizable variable $C_\mu$,
 - Optional scale limiting for the time scale,
-- Bulk and near-wall formulations that match STAR‑CCM+ and Menter-type corrections.
+- Bulk and near-wall formulations that match Menter-type corrections [!cite](menter1994two).
 
 
 ## Turbulent viscosity in the bulk region
@@ -104,9 +104,7 @@ C_\mu^{\mathrm{eff}}
 where:
 
 - $S^* = (k/\epsilon)\sqrt{S^2}$,
-- $W^* = (k/\epsilon)\sqrt{W^2}$,
-- $S^2$ and $W^2$ are invariants of the strain and rotation tensors computed in
-  `TurbulenceMethods::computeStrainRotationInvariants`.
+- $W^* = (k/\epsilon)\sqrt{W^2}$.
 
 This value replaces the standard constant $C_\mu$ everywhere in the model.
 
@@ -121,7 +119,7 @@ Let:
 
 - $\mu_{t,k\epsilon} = \rho C_\mu^{\mathrm{eff}} k T$,
 - $\mu_{2L}$ = near-wall turbulent viscosity from the chosen flavor
-  (Wolfstein, Norris–Reynolds, or Xu).
+  (Wolfstein, Norris–Reynolds, or Xu), see the [theory](theory/turbulenceModeling.md) section for more details.
 
 Using the wall-distance Reynolds number $Re_d = \sqrt{k} d / \nu$,
 the two-layer blending function is:
@@ -159,9 +157,9 @@ y^+ = \frac{\rho u_\tau y}{\mu}.
 
 4. Classify into:
 
-- **Viscous sublayer**: $y^+ \le 5$ → $\mu_t = 0$,
-- **Log‑layer**: $y^+ \ge 30$ → $\mu_t = \mu_\mathrm{log}(y^+)$,
-- **Buffer layer**: linear blending between the two regimes.
+- *Viscous sublayer*: $y^+ \le 5$ → $\mu_t = 0$,
+- *Log‑layer*: $y^+ \ge 30$ → $\mu_t = \mu_\mathrm{log}(y^+)$ (see [theory](theory/turbulenceModeling.md) for more details),
+- *Buffer layer*: linear blending between the two regimes.
 
 Four wall-function types are supported:
 
@@ -178,7 +176,7 @@ models used in the Navier–Stokes FV physics.
 
 ## Wall distance requirements
 
-The following variants **require** a wall-distance functor:
+The following variants *require* a wall-distance functor:
 
 - `StandardTwoLayer`
 - `RealizableTwoLayer`
