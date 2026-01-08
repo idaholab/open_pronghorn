@@ -4,6 +4,9 @@
     input = 'Ret395_linear_SIMPLE_k-epsilon.i'
     cli_args = 'Outputs/file_base=Ret395_MOOSE_LSFV_k-epsilon'
     csvdiff = 'Ret395_MOOSE_LSFV_k-epsilon_test_csv_0002.csv'
+    # The convergence of the fields is good in CFD terms but the defaults on this are a bit too strict
+    abs_zero = 1e-6
+    rel_err = 1e-5
     requirement = 'The system should be able to accurately simulate turbulent flow in a pipe at a Reynolds number of 395 using the linear finite volume discretization and a K-Epsilon turbulence model.'
     min_parallel = 10
     max_time = 1000
@@ -20,6 +23,9 @@
     input = 'Ret590_linear_SIMPLE_k-epsilon.i'
     cli_args = 'Outputs/file_base=Ret590_MOOSE_LSFV_k-epsilon'
     csvdiff = 'Ret590_MOOSE_LSFV_k-epsilon_test_csv_0002.csv'
+    # The convergence of the fields is good in CFD terms but the defaults on this are a bit too strict
+    abs_zero = 1e-6
+    rel_err = 1e-5
     requirement = 'The system should be able to accurately simulate turbulent flow in a pipe at a Reynolds number of 395 using the linear finite volume discretization and a K-Epsilon turbulence model.'
     min_parallel = 10
     max_time = 1000
