@@ -1,7 +1,7 @@
 # kEpsilonTKESourceSink
 
-`kEpsilonTKESourceSink` is a finite volume elemental kernel that computes the **turbulent source
-and sink term for the turbulent kinetic energy equation** in the k–$\epsilon$ family of models.
+`kEpsilonTKESourceSink` is a finite volume elemental kernel that computes the *turbulent source
+and sink term for the turbulent kinetic energy equation* in the k–$\epsilon$ family of models.
 
 !alert note
 The explanations in this kernel documentation are straightforward.
@@ -24,7 +24,7 @@ where:
 - $\gamma_M$ is a compressibility correction, and
 - $\epsilon$ is the dissipation rate supplied by the $\epsilon$-equation.
 
-`kEpsilonTKESourceSink` forms the **right-hand side source term** for the k-equation by computing
+`kEpsilonTKESourceSink` forms the *right-hand side source term* for the k-equation by computing
 the combination
 
 \begin{equation}
@@ -61,7 +61,7 @@ The choice of variant affects:
 
 ## Bulk formulation
 
-In **bulk cells** (not explicitly treated as near-wall by this kernel), the source term is
+In *bulk cells* (not explicitly treated as near-wall by this kernel), the source term is
 computed in `computeBulkProduction()` as
 
 \begin{equation}
@@ -133,12 +133,12 @@ supports:
 `NS::computeCurvatureFactor` builds a correction $f_c = f_c(S^2, W^2)$ that enhances production
 in stabilizing curvature and reduces it in destabilizing regions. The corrected shear production is
 
-- **Standard**, **StandardLowRe**, **StandardTwoLayer**:
+- *Standard*, *StandardLowRe*, *StandardTwoLayer*:
   \begin{equation}
   P_k = G_k;
   \end{equation}
 
-- **Realizable**, **RealizableTwoLayer**:
+- *Realizable*, *RealizableTwoLayer*:
   \begin{equation}
   P_k = f_c G_k.
   \end{equation}
@@ -165,7 +165,7 @@ production depending on the sign of the dot product $\nabla T\cdot\mathbf{g}$.
 
 ### Non-linear production $G_{\text{nl}}$
 
-`kEpsilonTKESourceSink` supports optional **non-linear constitutive relations** for the Reynolds
+`kEpsilonTKESourceSink` supports optional *non-linear constitutive relations* for the Reynolds
 stress tensor. The choice is controlled by
 [!param](/LinearFVKernels/kEpsilonTKESourceSink/nonlinear_model):
 
@@ -208,7 +208,7 @@ acoustic modes in compressible flow.
 
 ### Production limiter
 
-To avoid excessive TKE generation in stagnation regions, a **production limiter** is applied:
+To avoid excessive TKE generation in stagnation regions, a *production limiter* is applied:
 
 \begin{equation}
 G_k \le C_{PL}\,\rho\,\epsilon.
@@ -235,14 +235,14 @@ In non-wall-bounded cells, the kernel assembles the following source term for th
 ## Wall formulation
 
 Cells adjacent to boundaries listed in
-[!param](/LinearFVKernels/kEpsilonTKESourceSink/walls) are treated as **next-to-wall cells** with a
+[!param](/LinearFVKernels/kEpsilonTKESourceSink/walls) are treated as *next-to-wall cells* with a
 different expression for production and destruction, similar in spirit to
 [`LinearFVTKESourceSink`](LinearFVTKESourceSink.md). Wall distances are typically computed using
 [`WallDistanceAux`](WallDistanceAux.md), which returns the distance from each cell centroid to the
 nearest wall.
 
 The near-wall treatment is implemented in the matrix contribution for this kernel, where a
-distinction is made between the **viscous sublayer** and the **logarithmic region** based on the
+distinction is made between the *viscous sublayer* and the *logarithmic region* based on the
 non-dimensional wall distance
 
 \begin{equation}
@@ -306,7 +306,7 @@ those walls are typically unnecessary.
 
 ## Interaction with $\epsilon$-equation and viscosity
 
-`kEpsilonTKESourceSink` only forms the **k-equation** source terms. For a complete k–$\epsilon$ model, this
+`kEpsilonTKESourceSink` only forms the *k-equation* source terms. For a complete k–$\epsilon$ model, this
 kernel must be used together with:
 
 - [`kEpsilonTKEDSourceSink`](kEpsilonTKEDSourceSink.md), which provides the $\epsilon$-equation sources,

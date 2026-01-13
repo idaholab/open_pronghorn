@@ -1,7 +1,7 @@
 # WallDistanceAux
 
-`WallDistanceAux` is an auxiliary finite volume (FV) kernel that **computes the distance from each
-quadrature point to the nearest solid wall boundary**. The resulting distance field can be used
+`WallDistanceAux` is an auxiliary finite volume (FV) kernel that *computes the distance from each
+quadrature point to the nearest solid wall boundary*. The resulting distance field can be used
 by near-wall turbulence models, wall functions, or any model that requires a wall-normal length
 scale (e.g., for computing $y^+$ or two-layer blending functions).
 

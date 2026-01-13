@@ -1,7 +1,7 @@
 # kEpsilonTKEDSourceSink
 
-`kEpsilonTKEDSourceSink` is a finite volume elemental kernel that computes the **turbulent source
-and sink terms for the $\epsilon$-equation** in the k–$\epsilon$ family of models. Together with
+`kEpsilonTKEDSourceSink` is a finite volume elemental kernel that computes the *turbulent source
+and sink terms for the $\epsilon$-equation* in the k–$\epsilon$ family of models. Together with
 [`kEpsilonTKESourceSink`](kEpsilonTKESourceSink.md) and [`kEpsilonViscosity`](kEpsilonViscosity.md),
 it forms the full set of transport and closure relations for the k–$\epsilon$ turbulence models implemented
 in OpenPronghorn.
@@ -85,7 +85,7 @@ The exact combination depends on the chosen k–$\epsilon$ variant.
 
 ### Standard k–$\epsilon$
 
-For the **Standard** high-Re k–$\epsilon$ model, the $\epsilon$-production is
+For the *Standard* high-Re k–$\epsilon$ model, the $\epsilon$-production is
 
 \begin{equation}
 P_\epsilon = G_k^{\text{lim}} + G_{\text{nl}} + C_{\epsilon3} G_b,
@@ -104,7 +104,7 @@ The production limiter is consistent with the one used in the k-equation kernel.
 
 ### StandardTwoLayer k–$\epsilon$
 
-For the **StandardTwoLayer** model, the $\epsilon$-production is
+For the *StandardTwoLayer* model, the $\epsilon$-production is
 
 \begin{equation}
 P_\epsilon = G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
@@ -121,7 +121,7 @@ The Yap term is especially important near walls and is detailed in a separate se
 
 ### StandardLowRe k–$\epsilon$ (low-Re model)
 
-For the **StandardLowRe** model, low-Re corrections are included via damping functions and the
+For the *StandardLowRe* model, low-Re corrections are included via damping functions and the
 extra production term $G'$. The $\epsilon$-production is
 
 \begin{equation}
@@ -136,7 +136,7 @@ where
 
 ### Realizable k–$\epsilon$
 
-For the **Realizable** high-Re model, the $\epsilon$-production is written in terms of the shear-based
+For the *Realizable* high-Re model, the $\epsilon$-production is written in terms of the shear-based
 
 production $S_k$:
 \begin{equation}
@@ -155,7 +155,7 @@ than $G_k$ or $G_{\text{nl}}$.
 
 ### RealizableTwoLayer k–$\epsilon$
 
-The **RealizableTwoLayer** model combines the realizable bulk behavior with a two-layer near-wall
+The *RealizableTwoLayer* model combines the realizable bulk behavior with a two-layer near-wall
 enhancement via Yap:
 
 \begin{equation}
@@ -212,7 +212,7 @@ the $\epsilon$-equation kernels for consistency.
 
 ## Yap correction
 
-The **Yap correction** is an additional near-wall term that modifies the $\epsilon$-equation source in
+The *Yap correction* is an additional near-wall term that modifies the $\epsilon$-equation source in
 two-layer and low-Re variants. It is enabled when
 [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_yap) is `true` and a wall-distance functor is
 available.
@@ -290,7 +290,7 @@ The Yap contribution appears in:
 
 ## Low-Re extra production $G'$
 
-For the **StandardLowRe** model, an additional low-Re production term $G'$ is included in
+For the *StandardLowRe* model, an additional low-Re production term $G'$ is included in
 $P_\epsilon$ when [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_low_re_Gprime) is `true`
 and a wall-distance functor is provided.
 
