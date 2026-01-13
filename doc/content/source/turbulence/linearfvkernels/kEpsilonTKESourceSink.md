@@ -4,7 +4,7 @@
 and sink term for the turbulent kinetic energy equation* in the k–$\epsilon$ family of models.
 
 !alert note
-The explanations in this kernel documentation are straightforward.
+The explanations in this kernel documentation are a summary.
 The reader is referred to the [theory](theory/turbulenceModeling.md) for more details if needed.
 
 The turbulent kinetic energy (TKE) equation is written in conservative form as
@@ -20,7 +20,7 @@ where:
 - $\mathbf{u}$ is the mean velocity,
 - $P_k$ is the shear production,
 - $G_b$ is the buoyancy production,
-- $G_{\text{nl}}$ is the production due to non-linear Reynolds stresses,
+- $G_{\text{nl}}$ is the production due to nonlinear Reynolds stresses,
 - $\gamma_M$ is a compressibility correction, and
 - $\epsilon$ is the dissipation rate supplied by the $\epsilon$-equation.
 
@@ -35,8 +35,8 @@ with expressions that depend on the chosen k–$\epsilon$ variant and options.
 
 The kernel is designed to be used together with:
 
-- [`kEpsilonTKEDSourceSink`](kEpsilonTKEDSourceSink.md) for the $\epsilon$-equation, and
-- [`kEpsilonViscosity`](kEpsilonViscosity.md) for the turbulent viscosity $\mu_t$.
+- [kEpsilonTKEDSourceSink.md] for the $\epsilon$-equation, and
+- [kEpsilonViscosity.md] for the turbulent viscosity $\mu_t$.
 
 ## Model variants
 
@@ -62,7 +62,7 @@ The choice of variant affects:
 ## Bulk formulation
 
 In *bulk cells* (not explicitly treated as near-wall by this kernel), the source term is
-computed in `computeBulkProduction()` as
+computed as
 
 \begin{equation}
 \text{source}_{\text{bulk}} = P_k + G_b + G_{\text{nl}} - \gamma_M - \epsilon.
@@ -83,15 +83,13 @@ $\mathbf{S}$ and the antisymmetric rotation tensor $\mathbf{W}$:
 \mathbf{W} = \frac{1}{2} \left(\nabla \mathbf{u} - \nabla \mathbf{u}^T \right)
 \end{equation}
 
-`kEpsilonTKESourceSink` calls
-`NS::computeStrainRotationInvariants(u, v, w, elem_arg, state)` from
-`TurbulenceMethods` to obtain the invariants:
+The invariants are defined as:
 
 - $S^2 = 2 S_{ij} S_{ij}$,
 - $W^2 = 2 W_{ij} W_{ij}$,
 - $\nabla \cdot \mathbf{u}$.
 
-These invariants are shared by the turbulence viscosity, non-linear models, and curvature
+These invariants are shared by the turbulence viscosity, nonlinear models, and curvature
 correction.
 
 ### Shear production $G_k$
@@ -130,7 +128,7 @@ supports:
 - `curvature_model = standard` — Spalart–Shur–type rotation/curvature correction based on
   $S^2$ and $W^2$.
 
-`NS::computeCurvatureFactor` builds a correction $f_c = f_c(S^2, W^2)$ that enhances production
+The curvature correction builds a correction $f_c = f_c(S^2, W^2)$ that enhances production
 in stabilizing curvature and reduces it in destabilizing regions. The corrected shear production is
 
 - *Standard*, *StandardLowRe*, *StandardTwoLayer*:
@@ -159,33 +157,32 @@ where
 - $T$ is the temperature,
 - $\mathbf{g}$ is the gravitational acceleration.
 
-The gradient $\nabla T$ and gravity vector are supplied as functors / parameters, and the
-computation is performed through `NS::computeGb`. Buoyancy can either augment or reduce total
+The gradient $\nabla T$ and gravity vector are supplied as functors / parameters.
+Buoyancy can either augment or reduce total
 production depending on the sign of the dot product $\nabla T\cdot\mathbf{g}$.
 
-### Non-linear production $G_{\text{nl}}$
+### nonlinear production $G_{\text{nl}}$
 
-`kEpsilonTKESourceSink` supports optional *non-linear constitutive relations* for the Reynolds
+`kEpsilonTKESourceSink` supports optional *nonlinear constitutive relations* for the Reynolds
 stress tensor. The choice is controlled by
 [!param](/LinearFVKernels/kEpsilonTKESourceSink/nonlinear_model):
 
-- `nonlinear_model = none` — no non-linear production, $G_{\text{nl}} = 0$;
+- `nonlinear_model = none` — no nonlinear production, $G_{\text{nl}} = 0$;
 - `nonlinear_model = quadratic` — quadratic constitutive relation;
 - `nonlinear_model = cubic` — quadratic + cubic terms.
 
-The non-linear Reynolds stress contribution is computed in `TurbulenceMethods` as
+The nonlinear Reynolds stress contribution is computed in `TurbulenceMethods` as
 
 \begin{equation}
 G_{\text{nl}} = \mathbf{T}_{\text{RANS,NL}} : \nabla \mathbf{u},
 \end{equation}
 
-where $\mathbf{T}_{\text{RANS,NL}}$ is obtained from `NS::computeTRANS_NL` and depends on:
+where $\mathbf{T}_{\text{RANS,NL}}$ depends on:
 
 - the velocity gradient $\nabla \mathbf{u}$ (through $\mathbf{S}$ and $\mathbf{W}$),
 - the invariants $S^2$, $W^2$,
 - $\mu_t$, $k$, $\epsilon$,
-- fixed model coefficients $C_{\text{NL}1\ldots 7}$ and a variable $C_\mu$ computed by
-  `NS::Cmu_nonlinear`.
+- fixed model coefficients $C_{\text{NL}1\ldots 7}$ and a variable $C_\mu$.
 
 In all k–$\epsilon$ variants, `kEpsilonTKESourceSink` adds $G_{\text{nl}}$ to the k-equation’s production:
 
@@ -216,7 +213,7 @@ G_k \le C_{PL}\,\rho\,\epsilon.
 
 The limiter coefficient $C_{PL}$ is available as
 [!param](/LinearFVKernels/kEpsilonTKESourceSink/C_pl). This limiter follows the standard approach
-from Durbin (1996) and Menter (1994) and is applied in the bulk region.
+from [!cite](menter1994two) and is applied in the bulk region.
 
 ### Summary of bulk source
 
@@ -226,7 +223,7 @@ In non-wall-bounded cells, the kernel assembles the following source term for th
 \text{source}_{\text{bulk}}
 = \underbrace{P_k}_{\text{shear (varies by variant)}}
 + \underbrace{G_b}_{\text{buoyancy}}
-+ \underbrace{G_{\text{nl}}}_{\text{non-linear model}}
++ \underbrace{G_{\text{nl}}}_{\text{nonlinear model}}
 - \underbrace{\gamma_M}_{\text{compressibility}}
 - \underbrace{\epsilon}_{\text{dissipation}}.
 \end{equation}
@@ -237,8 +234,8 @@ In non-wall-bounded cells, the kernel assembles the following source term for th
 Cells adjacent to boundaries listed in
 [!param](/LinearFVKernels/kEpsilonTKESourceSink/walls) are treated as *next-to-wall cells* with a
 different expression for production and destruction, similar in spirit to
-[`LinearFVTKESourceSink`](LinearFVTKESourceSink.md). Wall distances are typically computed using
-[`WallDistanceAux`](WallDistanceAux.md), which returns the distance from each cell centroid to the
+[LinearFVTKESourceSink.md]. Wall distances are typically computed using
+[WallDistanceAux.md], which returns the distance from each cell centroid to the
 nearest wall.
 
 The near-wall treatment is implemented in the matrix contribution for this kernel, where a
@@ -284,7 +281,9 @@ For cells in the log layer, production and destruction take the classical wall-f
   G_k = \tau_w \|\nabla \mathbf{u}\|
       = \mu_w \|\nabla \mathbf{u}\| \frac{C_\mu^{1/4}\sqrt{k}}{\kappa y_p},
   \end{equation}
+
   where
+
   - $\tau_w$ is the wall shear stress,
   - $\mu_w$ is the effective wall viscosity (including turbulent contributions),
   - $\|\nabla \mathbf{u}\|$ is the wall-normal velocity gradient norm,
@@ -309,21 +308,25 @@ those walls are typically unnecessary.
 `kEpsilonTKESourceSink` only forms the *k-equation* source terms. For a complete k–$\epsilon$ model, this
 kernel must be used together with:
 
-- [`kEpsilonTKEDSourceSink`](kEpsilonTKEDSourceSink.md), which provides the $\epsilon$-equation sources,
-  including:
-  - realizable production terms,
-  - non-linear contributions,
-  - low-Re extra production $G'$,
-  - Yap correction,
-  - buoyancy source for $\epsilon$;
-- [`kEpsilonViscosity`](kEpsilonViscosity.md), which computes the turbulent viscosity $\mu_t$
-  from the current $k$ and $\epsilon$, including:
-  - low-Re damping for SKE-LRe,
-  - two-layer viscosity blending,
-  - realizable variable $C_\mu$,
-  - bulk wall treatment for $\mu_t$ (if requested).
+- [kEpsilonTKEDSourceSink.md], which provides the $\epsilon$-equation sources,
 
-The three objects together implement the full k–$\epsilon$ turbulence model family.`
+including:
+
+1. realizable production terms,
+2. nonlinear contributions,
+3. ow-Re extra production $G'$,
+4. Yap correction,
+5. buoyancy source for $\epsilon$;
+
+- [kEpsilonViscosity.md], which computes the turbulent viscosity $\mu_t$
+  from the current $k$ and $\epsilon$, including:
+
+1. low-Re damping for SKE-LRe,
+2. two-layer viscosity blending,
+3. realizable variable $C_\mu$,
+4. bulk wall treatment for $\mu_t$ (if requested).
+
+The three objects together implement the full k–$\epsilon$ turbulence model family.
 
 !syntax parameters /LinearFVKernels/kEpsilonTKESourceSink
 

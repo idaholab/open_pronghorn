@@ -7,7 +7,7 @@ it forms the full set of transport and closure relations for the k–$\epsilon$ 
 in OpenPronghorn.
 
 !alert note
-The explanations in this kernel documentation are straightforward.
+The explanations in this kernel documentation are a summary.
 The reader is referred to the [theory](theory/turbulenceModeling.md) for more details if needed.
 
 The $\epsilon$-equation is written in conservative form as
@@ -45,7 +45,7 @@ The kernel supports the same k–$\epsilon$ variants as [kEpsilonTKESourceSink.m
 - `RealizableTwoLayer` — realizable model with a two-layer near-wall treatment.
 
 The $\epsilon$-production term $P_\epsilon$ is assembled differently for each variant, combining shear
-production, buoyancy contributions, non-linear production, Yap correction, and low-Re extra
+production, buoyancy contributions, nonlinear production, Yap correction, and low-Re extra
 production $G'$.
 
 
@@ -65,9 +65,9 @@ These invariants are used to construct:
   \begin{equation}
   G_k = \mu_t S^2 \;\; (\text{plus compressible terms if enabled}),
   \end{equation}
-- the shear-based $\epsilon$-production term $S_k = \mu_t S^2$ for realizable variants,
+- the shear-based $\epsilon$-production term $S_k = \mu_t S^2$ for realizable variants (note that $G_k$ may be limited so a disctinction is made with the non-limited $S_k$),
 - the curvature correction factor $f_c$ (for realizable models when enabled),
-- the normalized strain/rotation quantities used by the non-linear constitutive relations.
+- the normalized strain/rotation quantities used by the nonlinear constitutive relations.
 
 
 ## $\epsilon$-production term $P_\epsilon$
@@ -75,7 +75,7 @@ These invariants are used to construct:
 The $\epsilon$-production term $P_\epsilon$ is built from several contributions:
 
 - $G_k$: shear production of k,
-- $G_{\text{nl}}$: non-linear production (optional quadratic/cubic constitutive relations),
+- $G_{\text{nl}}$: nonlinear production (optional quadratic/cubic constitutive relations),
 - $G'$: low-Re extra production (StandardLowRe only),
 - $G_b$: buoyancy production,
 - $Y_y$: Yap correction (two-layer and low-Re variants),
@@ -88,7 +88,7 @@ The exact combination depends on the chosen k–$\epsilon$ variant.
 For the *Standard* high-Re k–$\epsilon$ model, the $\epsilon$-production is
 
 \begin{equation}
-P_\epsilon = G_k^{\text{lim}} + G_{\text{nl}} + C_{\epsilon3} G_b,
+G_k^{\text{lim}} + G_{\text{nl}} + C_{\epsilon3} G_b,
 \end{equation}
 
 where
@@ -97,7 +97,7 @@ where
   \begin{equation}
   G_k^{\text{lim}} = \min(G_k, C_{PL}\,\rho\,\epsilon),
   \end{equation}
-- $G_{\text{nl}}$ is the non-linear production term (if `nonlinear_model != none`),
+- $G_{\text{nl}}$ is the nonlinear production term (if `nonlinear_model != none`),
 - $C_{\epsilon3}$ is the buoyancy coefficient (usually model-dependent).
 
 The production limiter is consistent with the one used in the k-equation kernel.
@@ -107,7 +107,7 @@ The production limiter is consistent with the one used in the k-equation kernel.
 For the *StandardTwoLayer* model, the $\epsilon$-production is
 
 \begin{equation}
-P_\epsilon = G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
 \end{equation}
 
 where
@@ -125,7 +125,7 @@ For the *StandardLowRe* model, low-Re corrections are included via damping funct
 extra production term $G'$. The $\epsilon$-production is
 
 \begin{equation}
-P_\epsilon = G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
 \end{equation}
 
 where
@@ -140,7 +140,7 @@ For the *Realizable* high-Re model, the $\epsilon$-production is written in term
 
 production $S_k$:
 \begin{equation}
-P_\epsilon = f_c S_k + C_{\epsilon3} G_b,
+f_c S_k + C_{\epsilon3} G_b,
 \end{equation}
 
 where
@@ -149,7 +149,7 @@ where
 - $f_c$ is the curvature correction factor (if `curvature_model != none`),
 - $C_{\epsilon3} G_b$ is the buoyancy contribution.
 
-In realizable models the non-linear constitutive relation affects the viscosity (via realizable
+In realizable models the nonlinear constitutive relation affects the viscosity (via realizable
 $C_\mu$) and the k-equation, but $P_\epsilon$ itself is expressed in terms of $S_k$ rather
 than $G_k$ or $G_{\text{nl}}$.
 
@@ -159,14 +159,14 @@ The *RealizableTwoLayer* model combines the realizable bulk behavior with a two-
 enhancement via Yap:
 
 \begin{equation}
-P_\epsilon = f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
 \end{equation}
 
 with the same definitions of $S_k$, $f_c$, and $G_b$ as in the realizable model and the Yap
 term as described below.
 
 
-## Non-linear $\epsilon$-production $G_{\text{nl}}$
+## nonlinear $\epsilon$-production $G_{\text{nl}}$
 
 When [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/nonlinear_model) is set to `quadratic` or
 `cubic`, `kEpsilonTKEDSourceSink` includes the contribution $G_{\text{nl}}$ in the $\epsilon$-production
@@ -174,36 +174,36 @@ for Standard-family variants:
 
 - `Standard`:
   \begin{equation}
-  P_\epsilon = G_k^{\text{lim}} + G_{\text{nl}} + C_{\epsilon3} G_b,
+  \text{Production}= G_k^{\text{lim}} + G_{\text{nl}} + C_{\epsilon3} G_b,
   \end{equation}
 
 - `StandardTwoLayer`:
   \begin{equation}
-  P_\epsilon = G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+  \text{Production} = G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
   \end{equation}
 
 - `StandardLowRe`:
   \begin{equation}
-  P_\epsilon = G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+  \text{Production} = G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
   \end{equation}
 
-The term $G_{\text{nl}}$ is computed in `TurbulenceMethods` based on the quadratic or cubic
-non-linear Reynolds stress models and contracted with $\nabla \mathbf{u}$.
+The term $G_{\text{nl}}$ is based on the quadratic or cubic
+nonlinear Reynolds stress models and contracted with $\nabla \mathbf{u}$.
 
 
 ## Curvature correction in $\epsilon$-production
 
-For realizable variants, the curvature correction factor $f_c$ obtained from
-`NS::computeCurvatureFactor` is applied multiplicatively to $S_k$ in the $\epsilon$-production:
+For realizable variants, the curvature correction factor $f_c$
+is applied multiplicatively to $S_k$ in the $\epsilon$-production:
 
 - `Realizable`:
   \begin{equation}
-  P_\epsilon = f_c S_k + C_{\epsilon3} G_b,
+  \text{Production} = f_c S_k + C_{\epsilon3} G_b,
   \end{equation}
 
 - `RealizableTwoLayer`:
   \begin{equation}
-  P_\epsilon = f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+  \text{Production} = f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
   \end{equation}
 
 The same curvature model (e.g. `curvature_model = standard`) is used in both the k-equation and
@@ -265,7 +265,7 @@ with $C_\mu$ the model’s closure constant (or a realizable value when applicab
 
 ### Yap correction term $Y_y$
 
-The Yap correction term $\gamma_y$ is computed in `TurbulenceMethods::computeGammaY` as
+The Yap correction term $\gamma_y$ is computed as
 
 \begin{equation}
 \gamma_y =
@@ -311,10 +311,10 @@ where
 - $\mathrm{Re}_d = \sqrt{k} d / \nu$ is the wall-distance Reynolds number,
 - $\mathrm{Re}_t = k^2 / (\nu \epsilon)$ is the turbulence Reynolds number.
 
-In the $\epsilon$-production for the StandardLowRe variant,
+In the $\epsilon$-production for the StandardLowRe variant the production term is
 
 \begin{equation}
-P_\epsilon = G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
 \end{equation}
 
 The term $G'$ vanishes as $\mathrm{Re}_d \to \infty$ due to the exponential damping and is
@@ -343,7 +343,7 @@ the k–$\epsilon$ variant:
   \end{equation}
   consistent with the low-Re formulation used for $G'$.
 
-The same `f2_SKE_LRe` function is used for both the extra production term and the destruction
+The same function is used for both the extra production term and the destruction
 damping in the low-Re model.
 
 

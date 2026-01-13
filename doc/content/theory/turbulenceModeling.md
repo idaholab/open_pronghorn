@@ -2,8 +2,7 @@
 
 This page documents the Reynolds-averaged Navier–Stokes (RANS) turbulence-modeling
 capabilities implemented in OpenPronghorn. It focuses on the $k$–$\epsilon$ family of
-eddy-viscosity models, the shared utilities provided by the `NS::TurbulenceMethods`
-namespace, and practical guidance for choosing and using each model in applications.
+eddy-viscosity models and practical guidance for choosing and using each model in applications.
 
 For general background on turbulence and RANS closures, see Pope [!cite](pope2000turbulent)
 and Wilcox [!cite](wilcox2006turbulence). The baseline $k$–$\epsilon$ model follows
@@ -27,8 +26,7 @@ unresolved turbulent fluctuations on the mean flow. The main motivations are:
 
 OpenPronghorn’s turbulence infrastructure is designed to be:
 
-- *Modular*: The same utilities in `NS::TurbulenceMethods` are reused by several
-  $k$–$\epsilon$ kernels and auxiliary objects.
+- *Modular*: The same utilities are reused by several $k$–$\epsilon$ kernels and auxiliary objects.
 - *Extensible*: New turbulence models can be added by leveraging the existing functor and
   finite-volume infrastructure.
 - *Configurable*: Users can select a model variant and enable or disable individual
@@ -153,10 +151,10 @@ where
 The eddy viscosity is given by
 
 \begin{equation}
-\mu_t = \rho \, C_\mu^* \frac{k^2}{\epsilon},
+\mu_t = \rho \, C_\mu^{\mathrm{eff}} \frac{k^2}{\epsilon},
 \end{equation}
 
-where $C_\mu^*$ can be:
+where $C_\mu^{\mathrm{eff}}$ can be:
 
 - the classical constant $C_\mu = 0.09$ (standard model),
 - a realizable value $C_\mu^\text{real}$ depending on $S^2$ and $W^2$,
@@ -179,8 +177,7 @@ G_b = - \frac{\mu_t}{\Pr_t} \, \mathbf{g} \cdot \nabla T \, \beta(T),
 \end{equation}
 
 where $\Pr_t$ is the turbulent Prandtl number, $\mathbf{g}$ is gravity, $T$ is
-temperature, and $\beta(T)$ is the thermal expansion coefficient. These terms are computed
-by `NS::computeGk` and `NS::computeGb`, respectively.
+temperature, and $\beta(T)$ is the thermal expansion coefficient.
 
 ### Model constants (standard high-Re model)
 
@@ -194,7 +191,7 @@ The standard high-Re $k$–$\epsilon$ model uses the classical constants
 - $\sigma_\epsilon = 1.3$.
 
 These can be overridden through the parameters of the relevant kernels
-(`kEpsilonTKESourceSink`, `kEpsilonTKEDSourceSink`, and `kEpsilonViscosity`) if a different
+([kEpsilonTKESourceSink.md], [kEpsilonTKEDSourceSink.md], and [kEpsilonViscosity.md]) if a different
 calibration is required.
 
 ### Variant-specific forms
@@ -208,10 +205,11 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 - $f_1 = 1$, $f_2 = 1$.
 - No explicit low-Re damping; near-wall behavior is typically handled by wall functions.
 - Optional terms:
-  - compressibility correction $\gamma_M$ in $S_\epsilon$,
-  - Yap correction $\gamma_Y$ in $S_\epsilon$,
-  - curvature factor $f_c$ multiplying $P_k$,
-  - nonlinear production $G_\text{nl}$ added to $P_k$.
+
+1. compressibility correction $\gamma_M$ in $S_\epsilon$,
+2. Yap correction $\gamma_Y$ in $S_\epsilon$,
+3. curvature factor $f_c$ multiplying $P_k$,
+4. nonlinear production $G_\text{nl}$ added to $P_k$.
 
 #### StandardLowRe
 
@@ -254,8 +252,8 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 
 # TurbulenceMethods: complete list of utilities (equation-level detail)
 
-This document focuses exclusively on the `NS::TurbulenceMethods` utilities implemented in
-`TurbulenceMethods.C` and explains, for each function, exactly which mathematical
+This document focuses exclusively on the utilities implemented in
+the code and explains, for each function, exactly which mathematical
 expressions are implemented and how they are built from the input quantities.
 
 
