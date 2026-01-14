@@ -141,7 +141,7 @@ use_low_re_Gprime   = false
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [u_diffusion]
     type = LinearFVDiffusion
@@ -165,7 +165,7 @@ use_low_re_Gprime   = false
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [v_diffusion]
     type = LinearFVDiffusion
@@ -452,12 +452,12 @@ use_low_re_Gprime   = false
   momentum_absolute_tolerance = 1e-7
   turbulence_absolute_tolerance = '1e-7 1e-7'
 
-  momentum_petsc_options_iname = '-u_system_pc_type -u_system_pc_hypre_type -v_system_pc_type -v_system_pc_hypre_type'
-  momentum_petsc_options_value = 'hypre boomeramg hypre boomeramg'
+  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
+  momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
-  turbulence_petsc_options_iname = '-TKE_system_pc_type -TKE_system_pc_hypre_type -TKED_system_pc_type -TKED_system_pc_hypre_type'
-  turbulence_petsc_options_value = 'hypre boomeramg hypre boomeramg'
+  turbulence_petsc_options_iname = '-pc_type -pc_hypre_type'
+  turbulence_petsc_options_value = 'hypre boomeramg'
 
   momentum_l_max_its = 300
   pressure_l_max_its = 300

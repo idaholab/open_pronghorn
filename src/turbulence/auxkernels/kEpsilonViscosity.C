@@ -40,22 +40,14 @@ kEpsilonViscosity::validParams()
       "bulk_wall_treatment", false, "If true, use classical wall functions for near-wall cells.");
 
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "eq_newton");
-  params.addParam<MooseEnum>("wall_treatment",
-                             wall_treatment,
-                             "The method used for computing the wall functions: "
-                             "'eq_newton', 'eq_incremental', 'eq_linearized', 'neq'.");
+  params.addParam<MooseEnum>(
+      "wall_treatment", wall_treatment, "The method used for computing the wall functions.");
 
   MooseEnum scale_limiter("none standard", "standard");
   params.addParam<MooseEnum>("scale_limiter",
                              scale_limiter,
                              "The method used to limit the k-epsilon time scale: "
                              "'none' or 'standard' (max(T_e, sqrt(nu/epsilon))).");
-
-  params.addParam<bool>("newton_solve",
-                        false,
-                        "Whether a Newton nonlinear solve is being used (enables epsilon "
-                        "lower bounds in the time scale).");
-  params.addParamNamesToGroup("newton_solve", "Advanced");
 
   // ---- Extended k-epsilon model options ----
 
@@ -149,6 +141,67 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
        _variant == NS::KEpsilonVariant::StandardLowRe) &&
       !_has_wall_distance)
     paramError("wall_distance", "The selected k-epsilon variant requires a wall_distance functor.");
+
+  // Variant-specific parameter consistency checks
+
+  const bool is_two_layer_variant = (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
+                                     _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+
+  const bool is_realizable_variant = (_variant == NS::KEpsilonVariant::Realizable ||
+                                      _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+
+  const bool is_lowre_variant = (_variant == NS::KEpsilonVariant::StandardLowRe);
+
+  // Helper: if user explicitly set a parameter that is not applicable, throw
+  auto check_param_applicability =
+      [&](const std::string & pname, const bool allowed, const std::string & msg)
+  {
+    if (params.isParamSetByUser(pname) && !allowed)
+      paramError(pname, msg);
+  };
+
+  // ---- Two-layer flavor only makes sense for two-layer variants ----
+  check_param_applicability(
+      "two_layer_flavor",
+      is_two_layer_variant,
+      "Parameter 'two_layer_flavor' is only applicable when 'k_epsilon_variant' is "
+      "'StandardTwoLayer' or 'RealizableTwoLayer'.");
+
+  // ---- Low-Re damping coefficients only apply to StandardLowRe ----
+  check_param_applicability(
+      "Cd0",
+      is_lowre_variant,
+      "Parameter 'Cd0' is only applicable when 'k_epsilon_variant' is 'StandardLowRe'.");
+  check_param_applicability(
+      "Cd1",
+      is_lowre_variant,
+      "Parameter 'Cd1' is only applicable when 'k_epsilon_variant' is 'StandardLowRe'.");
+  check_param_applicability(
+      "Cd2",
+      is_lowre_variant,
+      "Parameter 'Cd2' is only applicable when 'k_epsilon_variant' is 'StandardLowRe'.");
+
+  // ---- Realizable coefficients only apply to realizable variants ----
+  check_param_applicability("Ca0",
+                            is_realizable_variant,
+                            "Parameter 'Ca0' is only applicable when 'k_epsilon_variant' is "
+                            "'Realizable' or 'RealizableTwoLayer'.");
+  check_param_applicability("Ca1",
+                            is_realizable_variant,
+                            "Parameter 'Ca1' is only applicable when 'k_epsilon_variant' is "
+                            "'Realizable' or 'RealizableTwoLayer'.");
+  check_param_applicability("Ca2",
+                            is_realizable_variant,
+                            "Parameter 'Ca2' is only applicable when 'k_epsilon_variant' is "
+                            "'Realizable' or 'RealizableTwoLayer'.");
+  check_param_applicability("Ca3",
+                            is_realizable_variant,
+                            "Parameter 'Ca3' is only applicable when 'k_epsilon_variant' is "
+                            "'Realizable' or 'RealizableTwoLayer'.");
+
+  // Error if using cylindrical coordinates - gradients won't be correct
+  if (getBlockCoordSystem() == Moose::COORD_RZ)
+    mooseError(name(), " is not valid on blocks that use an RZ coordinate system.");
 
   // Realizable variant needs velocity gradients for strain/rotation invariants
   if (_variant == NS::KEpsilonVariant::Realizable ||
@@ -296,7 +349,6 @@ kEpsilonViscosity::computeValue()
 
     if (_variant == NS::KEpsilonVariant::StandardLowRe)
     {
-      mooseAssert(_has_wall_distance, "StandardLowRe variant requires wall_distance functor.");
       const Real d = (*_wall_distance_functor)(elem_arg, state);
       const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
       const Real fmu = NS::fmu_SKE_LRe(_Cd0, _Cd1, _Cd2, Red);

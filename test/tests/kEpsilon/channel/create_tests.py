@@ -13,7 +13,7 @@ for the channel_ERCOFTAC case.
     * csvdiff list matches the actual output CSV naming (no 'out_', index 0002)
 
 Usage:
-  python generate_channel_ercoftac_kepsilon_tests.py > tests
+  python create_tests.py > tests
 
 Then include the generated [Tests] block into your MOOSE tests file.
 """
@@ -52,7 +52,7 @@ BASE_INPUT_FILE = "channel_ERCOFTAC.i"
 BASE_REQUIREMENT = (
     "The system shall be able to solve fluid flow problems with k-epsilon "
     "turbulence model for a standard channel with linear FV discretization, "
-    "and reach converged results with segregated solvers."
+    "and reach converged results with segregated solvers "
 )
 
 
@@ -81,12 +81,6 @@ def bool_to_moose(b: bool) -> str:
 def is_skipped_permutation(p) -> bool:
     """
     Return True if this permutation should be skipped based on the failures:
-
-      - realizabletwolayer_norrisreynolds_quadratic_yap  (ERRMSG)
-      - realizabletwolayer_norrisreynolds_cubic_yap      (ERRMSG)
-      - realizabletwolayer_xu_cubic                      (MISSING GOLD FILE)
-      - realizabletwolayer_xu_cubic_yap                  (MISSING GOLD FILE)
-      - realizabletwolayer_wolfstein_cubic_yap           (MISSING GOLD FILE)
     """
     variant = p["variant"]
     flavor = p["two_layer_flavor"]
@@ -206,7 +200,7 @@ def make_requirement_suffix(p) -> str:
     """
     Human-readable description for this permutation, appended to the base requirement.
     """
-    desc = [p["variant"]]
+    desc = [p["variant"] + " variant"]
     if p["two_layer_flavor"] is not None and "TwoLayer" in p["variant"]:
         desc.append(f"{p['two_layer_flavor']} two-layer flavor")
     if p["nonlinear_model"] != "none":
@@ -216,7 +210,12 @@ def make_requirement_suffix(p) -> str:
 
     if not desc:
         return ""
-    return " using " + ", ".join(desc)
+    if len(desc) == 1:
+        return "using " + desc[0] + "."
+    if len(desc) == 2:
+        return "using " + desc[0] + " and " + desc[1] + "."
+    else:
+        return "using " + ", ".join(desc[1:]) + ", and " + desc[-1] + "."
 
 
 def make_csvdiff_list(file_base: str) -> str:

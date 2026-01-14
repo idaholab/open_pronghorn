@@ -35,16 +35,8 @@ kEpsilonTKEDSourceSink::validParams()
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
 
-  params.addParam<bool>("linearized_model",
-                        true,
-                        "If true, this kernel is intended to be used in a linear "
-                        "solve (kept for API parity).");
-
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
-  params.addParam<MooseEnum>("wall_treatment",
-                             wall_treatment,
-                             "Method used for wall functions: "
-                             "'eq_newton', 'eq_incremental', 'eq_linearized', or 'neq'.");
+  params.addParam<MooseEnum>("wall_treatment", wall_treatment, "Method used for wall functions.");
 
   params.addParam<Real>("C_mu", 0.09, "Turbulent kinetic energy closure constant C_mu.");
 
@@ -102,8 +94,7 @@ kEpsilonTKEDSourceSink::validParams()
   MooseEnum nonlinear_model("none quadratic cubic", "none");
   params.addParam<MooseEnum>("nonlinear_model",
                              nonlinear_model,
-                             "Non-linear constitutive relation for standard k-epsilon: "
-                             "'none', 'quadratic', or 'cubic'.");
+                             "Non-linear constitutive relation for standard k-epsilon.");
 
   MooseEnum curvature_model("none standard", "none");
   params.addParam<MooseEnum>("curvature_model",
@@ -125,7 +116,6 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _mu(getFunctor<Real>(NS::mu)),
     _mu_t(getFunctor<Real>(NS::mu_t)),
     _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls")),
-    _linearized_model(getParam<bool>("linearized_model")),
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
     _C1_eps(getParam<Real>("C1_eps")),
@@ -157,13 +147,122 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _has_beta(params.isParamValid("beta")),
     _has_c(params.isParamValid("speed_of_sound")),
     _has_wall_distance(params.isParamValid("wall_distance")),
-    _nonlinear_model(NS::NonlinearConstitutiveRelation::None),
-    _curvature_model(NS::CurvatureCorrectionModel::None)
+    _nonlinear_model(
+        getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
+    _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>())
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three or more dimensions, the w velocity must be supplied.");
+
+  // Additional constructor error checks (variant/option consistency)
+
+  const bool is_standard_family = (_variant == NS::KEpsilonVariant::Standard ||
+                                   _variant == NS::KEpsilonVariant::StandardTwoLayer ||
+                                   _variant == NS::KEpsilonVariant::StandardLowRe);
+
+  const bool is_realizable_family = (_variant == NS::KEpsilonVariant::Realizable ||
+                                     _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+
+  const bool is_two_layer = (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
+                             _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+
+  const bool is_low_re = (_variant == NS::KEpsilonVariant::StandardLowRe);
+
+  // Helper: "user explicitly set this parameter"
+  auto user_set = [&](const std::string & pname) { return params.isParamSetByUser(pname); };
+
+  // Pull enums locally so we don't depend on other names being in-scope
+  const MooseEnum nl_local = getParam<MooseEnum>("nonlinear_model");
+  const MooseEnum cm_local = getParam<MooseEnum>("curvature_model");
+
+  // ---- Wall-distance requirements (variants + enabled options) ----
+  if ((is_two_layer || is_low_re) && !_has_wall_distance)
+    paramError("wall_distance",
+               "The selected k_epsilon_variant requires 'wall_distance' (two-layer or low-Re).");
+
+  if (_switches.use_yap && !_has_wall_distance)
+    paramError("wall_distance", "'use_yap=true' requires the 'wall_distance' functor.");
+
+  if (_switches.use_low_re_Gprime && !_has_wall_distance)
+    paramError("wall_distance", "'use_low_re_Gprime=true' requires the 'wall_distance' functor.");
+
+  // ---- Option allowed-sets by variant ----
+  // Yap only meaningful for: StandardTwoLayer, StandardLowRe, RealizableTwoLayer
+  if (_switches.use_yap && !(is_two_layer || is_low_re))
+    paramError("use_yap",
+               "'use_yap=true' is only supported for StandardTwoLayer, StandardLowRe, "
+               "and RealizableTwoLayer variants.");
+
+  // G' only meaningful for: StandardLowRe
+  if (_switches.use_low_re_Gprime && !is_low_re)
+    paramError("use_low_re_Gprime",
+               "'use_low_re_Gprime=true' is only supported for the StandardLowRe variant.");
+
+  // Nonlinear model only supported for Standard-family (not realizable)
+  if (is_realizable_family && (nl_local != "none"))
+    paramError("nonlinear_model",
+               "nonlinear_model must be 'none' for realizable variants. "
+               "Nonlinear production terms are only supported for Standard-family variants.");
+
+  // Curvature model only supported for realizable-family (not standard)
+  if (is_standard_family && (cm_local != "none"))
+    paramError("curvature_model",
+               "curvature_model must be 'none' for Standard-family variants. "
+               "Curvature/rotation correction is only supported for realizable variants.");
+
+  // ---- Cross-parameter consistency: use_curvature_correction vs curvature_model ----
+  const bool use_curv_flag = getParam<bool>("use_curvature_correction");
+  const bool curv_model_enabled = (cm_local != "none");
+
+  if ((user_set("use_curvature_correction") || user_set("curvature_model")) &&
+      (use_curv_flag != curv_model_enabled))
+  {
+    if (use_curv_flag && !curv_model_enabled)
+      paramError(
+          "curvature_model",
+          "use_curvature_correction=true but curvature_model='none'. "
+          "Select a curvature_model (e.g. 'standard') or set use_curvature_correction=false.");
+    else if (!use_curv_flag && curv_model_enabled)
+      paramError("use_curvature_correction",
+                 "curvature_model is enabled but use_curvature_correction=false. "
+                 "Either set use_curvature_correction=true or set curvature_model='none'.");
+  }
+
+  // ---- Dependent-functor checks for enabled physics toggles ----
+  if (_switches.use_buoyancy)
+  {
+    if (!_has_T)
+      paramError("temperature", "'use_buoyancy=true' requires the 'temperature' functor.");
+    if (!_has_beta)
+      paramError("beta", "'use_buoyancy=true' requires the 'beta' functor.");
+  }
+  else
+  {
+    if (user_set("temperature"))
+      paramError("temperature",
+                 "Parameter 'temperature' is only applicable when use_buoyancy = true.");
+    if (user_set("beta"))
+      paramError("beta", "Parameter 'beta' is only applicable when use_buoyancy = true.");
+  }
+
+  if (_switches.use_compressibility)
+  {
+    if (!_has_c)
+      paramError("speed_of_sound",
+                 "'use_compressibility=true' requires the 'speed_of_sound' functor.");
+  }
+  else
+  {
+    if (user_set("speed_of_sound"))
+      paramError("speed_of_sound",
+                 "Parameter 'speed_of_sound' is only applicable when use_compressibility = true.");
+  }
+
+  // Error if using cylindrical coordinates - gradients won't be correct
+  if (getBlockCoordSystem() == Moose::COORD_RZ)
+    mooseError(name(), " is not valid on blocks that use an RZ coordinate system.");
 
   // Strain / rotation invariants require velocity gradients
   if (dynamic_cast<const MooseLinearVariableFV<Real> *>(&_u_var))
@@ -173,26 +272,8 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
   if (_w_var && dynamic_cast<const MooseLinearVariableFV<Real> *>(_w_var))
     requestVariableCellGradient(getParam<MooseFunctorName>("w"));
 
-  // Nonlinear model selection
-  const auto nl = getParam<MooseEnum>("nonlinear_model");
-  if (nl == "quadratic")
-    _nonlinear_model = NS::NonlinearConstitutiveRelation::Quadratic;
-  else if (nl == "cubic")
-    _nonlinear_model = NS::NonlinearConstitutiveRelation::Cubic;
-  else
-    _nonlinear_model = NS::NonlinearConstitutiveRelation::None;
-
   // keep the switches struct up to date
   _switches.use_nonlinear = (_nonlinear_model != NS::NonlinearConstitutiveRelation::None);
-
-  // Curvature model section
-  const auto cm = getParam<MooseEnum>("curvature_model");
-  if (cm == "standard")
-    _curvature_model = NS::CurvatureCorrectionModel::Standard;
-  else
-    _curvature_model = NS::CurvatureCorrectionModel::None;
-
-  // Keep switches in sync
   _switches.use_curvature_correction = (_curvature_model != NS::CurvatureCorrectionModel::None);
 }
 
@@ -265,9 +346,7 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
   }
   else if (_variant == NS::KEpsilonVariant::Realizable ||
            _variant == NS::KEpsilonVariant::RealizableTwoLayer)
-  {
     f2 = NS::f2_RKE(k, nu, eps);
-  }
 
   const Real destruction_coeff = _C2_eps * f2 * rho / std::max(Te, 1e-20);
   return destruction_coeff * _current_elem_volume;
@@ -435,7 +514,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
   Real Gb = 0.0;
   Real C3_eps_local = _C3_eps;
 
-  if (_switches.use_buoyancy && _has_T && _has_beta)
+  if (_switches.use_buoyancy)
   {
     const Real beta = (*_beta_functor)(elem_arg, state);
     const auto grad_T_raw = _T_functor->gradient(elem_arg, state);
@@ -451,9 +530,9 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     if (_g.norm() > 0.0)
     {
       libMesh::VectorValue<Real> velocity(_u_var(elem_arg, state), 0.0, 0.0);
-      if (_dim >= 2 && _v_var)
+      if (_dim >= 2)
         velocity(1) = (*_v_var)(elem_arg, state);
-      if (_dim >= 3 && _w_var)
+      if (_dim >= 3)
         velocity(2) = (*_w_var)(elem_arg, state);
 
       libMesh::VectorValue<Real> g_versor = _g / _g.norm();
@@ -493,7 +572,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
 
   // Yap correction gamma_y => translated into a source term (rho / Ct) * gamma_y
   Real yap_source = 0.0;
-  if (_switches.use_yap && _has_wall_distance)
+  if (_switches.use_yap)
   {
     const Real d = (*_wall_distance_functor)(elem_arg, state);
     const Real nu = mu / rho;
@@ -523,7 +602,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     case NS::KEpsilonVariant::Standard:
     {
       // Match old LinearFVTKEDSourceSink for Standard:
-      // - Gk = mu_t S²
+      // - Gk = mu_t S2
       // - apply C_pl limiter on Gk (production)
       const Real production_limit = _C_pl * rho * eps;
       const Real Gk_limited = std::min(Gk, production_limit);

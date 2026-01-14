@@ -22,7 +22,7 @@
     max_threads = 1
     mesh_mode = 'replicated'
     heavy = true
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with turbulent buoyance and compressibility corrections.'
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with turbulent buoyancy and compressibility corrections.'
   []
   [channel_ERCOFTAC_low_Re]
     type = 'CSVDiff'

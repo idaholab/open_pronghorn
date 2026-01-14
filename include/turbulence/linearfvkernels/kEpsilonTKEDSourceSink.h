@@ -69,9 +69,6 @@ protected:
   /// Wall boundary names
   const std::vector<BoundaryName> & _wall_boundary_names;
 
-  /// Linearized vs nonlinear model (kept for API parity, currently unused)
-  const bool _linearized_model;
-
   /// Wall-treatment choice (equilibrium / non-equilibrium / linearized, etc.)
   const NS::WallTreatmentEnum _wall_treatment;
 

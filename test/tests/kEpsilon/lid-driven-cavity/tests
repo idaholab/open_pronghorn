@@ -10,9 +10,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=Standard use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standard'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using Standard'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using Standard variant.'
   []
   [lid-driven_k_epsilon_standard_lowreGprime]
     type = 'CSVDiff'
@@ -23,9 +23,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=Standard use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_standard_lowreGprime'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using Standard, Low-Re Gprime correction'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using Standard variant and Low-Re Gprime correction.'
   []
   [lid-driven_k_epsilon_standardlowre]
     type = 'CSVDiff'
@@ -36,9 +36,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=StandardLowRe use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardlowre'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using StandardLowRe'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using StandardLowRe variant.'
   []
   [lid-driven_k_epsilon_standardlowre_lowreGprime]
     type = 'CSVDiff'
@@ -49,9 +49,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=StandardLowRe use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_standardlowre_lowreGprime'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using StandardLowRe, Low-Re Gprime correction'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using StandardLowRe variant and Low-Re Gprime correction.'
   []
   [lid-driven_k_epsilon_standardtwolayer]
     type = 'CSVDiff'
@@ -62,9 +62,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=StandardTwoLayer use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using StandardTwoLayer'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using StandardTwoLayer variant.'
   []
   [lid-driven_k_epsilon_standardtwolayer_lowreGprime]
     type = 'CSVDiff'
@@ -75,9 +75,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=StandardTwoLayer use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_standardtwolayer_lowreGprime'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using StandardTwoLayer, Low-Re Gprime correction'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using StandardTwoLayer variant and Low-Re Gprime correction.'
   []
   [lid-driven_k_epsilon_realizable]
     type = 'CSVDiff'
@@ -88,9 +88,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=Realizable use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizable'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using Realizable'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using Realizable variant.'
   []
   [lid-driven_k_epsilon_realizable_lowreGprime]
     type = 'CSVDiff'
@@ -101,9 +101,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=Realizable use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_realizable_lowreGprime'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using Realizable, Low-Re Gprime correction'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using Realizable variant and Low-Re Gprime correction.'
   []
   [lid-driven_k_epsilon_realizabletwolayer]
     type = 'CSVDiff'
@@ -114,9 +114,9 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=RealizableTwoLayer use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using RealizableTwoLayer'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using RealizableTwoLayer variant.'
   []
   [lid-driven_k_epsilon_realizabletwolayer_lowreGprime]
     type = 'CSVDiff'
@@ -127,8 +127,8 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     cli_args = 'k_epsilon_variant=RealizableTwoLayer use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer_lowreGprime'
-    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers. using RealizableTwoLayer, Low-Re Gprime correction'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers.using RealizableTwoLayer variant and Low-Re Gprime correction.'
   []
 []

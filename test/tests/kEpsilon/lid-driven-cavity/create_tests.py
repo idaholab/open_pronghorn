@@ -154,14 +154,19 @@ def make_requirement_suffix(p) -> str:
     Human-readable description for this permutation, appended to the base requirement.
     Avoid apostrophes to keep the single-quoted MOOSE string valid.
     """
-    desc = [p["variant"]]
+    desc = [p["variant"] + " variant"]
 
     if p["use_low_re_Gprime"]:
         desc.append("Low-Re Gprime correction")
 
     if not desc:
         return ""
-    return " using " + ", ".join(desc)
+    if len(desc) == 1:
+        return "using " + desc[0] + "."
+    if len(desc) == 2:
+        return "using " + desc[0] + " and " + desc[1] + "."
+    else:
+        return "using " + ", ".join(desc[1:]) + ", and " + desc[-1] + "."
 
 
 def make_csvdiff_list(file_base: str) -> str:
@@ -208,7 +213,7 @@ def main():
         print("    recover = false")
         print("    max_threads = 1")
         print("    mesh_mode = 'replicated'")
-        print("    heavy = true")
+        print("    heavy = false")
         print(f"    cli_args = '{cli_args}'")
         print(f"    requirement = '{BASE_REQUIREMENT}{req_suffix}'")
         print("  []")

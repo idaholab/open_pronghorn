@@ -152,7 +152,7 @@ use_low_re_Gprime   = false
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [u_diffusion]
     type = LinearFVDiffusion
@@ -184,7 +184,7 @@ use_low_re_Gprime   = false
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = false
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [v_diffusion]
     type = LinearFVDiffusion
@@ -258,7 +258,7 @@ use_low_re_Gprime   = false
     curvature_model          = ${curvature_model}
     Pr_t                     = 0.9
     C_M                      = 1.0
-    gravity                  = '0 0 0'                 # leave 0 for BFS
+    gravity                  = '-9.81 0 0'
 
     # if/when you have these fields:
     temperature       = T
@@ -315,7 +315,7 @@ use_low_re_Gprime   = false
 
     Pr_t = 0.9
     C_M  = 1.0
-    gravity = '0 -9.81 0'
+    gravity = '-9.81 0 0'
 
     # same functors as for TKE if you use them:
     temperature       = T
@@ -542,14 +542,12 @@ use_low_re_Gprime   = false
   turbulence_absolute_tolerance = '1e-7 1e-7'
   energy_absolute_tolerance = 1e-7
 
-  momentum_petsc_options_iname = '-u_system_pc_type -u_system_pc_hypre_type -v_system_pc_type -v_system_pc_hypre_type'
-  momentum_petsc_options_value = 'hypre boomeramg hypre boomeramg'
+  momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
+  momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
   pressure_petsc_options_value = 'hypre boomeramg'
-  turbulence_petsc_options_iname = '-TKE_system_pc_type -TKE_system_pc_hypre_type -TKED_system_pc_type -TKED_system_pc_hypre_type'
-  turbulence_petsc_options_value = 'hypre boomeramg hypre boomeramg'
-  energy_petsc_options_iname = '-pc_type -pc_hypre_type'
-  energy_petsc_options_value = 'hypre boomeramg'
+  turbulence_petsc_options_iname = '-pc_type -pc_hypre_type'
+  turbulence_petsc_options_value = 'hypre boomeramg'
 
   momentum_l_max_its = 300
   pressure_l_max_its = 300

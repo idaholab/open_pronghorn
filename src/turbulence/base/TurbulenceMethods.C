@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TurbulenceMethods.h"
+#include "SystemBase.h"
 
 namespace NS
 {
@@ -198,14 +199,12 @@ computeGb(const Real beta,
           const libMesh::VectorValue<Real> & grad_T,
           const libMesh::VectorValue<Real> & g)
 {
-  // Gb = beta mu_t / Pr_t * (gradT · g)
   return beta * mu_t / Pr_t * (grad_T * g);
 }
 
 Real
 computeGammaM(const Real rho, const Real C_M, const Real k, const Real eps, const Real c)
 {
-  // gamma_M = rho C_M k epsilon / c^2
   return rho * C_M * k * eps / (c * c);
 }
 
@@ -242,6 +241,7 @@ computeVelocityGradient(const Moose::Functor<Real> & u_var,
                         const Moose::ElemArg & elem_arg,
                         const Moose::StateArg & state)
 {
+
   RankTwoTensor grad_vel; // zero initialization
 
   // grad_u_ij = du_i / dx_j
