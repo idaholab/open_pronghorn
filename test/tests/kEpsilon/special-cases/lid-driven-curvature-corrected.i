@@ -24,7 +24,7 @@ walls = 'left top right bottom'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 # Turbulence-model knobs (optional)
-k_epsilon_variant   = 'Standard'           # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
+k_epsilon_variant   = 'Realizable'           # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
@@ -194,17 +194,8 @@ use_low_re_Gprime   = false
     use_buoyancy             = ${use_buoyancy}
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
+    use_curvature_correction = true
     curvature_model          = ${curvature_model}
-    Pr_t                     = 0.9
-    C_M                      = 1.0
-    gravity                  = '0 0 0'                 # leave 0 for BFS
-
-    # if/when you have these fields:
-    # temperature       = T
-    # beta              = beta
-    # speed_of_sound    = c
-    # nonlinear_production = Gnl
-    # curvature_factor  = fc
   []
 
   [TKED_advection]
@@ -247,21 +238,11 @@ use_low_re_Gprime   = false
     k_epsilon_variant   = ${k_epsilon_variant}
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
-    nonlinear_model       = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
+    nonlinear_model     = ${nonlinear_model}
+    use_curvature_correction = true
+    curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
-
-    Pr_t = 0.9
-    C_M  = 1.0
-    gravity = '0 -9.81 0'
-
-    # same functors as for TKE if you use them:
-    # temperature       = T
-    # beta              = beta
-    # speed_of_sound    = c
-    # nonlinear_production = Gnl
-    # curvature_factor  = fc
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
   []
 []

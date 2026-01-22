@@ -21,7 +21,7 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with turbulent buoyancy and compressibility corrections.'
   []
   [channel_ERCOFTAC_low_Re]
@@ -33,7 +33,7 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel using low-Reynolds number production corrections.'
   []
   [lid-driven-curvature-corrected]
@@ -45,7 +45,7 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
-    heavy = true
+    heavy = false
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers with curvature corrections for production.'
   []
 []

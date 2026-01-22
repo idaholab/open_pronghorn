@@ -3,7 +3,7 @@ Generate a MOOSE tests file for k-epsilon permutations on the lid-driven cavity.
 
 Permutations are done over:
   - k_epsilon_variant
-  - use_low_re_Gprime
+  - use_low_re_Gprime (applied only for StandardLowRe due to kernel rail-guards)
 
 We explicitly do NOT vary:
   - two_layer_flavor
@@ -136,12 +136,25 @@ def build_file_base(p) -> str:
 def make_cli_args(p, file_base: str) -> str:
     """
     Build the cli_args string for a permutation `p`.
-    Only k_epsilon_variant and use_low_re_Gprime are varied.
+
+    NOTE: We set parameters on the actual objects (kernels/auxkernel) rather than
+    relying on top-level 'header' variables in lid-driven.i. This avoids tripping
+    the newer rail-guards that reject unsupported option/variant combinations.
+
+    Only k_epsilon_variant and use_low_re_Gprime are varied by this test generator.
     """
     args = []
 
-    args.append(f"k_epsilon_variant={p['variant']}")
-    args.append(f"use_low_re_Gprime={bool_to_moose(p['use_low_re_Gprime'])}")
+    # Set the k-epsilon variant consistently everywhere it is used
+    args.append(f"AuxKernels/compute_mu_t/k_epsilon_variant={p['variant']}")
+    args.append(f"LinearFVKernels/TKE_source_sink/k_epsilon_variant={p['variant']}")
+    args.append(f"LinearFVKernels/TKED_source_sink/k_epsilon_variant={p['variant']}")
+
+    # Low-Re G' correction is only supported for the StandardLowRe variant
+    enable_gprime = p['use_low_re_Gprime'] and p['variant'] == 'StandardLowRe'
+    args.append(
+        f"LinearFVKernels/TKED_source_sink/use_low_re_Gprime={bool_to_moose(enable_gprime)}"
+    )
 
     # Set output base
     args.append(f"Outputs/file_base={file_base}")

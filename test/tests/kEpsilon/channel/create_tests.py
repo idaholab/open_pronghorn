@@ -91,6 +91,10 @@ def is_skipped_permutation(p) -> bool:
     if variant == "StandardTwoLayer" and flavor == "Xu":
         return True
 
+    # Skip StandardTwoLayer + NorrisReynolds flavor for quadratic/cubic (with or without YAP)
+    if variant == "StandardTwoLayer" and flavor == "NorrisReynolds" and nonlinear in ("quadratic", "cubic"):
+        return True
+
     if variant == "RealizableTwoLayer":
         # NorrisReynolds, quadratic/cubic, with YAP
         if (
@@ -182,13 +186,52 @@ def make_cli_args(p, file_base: str) -> str:
     """
     args = []
 
-    # Turbulence knobs
-    args.append(f"k_epsilon_variant={p['variant']}")
-    if p["nonlinear_model"] != "none":
-        args.append(f"nonlinear_model={p['nonlinear_model']}")
-    if p["two_layer_flavor"] is not None and "TwoLayer" in p["variant"]:
-        args.append(f"two_layer_flavor={p['two_layer_flavor']}")
-    args.append(f"use_yap={bool_to_moose(p['use_yap'])}")
+    variant = p["variant"]
+    nonlinear_model = p["nonlinear_model"]
+    two_layer_flavor = p["two_layer_flavor"]
+    use_yap = p["use_yap"]
+
+    # ---------------------------------------------------------------------
+    # NOTE ABOUT CLI OVERRIDES
+    # ---------------------------------------------------------------------
+    # The updated kernels now contain parameter applicability checks.
+    # To avoid tripping those checks, we:
+    #   1) Set the model variant explicitly on each relevant object
+    #   2) Only set optional parameters (nonlinear_model, two_layer_flavor,
+    #      use_yap, ...) when that option is valid for the chosen variant
+    #
+    # We intentionally target the specific blocks instead of using header
+    # variables in the input file.
+
+    # Always set variant on all participating objects
+    args.append(f"LinearFVKernels/TKE_source_sink/k_epsilon_variant={variant}")
+    args.append(f"LinearFVKernels/TKED_source_sink/k_epsilon_variant={variant}")
+    args.append(f"AuxKernels/compute_mu_t/k_epsilon_variant={variant}")
+
+    # Nonlinear constitutive relation is only supported for Standard-family variants
+    is_standard_family = variant.startswith("Standard")
+    if nonlinear_model != "none" and is_standard_family:
+        args.append(
+            f"LinearFVKernels/TKE_source_sink/nonlinear_model={nonlinear_model}"
+        )
+        args.append(
+            f"LinearFVKernels/TKED_source_sink/nonlinear_model={nonlinear_model}"
+        )
+
+    # Two-layer flavor only applies to *TwoLayer variants (viscosity blending)
+    if two_layer_flavor is not None and "TwoLayer" in variant:
+        args.append(
+            f"AuxKernels/compute_mu_t/two_layer_flavor={two_layer_flavor}"
+        )
+
+    # Yap correction is only supported for StandardTwoLayer, StandardLowRe, RealizableTwoLayer
+    yap_supported = variant in (
+        "StandardTwoLayer",
+        "StandardLowRe",
+        "RealizableTwoLayer",
+    )
+    if use_yap and yap_supported:
+        args.append("LinearFVKernels/TKED_source_sink/use_yap=true")
 
     # Output base so CSVs are unique per permutation
     args.append(f"Outputs/file_base={file_base}")
@@ -214,8 +257,9 @@ def make_requirement_suffix(p) -> str:
         return "using " + desc[0] + "."
     if len(desc) == 2:
         return "using " + desc[0] + " and " + desc[1] + "."
-    else:
-        return "using " + ", ".join(desc[1:]) + ", and " + desc[-1] + "."
+
+    # Oxford-comma join for 3+ items
+    return "using " + ", ".join(desc[:-1]) + ", and " + desc[-1] + "."
 
 
 def make_csvdiff_list(file_base: str) -> str:
@@ -274,3 +318,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -37,15 +37,11 @@ bulk_wall_treatment = false
 walls = 'bottom top'
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
-# Turbulence-model knobs (optional)
-k_epsilon_variant   = 'RealizableTwoLayer'    # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-two_layer_flavor    = 'Wolfstein'             # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
-use_buoyancy        = false
-use_compressibility = false
-nonlinear_model     = 'none'
-curvature_model     = 'none'
-use_yap             = false
-use_low_re_Gprime   = false
+# NOTE:
+# The k-epsilon kernels/aux-kernels now include strict parameter applicability
+# checks. To keep this input file usable across all test permutations, we do
+# *not* hard-code model-variant-specific options here. Instead, the test harness
+# sets per-object options via CLI overrides (see create_tests.py).
 
 [Mesh]
   [block_1]
@@ -223,23 +219,6 @@ use_low_re_Gprime   = false
     walls = ${walls}
     wall_treatment = ${wall_treatment}
     C_pl = 1e10
-
-    # NEW (optional)
-    k_epsilon_variant        = ${k_epsilon_variant}    # 'Standard', 'Realizable', etc.
-    use_buoyancy             = ${use_buoyancy}
-    use_compressibility      = ${use_compressibility}
-    nonlinear_model          = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
-    Pr_t                     = 0.9
-    C_M                      = 1.0
-    gravity                  = '0 0 0'                 # leave 0 for BFS
-
-    # if/when you have these fields:
-    # temperature       = T
-    # beta              = beta
-    # speed_of_sound    = c
-    # nonlinear_production = Gnl
-    # curvature_factor  = fc
   []
 
   [TKED_advection]
@@ -277,26 +256,6 @@ use_low_re_Gprime   = false
     walls = ${walls}
     wall_treatment = ${wall_treatment}
     C_pl = 1e10
-
-    # NEW (optional)
-    k_epsilon_variant   = ${k_epsilon_variant}
-    use_buoyancy        = ${use_buoyancy}
-    use_compressibility = ${use_compressibility}
-    nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
-    use_yap             = ${use_yap}
-    use_low_re_Gprime   = ${use_low_re_Gprime}
-
-    Pr_t = 0.9
-    C_M  = 1.0
-    gravity = '0 -9.81 0'
-
-    # same functors as for TKE if you use them:
-    # temperature       = T
-    # beta              = beta
-    # speed_of_sound    = c
-    # nonlinear_production = Gnl
-    # curvature_factor  = fc
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
   []
 []
@@ -421,17 +380,6 @@ use_low_re_Gprime   = false
     wall_treatment = ${wall_treatment}
     mu_t_ratio_max = 1e20
     execute_on = 'NONLINEAR'
-
-    # NEW (optional) – choose model and options
-    k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
-    two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
-    Cd0 = 0.091      # defaults, can omit if you keep Standard
-    Cd1 = 0.0042
-    Cd2 = 0.00011
-    Ca0 = 0.667      # Realizable C_mu coefficients
-    Ca1 = 1.25
-    Ca2 = 1.0
-    Ca3 = 0.9
     wall_distance = wall_distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_y_plus]
@@ -531,3 +479,4 @@ variables_to_sample = 'vel_x vel_y pressure TKE TKED'
     execute_on = 'timestep_end'
   []
 []
+
