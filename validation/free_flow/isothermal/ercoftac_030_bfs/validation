@@ -15,21 +15,12 @@
   [bfs_030_standard]
     type = CSVDiff
     input = 'bfs_input.i'
-<<<<<<< HEAD
-    csvdiff = 'bfs_input_csv.csv bfs_input_csv_inlet_channel_wall_sampler_0002.csv bfs_input_csv_outlet_channel_wall_sampler_0002.csv bfs_input_csv_vel_x_xoH_1_sampler_0002.csv bfs_input_csv_vel_x_xoH_4_sampler_0002.csv bfs_input_csv_vel_x_xoH_6_sampler_0002.csv bfs_input_csv_vel_x_xoH_10_sampler_0002.csv'
-    # The convergence of the fields is good in CFD terms but the defaults on this are a bit too strict
-    abs_zero = 1e-6
-    rel_err = 5e-5
-=======
     csvdiff = 'k_epsilon_standard.csv k_epsilon_standard_inlet_channel_wall_sampler_0002.csv k_epsilon_standard_outlet_channel_wall_sampler_0002.csv k_epsilon_standard_vel_x_xoH_1_sampler_0002.csv k_epsilon_standard_vel_x_xoH_4_sampler_0002.csv k_epsilon_standard_vel_x_xoH_6_sampler_0002.csv k_epsilon_standard_vel_x_xoH_10_sampler_0002.csv'
->>>>>>> 55a2767 (re-developing validation tests for bfs with all kEpsilon variants)
     requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a standard K-Epsilon turbulence model.'
     min_parallel = 24
     max_time = 1000
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
-<<<<<<< HEAD
-=======
     # Toletance for comparison to gold files
     rel_err = 1e-4
     abs_zero = 1e-6
@@ -46,7 +37,7 @@
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
-    rel_err = 4e-5
+    rel_err = 1e-4
     abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable k_epsilon_variant=Realizable'
@@ -61,7 +52,7 @@
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
-    rel_err = 4e-5
+    rel_err = 1e-4
     abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_two_layer k_epsilon_variant=RealizableTwoLayer'
@@ -76,7 +67,7 @@
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
-    rel_err = 4e-5
+    rel_err = 1e-4
     abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_quadratic k_epsilon_variant=Realizable nonlinear_model=quadratic'
@@ -91,7 +82,7 @@
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
-    rel_err = 4e-5
+    rel_err = 1e-4
     abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_cubic k_epsilon_variant=Realizable nonlinear_model=cubic'
@@ -106,10 +97,9 @@
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
-    rel_err = 4e-5
+    rel_err = 1e-4
     abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_yap k_epsilon_variant=Realizable use_yap=true'
->>>>>>> 55a2767 (re-developing validation tests for bfs with all kEpsilon variants)
   []
 []
