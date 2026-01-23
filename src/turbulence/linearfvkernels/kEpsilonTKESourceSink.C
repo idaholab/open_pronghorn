@@ -155,12 +155,6 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
                "Two-layer k-epsilon variants require a non-empty 'walls' list so wall-bounded "
                "elements and wall distance can be computed.");
 
-  // Nonlinear constitutive relation: only supported for standard-family variants (not realizable)
-  if (nl_local != "none" && is_realizable_variant)
-    paramError("nonlinear_model",
-               "Nonlinear constitutive relations ('quadratic'/'cubic') are only supported for "
-               "standard k-epsilon variants (Standard/StandardLowRe/StandardTwoLayer).");
-
   // Curvature correction: only applicable for realizable variants in this kernel
   const bool use_curv_flag = getParam<bool>("use_curvature_correction");
   const bool curv_model_enabled = (cm_local != "none");

@@ -261,6 +261,7 @@ bulk_wall_treatment = false
     k_epsilon_variant   = ${k_epsilon_variant}
     use_yap             = ${use_yap}
     nonlinear_model     = ${nonlinear_model}
+    wall_distance       = distance
 
     # use_buoyancy        = ${use_buoyancy}
     # use_compressibility = ${use_compressibility}
