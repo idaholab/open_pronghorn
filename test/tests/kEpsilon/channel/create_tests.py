@@ -92,7 +92,11 @@ def is_skipped_permutation(p) -> bool:
         return True
 
     # Skip StandardTwoLayer + NorrisReynolds flavor for quadratic/cubic (with or without YAP)
-    if variant == "StandardTwoLayer" and flavor == "NorrisReynolds" and nonlinear in ("quadratic", "cubic"):
+    if (
+        variant == "StandardTwoLayer"
+        and flavor == "NorrisReynolds"
+        and nonlinear in ("quadratic", "cubic")
+    ):
         return True
 
     if variant == "RealizableTwoLayer":
@@ -220,9 +224,7 @@ def make_cli_args(p, file_base: str) -> str:
 
     # Two-layer flavor only applies to *TwoLayer variants (viscosity blending)
     if two_layer_flavor is not None and "TwoLayer" in variant:
-        args.append(
-            f"AuxKernels/compute_mu_t/two_layer_flavor={two_layer_flavor}"
-        )
+        args.append(f"AuxKernels/compute_mu_t/two_layer_flavor={two_layer_flavor}")
 
     # Yap correction is only supported for StandardTwoLayer, StandardLowRe, RealizableTwoLayer
     yap_supported = variant in (
@@ -318,4 +320,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

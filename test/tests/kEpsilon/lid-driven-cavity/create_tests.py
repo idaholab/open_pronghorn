@@ -151,7 +151,7 @@ def make_cli_args(p, file_base: str) -> str:
     args.append(f"LinearFVKernels/TKED_source_sink/k_epsilon_variant={p['variant']}")
 
     # Low-Re G' correction is only supported for the StandardLowRe variant
-    enable_gprime = p['use_low_re_Gprime'] and p['variant'] == 'StandardLowRe'
+    enable_gprime = p["use_low_re_Gprime"] and p["variant"] == "StandardLowRe"
     args.append(
         f"LinearFVKernels/TKED_source_sink/use_low_re_Gprime={bool_to_moose(enable_gprime)}"
     )
