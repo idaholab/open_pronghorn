@@ -9,7 +9,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Standard LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standard'
@@ -23,7 +22,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Standard LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standard_lowreGprime'
@@ -37,7 +35,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardLowRe LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardLowRe LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardLowRe LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardlowre'
@@ -51,7 +48,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardLowRe LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardLowRe LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardLowRe LinearFVKernels/TKED_source_sink/use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_standardlowre_lowreGprime'
@@ -65,7 +61,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer'
@@ -79,7 +74,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer_lowreGprime'
@@ -93,7 +87,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizable'
@@ -107,7 +100,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizable_lowreGprime'
@@ -121,7 +113,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer'
@@ -135,7 +126,6 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    max_time = 100
     mesh_mode = 'replicated'
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer_lowreGprime'
