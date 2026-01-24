@@ -134,9 +134,6 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
   const bool is_two_layer_variant = (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
                                      _variant == NS::KEpsilonVariant::RealizableTwoLayer);
 
-  const bool is_realizable_variant = (_variant == NS::KEpsilonVariant::Realizable ||
-                                      _variant == NS::KEpsilonVariant::RealizableTwoLayer);
-
   auto user_set = [&](const std::string & pname) { return params.isParamSetByUser(pname); };
 
   // Pull the enums locally (avoid name collisions + ensures they're in-scope)
@@ -158,11 +155,6 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
   // Curvature correction: only applicable for realizable variants in this kernel
   const bool use_curv_flag = getParam<bool>("use_curvature_correction");
   const bool curv_model_enabled = (cm_local != "none");
-
-  if ((use_curv_flag || curv_model_enabled) && !is_realizable_variant)
-    paramError("k_epsilon_variant",
-               "Curvature correction is only applicable for realizable k-epsilon variants "
-               "(Realizable/RealizableTwoLayer).");
 
   // If user explicitly enables curvature correction but leaves model as none -> error
   if (user_set("use_curvature_correction") && use_curv_flag && !curv_model_enabled)

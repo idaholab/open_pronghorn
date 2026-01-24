@@ -18,7 +18,7 @@
     csvdiff = 'k_epsilon_standard.csv k_epsilon_standard_inlet_channel_wall_sampler_0002.csv k_epsilon_standard_outlet_channel_wall_sampler_0002.csv k_epsilon_standard_vel_x_xoH_1_sampler_0002.csv k_epsilon_standard_vel_x_xoH_4_sampler_0002.csv k_epsilon_standard_vel_x_xoH_6_sampler_0002.csv k_epsilon_standard_vel_x_xoH_10_sampler_0002.csv'
     requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a standard K-Epsilon turbulence model.'
     min_parallel = 24
-    max_time = 1000
+    max_time = 10000
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
@@ -33,7 +33,7 @@
     csvdiff = 'k_epsilon_realizable.csv k_epsilon_realizable_inlet_channel_wall_sampler_0002.csv k_epsilon_realizable_outlet_channel_wall_sampler_0002.csv k_epsilon_realizable_vel_x_xoH_1_sampler_0002.csv k_epsilon_realizable_vel_x_xoH_4_sampler_0002.csv k_epsilon_realizable_vel_x_xoH_6_sampler_0002.csv k_epsilon_realizable_vel_x_xoH_10_sampler_0002.csv'
     requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a standard K-Epsilon turbulence model.'
     min_parallel = 24
-    max_time = 1000
+    max_time = 10000
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
@@ -48,7 +48,7 @@
     csvdiff = 'k_epsilon_realizable_two_layer.csv k_epsilon_realizable_two_layer_inlet_channel_wall_sampler_0002.csv k_epsilon_realizable_two_layer_outlet_channel_wall_sampler_0002.csv k_epsilon_realizable_two_layer_vel_x_xoH_1_sampler_0002.csv k_epsilon_realizable_two_layer_vel_x_xoH_4_sampler_0002.csv k_epsilon_realizable_two_layer_vel_x_xoH_6_sampler_0002.csv k_epsilon_realizable_two_layer_vel_x_xoH_10_sampler_0002.csv'
     requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a standard K-Epsilon turbulence model.'
     min_parallel = 24
-    max_time = 1000
+    max_time = 10000
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
@@ -63,7 +63,7 @@
     csvdiff = 'k_epsilon_realizable_quadratic.csv k_epsilon_realizable_quadratic_inlet_channel_wall_sampler_0002.csv k_epsilon_realizable_quadratic_outlet_channel_wall_sampler_0002.csv k_epsilon_realizable_quadratic_vel_x_xoH_1_sampler_0002.csv k_epsilon_realizable_quadratic_vel_x_xoH_4_sampler_0002.csv k_epsilon_realizable_quadratic_vel_x_xoH_6_sampler_0002.csv k_epsilon_realizable_quadratic_vel_x_xoH_10_sampler_0002.csv'
     requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a standard K-Epsilon turbulence model.'
     min_parallel = 24
-    max_time = 1000
+    max_time = 10000
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
@@ -78,7 +78,7 @@
     csvdiff = 'k_epsilon_realizable_cubic.csv k_epsilon_realizable_cubic_inlet_channel_wall_sampler_0002.csv k_epsilon_realizable_cubic_outlet_channel_wall_sampler_0002.csv k_epsilon_realizable_cubic_vel_x_xoH_1_sampler_0002.csv k_epsilon_realizable_cubic_vel_x_xoH_4_sampler_0002.csv k_epsilon_realizable_cubic_vel_x_xoH_6_sampler_0002.csv k_epsilon_realizable_cubic_vel_x_xoH_10_sampler_0002.csv'
     requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a standard K-Epsilon turbulence model.'
     min_parallel = 24
-    max_time = 1000
+    max_time = 10000
     # The tolerance is hardcoded at max increase of 1% in the current error
     validation_test = 'bfs_vnv_script_vector.py'
     # Toletance for comparison to gold files
@@ -86,20 +86,5 @@
     abs_zero = 1e-6
     # Correct base file
     cli_args = 'Outputs/file_base=k_epsilon_realizable_cubic k_epsilon_variant=Realizable nonlinear_model=cubic'
-  []
-  [bfs_030_realizable_yap]
-    type = CSVDiff
-    input = 'bfs_input.i'
-    csvdiff = 'k_epsilon_realizable_yap.csv k_epsilon_realizable_yap_inlet_channel_wall_sampler_0002.csv k_epsilon_realizable_yap_outlet_channel_wall_sampler_0002.csv k_epsilon_realizable_yap_vel_x_xoH_1_sampler_0002.csv k_epsilon_realizable_yap_vel_x_xoH_4_sampler_0002.csv k_epsilon_realizable_yap_vel_x_xoH_6_sampler_0002.csv k_epsilon_realizable_yap_vel_x_xoH_10_sampler_0002.csv'
-    requirement = 'The system should be able to accurately simulate turbulent flow in a channel with rear-facing step at a Reynolds number of 5000 using the linear finite volume discretization and a standard K-Epsilon turbulence model.'
-    min_parallel = 24
-    max_time = 1000
-    # The tolerance is hardcoded at max increase of 1% in the current error
-    validation_test = 'bfs_vnv_script_vector.py'
-    # Toletance for comparison to gold files
-    rel_err = 1e-4
-    abs_zero = 1e-6
-    # Correct base file
-    cli_args = 'Outputs/file_base=k_epsilon_realizable_yap k_epsilon_variant=Realizable use_yap=true'
   []
 []

@@ -35,11 +35,6 @@ k_eps_variants = [
         "label": r"Realizable k-$\varepsilon$",
     },
     {
-        "key": "realizable_yap",
-        "base": "k_epsilon_realizable_yap",
-        "label": r"Realizable k-$\varepsilon$ + YAP",
-    },
-    {
         "key": "realizable_two_layer",
         "base": "k_epsilon_realizable_two_layer",
         "label": r"Realizable k-$\varepsilon$ (two layer)",

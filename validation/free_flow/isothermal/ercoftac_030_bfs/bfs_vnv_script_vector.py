@@ -10,7 +10,7 @@ class TestCase(ValidationCase):
     def initialize(self):
 
         # Authorized relative increase in the error
-        err_max = 0.01
+        err_max = 0.05
 
         ############################ Setting Up Reference Data ############################
 

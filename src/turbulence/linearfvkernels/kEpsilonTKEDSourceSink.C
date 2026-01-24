@@ -158,13 +158,6 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
 
   // Additional constructor error checks (variant/option consistency)
 
-  const bool is_standard_family = (_variant == NS::KEpsilonVariant::Standard ||
-                                   _variant == NS::KEpsilonVariant::StandardTwoLayer ||
-                                   _variant == NS::KEpsilonVariant::StandardLowRe);
-
-  const bool is_realizable_family = (_variant == NS::KEpsilonVariant::Realizable ||
-                                     _variant == NS::KEpsilonVariant::RealizableTwoLayer);
-
   const bool is_two_layer = (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
                              _variant == NS::KEpsilonVariant::RealizableTwoLayer);
 
@@ -188,29 +181,10 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
   if (_switches.use_low_re_Gprime && !_has_wall_distance)
     paramError("wall_distance", "'use_low_re_Gprime=true' requires the 'wall_distance' functor.");
 
-  // ---- Option allowed-sets by variant ----
-  // Yap only meaningful for: StandardTwoLayer, StandardLowRe, RealizableTwoLayer
-  if (_switches.use_yap && !(is_two_layer || is_low_re))
-    paramError("use_yap",
-               "'use_yap=true' is only supported for StandardTwoLayer, StandardLowRe, "
-               "and RealizableTwoLayer variants.");
-
   // G' only meaningful for: StandardLowRe
   if (_switches.use_low_re_Gprime && !is_low_re)
     paramError("use_low_re_Gprime",
                "'use_low_re_Gprime=true' is only supported for the StandardLowRe variant.");
-
-  // Nonlinear model only supported for Standard-family (not realizable)
-  if (is_realizable_family && (nl_local != "none"))
-    paramError("nonlinear_model",
-               "nonlinear_model must be 'none' for realizable variants. "
-               "Nonlinear production terms are only supported for Standard-family variants.");
-
-  // Curvature model only supported for realizable-family (not standard)
-  if (is_standard_family && (cm_local != "none"))
-    paramError("curvature_model",
-               "curvature_model must be 'none' for Standard-family variants. "
-               "Curvature/rotation correction is only supported for realizable variants.");
 
   // ---- Cross-parameter consistency: use_curvature_correction vs curvature_model ----
   const bool use_curv_flag = getParam<bool>("use_curvature_correction");

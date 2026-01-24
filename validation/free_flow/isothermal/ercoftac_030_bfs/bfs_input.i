@@ -31,12 +31,12 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
 # Turbulence-model knobs (optional)
 k_epsilon_variant   = 'Standard'  # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
 # two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
-# use_buoyancy        = false
-# use_compressibility = false
+use_buoyancy        = false
+use_compressibility = false
 nonlinear_model     = 'none'
-# curvature_model     = 'none'
+curvature_model     = 'none'
 use_yap             = false
-# use_low_re_Gprime   = false
+use_low_re_Gprime   = false
 bulk_wall_treatment = false
 
 [Mesh]
@@ -213,13 +213,10 @@ bulk_wall_treatment = false
 
     # NEW (optional)
     k_epsilon_variant        = ${k_epsilon_variant}    # 'Standard', 'Realizable', etc.
+    use_buoyancy             = ${use_buoyancy}
+    use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
-
-    # use_buoyancy             = ${use_buoyancy}
-    # use_compressibility      = ${use_compressibility}
-    # curvature_model          = ${curvature_model}
-    # Pr_t                     = 0.9
-    # C_M                      = 1.0
+    curvature_model          = ${curvature_model}
   []
   [TKED_advection]
     type = LinearFVTurbulentAdvection
@@ -259,16 +256,13 @@ bulk_wall_treatment = false
 
     # NEW (optional)
     k_epsilon_variant   = ${k_epsilon_variant}
-    use_yap             = ${use_yap}
+    use_buoyancy        = ${use_buoyancy}
+    use_compressibility = ${use_compressibility}
     nonlinear_model     = ${nonlinear_model}
+    curvature_model     = ${curvature_model}
+    use_yap             = ${use_yap}
+    use_low_re_Gprime   = ${use_low_re_Gprime}
     wall_distance       = distance
-
-    # use_buoyancy        = ${use_buoyancy}
-    # use_compressibility = ${use_compressibility}
-    # curvature_model     = ${curvature_model}
-    # use_low_re_Gprime   = ${use_low_re_Gprime}
-    # Pr_t = 0.9
-    # C_M  = 1.0
   []
 []
 
@@ -518,9 +512,9 @@ bulk_wall_treatment = false
   momentum_l_tol = 1e-10
   pressure_l_tol = 1e-10
   turbulence_l_tol = 1e-10
-  momentum_equation_relaxation = 0.9
-  pressure_variable_relaxation = 0.5
-  turbulence_equation_relaxation = '0.2 0.2'
+  momentum_equation_relaxation = 0.7
+  pressure_variable_relaxation = 0.3
+  turbulence_equation_relaxation = '0.4 0.4'
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   turbulence_absolute_tolerance = '1e-8 1e-8'
@@ -535,7 +529,7 @@ bulk_wall_treatment = false
   turbulence_l_max_its = 30
   print_fields = false
 
-  num_iterations = 6000
+  num_iterations = 8000
   continue_on_max_its = true
 []
 
