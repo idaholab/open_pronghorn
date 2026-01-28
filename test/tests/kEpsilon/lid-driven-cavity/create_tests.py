@@ -54,7 +54,7 @@ BASE_INPUT_FILE = "lid-driven.i"
 BASE_REQUIREMENT = (
     "The system shall be able to solve turbulent lid-driven cavity flow using "
     "the k-epsilon turbulence model and reach converged results with "
-    "segregated solvers."
+    "segregated solvers "
 )
 
 # VectorPostprocessor samplers we want to compare (from your gold list)
