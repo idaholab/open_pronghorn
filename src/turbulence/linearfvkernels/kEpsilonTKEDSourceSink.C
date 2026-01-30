@@ -239,11 +239,11 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     mooseError(name(), " is not valid on blocks that use an RZ coordinate system.");
 
   // Strain / rotation invariants require velocity gradients
-  if (dynamic_cast<const MooseLinearVariableFV<Real> *>(&_u_var))
+  if (_u_var.wrapsType<MooseLinearVariableFV<Real>>())
     requestVariableCellGradient(getParam<MooseFunctorName>("u"));
-  if (_v_var && dynamic_cast<const MooseLinearVariableFV<Real> *>(_v_var))
+  if (_v_var && _v_var->wrapsType<MooseLinearVariableFV<Real>>())
     requestVariableCellGradient(getParam<MooseFunctorName>("v"));
-  if (_w_var && dynamic_cast<const MooseLinearVariableFV<Real> *>(_w_var))
+  if (_w_var && _w_var->wrapsType<MooseLinearVariableFV<Real>>())
     requestVariableCellGradient(getParam<MooseFunctorName>("w"));
 
   // keep the switches struct up to date

@@ -207,13 +207,13 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
   if (_variant == NS::KEpsilonVariant::Realizable ||
       _variant == NS::KEpsilonVariant::RealizableTwoLayer)
   {
-    if (dynamic_cast<const MooseLinearVariableFV<Real> *>(&_u_var))
+    if (_u_var.wrapsType<MooseLinearVariableFV<Real>>())
       dynamic_cast<MooseLinearVariableFV<Real> *>(&_subproblem.getStandardVariable(_tid, "u"))
           ->computeCellGradients();
-    if (_v_var && dynamic_cast<const MooseLinearVariableFV<Real> *>(_v_var))
+    if (_v_var && _v_var->wrapsType<MooseLinearVariableFV<Real>>())
       dynamic_cast<MooseLinearVariableFV<Real> *>(&_subproblem.getStandardVariable(_tid, "v"))
           ->computeCellGradients();
-    if (_w_var && dynamic_cast<const MooseLinearVariableFV<Real> *>(_w_var))
+    if (_w_var && _w_var->wrapsType<MooseLinearVariableFV<Real>>())
       dynamic_cast<MooseLinearVariableFV<Real> *>(&_subproblem.getStandardVariable(_tid, "w"))
           ->computeCellGradients();
   }

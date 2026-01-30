@@ -220,11 +220,11 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
 
   // Shear-strain-based production requires velocity gradients. Request them
   // when the underlying functor is a cell-based FV variable.
-  if (dynamic_cast<const MooseLinearVariableFV<Real> *>(&_u_var))
+  if (_u_var.wrapsType<MooseLinearVariableFV<Real>>())
     requestVariableCellGradient(getParam<MooseFunctorName>("u"));
-  if (_v_var && dynamic_cast<const MooseLinearVariableFV<Real> *>(_v_var))
+  if (_v_var && _v_var->wrapsType<MooseLinearVariableFV<Real>>())
     requestVariableCellGradient(getParam<MooseFunctorName>("v"));
-  if (_w_var && dynamic_cast<const MooseLinearVariableFV<Real> *>(_w_var))
+  if (_w_var && _w_var->wrapsType<MooseLinearVariableFV<Real>>())
     requestVariableCellGradient(getParam<MooseFunctorName>("w"));
 
   // keep the switches struct up to date
