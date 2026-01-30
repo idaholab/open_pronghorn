@@ -20,67 +20,19 @@ computeStrainRotationInvariants(const Moose::Functor<Real> & u,
                                 const Moose::ElemArg & elem_arg,
                                 const Moose::StateArg & state)
 {
-  const auto & grad_u = u.gradient(elem_arg, state);
+  // Reuse the common gradient builder
+  const RankTwoTensor grad_vel = computeVelocityGradient(u, v, w, elem_arg, state);
 
-  // du/dx components
-  const Real dux = grad_u(0);
-  Real duy = 0.0;
-  Real duz = 0.0;
+  // Divergence = tr(grad u)
+  const Real div_u = grad_vel(0, 0) + grad_vel(1, 1) + grad_vel(2, 2);
 
-  // dv/dx components
-  Real dvx = 0.0, dvy = 0.0, dvz = 0.0;
-  // dw/dx components
-  Real dwx = 0.0, dwy = 0.0, dwz = 0.0;
+  // Symmetric strain-rate tensor and anti-symmetric rotation tensor
+  const RankTwoTensor S = 0.5 * (grad_vel + grad_vel.transpose());
+  const RankTwoTensor W = 0.5 * (grad_vel - grad_vel.transpose());
 
-  if (v)
-  {
-    const auto & grad_v = v->gradient(elem_arg, state);
-    dvx = grad_v(0);
-    dvy = grad_v(1);
-    if (w)
-      dvz = grad_v(2);
-  }
-
-  if (w)
-  {
-    const auto & grad_w = w->gradient(elem_arg, state);
-    dwx = grad_w(0);
-    dwy = grad_w(1);
-    dwz = grad_w(2);
-  }
-
-  if (v)
-  {
-    duy = grad_u(1);
-    if (w)
-      duz = grad_u(2);
-  }
-
-  // Divergence
-  Real div_u = dux;
-  if (v)
-    div_u += dvy;
-  if (w)
-    div_u += dwz;
-
-  // Symmetric strain-rate tensor S_ij
-  const Real Sxx = dux;
-  const Real Syy = v ? dvy : 0.0;
-  const Real Szz = w ? dwz : 0.0;
-  const Real Sxy = v ? 0.5 * (duy + dvx) : 0.0;
-  const Real Sxz = w ? 0.5 * (duz + dwx) : 0.0;
-  const Real Syz = (v && w) ? 0.5 * (dvz + dwy) : 0.0;
-
-  // Anti-symmetric rotation tensor W_ij
-  const Real Wxy = v ? 0.5 * (duy - dvx) : 0.0;
-  const Real Wxz = w ? 0.5 * (duz - dwx) : 0.0;
-  const Real Wyz = (v && w) ? 0.5 * (dvz - dwy) : 0.0;
-
-  // Invariants (2 S_ij S_ij and 2 W_ij W_ij)
-  const Real S2 =
-      2.0 * (Sxx * Sxx + Syy * Syy + Szz * Szz + 2.0 * (Sxy * Sxy + Sxz * Sxz + Syz * Syz));
-
-  const Real W2 = 4.0 * (Wxy * Wxy + Wxz * Wxz + Wyz * Wyz);
+  // Invariants: S2 = 2 S_ij S_ij, W2 = 2 W_ij W_ij
+  const Real S2 = 2.0 * S.doubleContraction(S);
+  const Real W2 = 2.0 * W.doubleContraction(W);
 
   StrainRotationInvariants out;
   out.S2 = S2;
@@ -339,11 +291,11 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
   const RankTwoTensor WS = W * S;
   const RankTwoTensor SWt = S * W.transpose();
 
-  RankTwoTensor quad_bracket =
+  const RankTwoTensor quad_bracket =
       C1 * (SS - (SdotS / 3.0) * I) + C2 * (WS + SWt) + C3 * (WW - (WdotW / 3.0) * I);
 
   // T_RANS,quad
-  RankTwoTensor Tquad = -4.0 * mu_t * (k / eps) * quad_bracket;
+  const RankTwoTensor Tquad = -4.0 * mu_t * (k / eps) * quad_bracket;
 
   if (model == NonlinearConstitutiveRelation::Quadratic)
     return Tquad;
