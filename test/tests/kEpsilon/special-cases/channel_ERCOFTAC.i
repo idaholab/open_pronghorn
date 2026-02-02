@@ -256,7 +256,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     walls = ${walls}
     wall_treatment = ${wall_treatment}
     C_pl = 1e10
-    wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
   []
 []
 
@@ -342,10 +341,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [AuxVariables]
-  [wall_distance]
-    type = MooseVariableFVReal
-    initial_condition = 1.0
-  []
   [mu_t]
     type = MooseLinearVariableFVReal
     initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
@@ -357,12 +352,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [AuxKernels]
-  [compute_wall_distance]
-    type = WallDistanceAux
-    variable = wall_distance
-    walls = ${walls}
-    execute_on = 'INITIAL NONLINEAR'
-  []
   [compute_mu_t]
     type = kEpsilonViscosity
     variable = mu_t
@@ -380,7 +369,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     wall_treatment = ${wall_treatment}
     mu_t_ratio_max = 1e20
     execute_on = 'NONLINEAR'
-    wall_distance = wall_distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_y_plus]
     type = RANSYPlusAux

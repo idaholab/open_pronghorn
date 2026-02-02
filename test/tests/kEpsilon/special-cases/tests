@@ -70,15 +70,15 @@
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_wall_incremental wall_treatment=eq_incremental'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using incremental equilibrium wall functions.'
   []
-  [channel_ERCOFTAC_wall_liearized]
+  [channel_ERCOFTAC_wall_linearized]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_wall_liearized_line_center_channel_0002.csv channel_ERCOFTAC_wall_liearized_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_wall_liearized_side_bottom_0002.csv channel_ERCOFTAC_wall_liearized_side_top_0002.csv'
+    csvdiff = 'channel_ERCOFTAC_wall_linearized_line_center_channel_0002.csv channel_ERCOFTAC_wall_linearized_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_wall_linearized_side_bottom_0002.csv channel_ERCOFTAC_wall_linearized_side_top_0002.csv'
     abs_zero = 1e-3
     rel_err = 1e-3
     recover = false
     max_threads = 1
-    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_wall_liearized  wall_treatment=eq_linearized'
+    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_wall_linearized  wall_treatment=eq_linearized'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using linearized equilibrium wall functions.'
   []
   [channel_ERCOFTAC_wall_neq]
