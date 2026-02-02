@@ -48,4 +48,48 @@
     heavy = false
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers with curvature corrections for production.'
   []
+  [channel_ERCOFTAC_wall_newton]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC.i'
+    csvdiff = 'channel_ERCOFTAC_wall_newton_line_center_channel_0002.csv channel_ERCOFTAC_wall_newton_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_wall_newton_side_bottom_0002.csv channel_ERCOFTAC_wall_newton_side_top_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_wall_newton wall_treatment=eq_newton'
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Newton equilibrium wall treatment.'
+  []
+  [channel_ERCOFTAC_wall_incremental]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC.i'
+    csvdiff = 'channel_ERCOFTAC_wall_incremental_line_center_channel_0002.csv channel_ERCOFTAC_wall_incremental_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_wall_incremental_side_bottom_0002.csv channel_ERCOFTAC_wall_incremental_side_top_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_wall_incremental wall_treatment=eq_incremental'
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using incremental equilibrium wall functions.'
+  []
+  [channel_ERCOFTAC_wall_liearized]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC.i'
+    csvdiff = 'channel_ERCOFTAC_wall_liearized_line_center_channel_0002.csv channel_ERCOFTAC_wall_liearized_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_wall_liearized_side_bottom_0002.csv channel_ERCOFTAC_wall_liearized_side_top_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_wall_liearized  wall_treatment=eq_linearized'
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using linearized equilibrium wall functions.'
+  []
+  [channel_ERCOFTAC_wall_neq]
+    type = 'CSVDiff'
+    input = 'channel_ERCOFTAC.i'
+    csvdiff = 'channel_ERCOFTAC_wall_neq_line_center_channel_0002.csv channel_ERCOFTAC_wall_neq_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_wall_neq_side_bottom_0002.csv channel_ERCOFTAC_wall_neq_side_top_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_wall_neq wall_treatment=neq'
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using non-equilibrium wall functions.'
+  []
 []
