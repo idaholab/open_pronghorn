@@ -403,13 +403,7 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
   if (_switches.use_buoyancy && _has_T && _has_beta)
   {
     const Real beta = (*_beta_functor)(elem_arg, state);
-    const auto grad_T_raw = _T_functor->gradient(elem_arg, state);
-    libMesh::VectorValue<Real> grad_T(grad_T_raw(0), 0., 0.);
-    if (_dim >= 2)
-      grad_T(1) = grad_T_raw(1);
-    if (_dim >= 3)
-      grad_T(2) = grad_T_raw(2);
-
+    const auto grad_T = _T_functor->gradient(elem_arg, state);
     Gb = NS::computeGb(beta, mu_t, _Pr_t, grad_T, _g);
   }
 
