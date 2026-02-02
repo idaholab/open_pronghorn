@@ -14,20 +14,25 @@ The $\epsilon$-equation is written in conservative form as
 
 \begin{equation}
 \frac{\partial \rho \epsilon}{\partial t} + \nabla \cdot (\rho \mathbf{u} \epsilon)
-= \rho (P_\epsilon - D_\epsilon + S_\epsilon),
+= P_\epsilon - D_\epsilon,
 \end{equation}
 
 where
 
 - $\epsilon$ is the turbulent dissipation rate,
 - $\mathbf{u}$ is the mean velocity,
-- $P_\epsilon$ is the production of $\epsilon$,
-- $D_\epsilon$ is the destruction term proportional to $\epsilon^2 / k$,
-- $S_\epsilon$ collects additional model-specific sources (Yap, low-Re extra production, etc.).
+- $P_\epsilon$ is the *assembled production-side term* for the $\epsilon$-equation (shear, buoyancy,
+  nonlinear production, and any variant-specific corrections such as Yap or the low-Re $G'$ term),
+- $D_\epsilon$ is the destruction term proportional to $\rho\,\epsilon^2/k$.
+
+Some references split the right-hand side as $\rho\,(P_\epsilon - D_\epsilon + S_\epsilon)$. In
+OpenPronghorn we fold any additional sources/corrections that would fall under $S_\epsilon$ directly into
+$P_\epsilon$, so the kernel assembles a single production term.
 
 In the implementation, `kEpsilonTKEDSourceSink` forms the $\epsilon$-source term as
 \begin{equation}
-\text{source}_\epsilon = P_\epsilon - \rho C_{\epsilon2} f_2 \frac{\epsilon^2}{k},
+\text{source}_\epsilon = P_\epsilon - D_\epsilon
+= P_\epsilon - \rho C_{\epsilon2} f_2 \frac{\epsilon^2}{k},
 \end{equation}
 where $C_{\epsilon2}$ and $f_2$ depend on the selected k–$\epsilon$ variant and damping model.
 
@@ -72,7 +77,7 @@ These invariants are used to construct:
 
 ## $\epsilon$-production term $P_\epsilon$
 
-The $\epsilon$-production term $P_\epsilon$ is built from several contributions:
+The $\epsilon$-production term $P_\epsilon$ is built from several contributions. Here, $P_\epsilon$ denotes the full non-destruction part of the $\epsilon$ source term (i.e., it already includes terms that are sometimes written separately as $S_\epsilon$, such as Yap or other near-wall/low-Re corrections):
 
 - $G_k$: shear production of k,
 - $G_{\text{nl}}$: nonlinear production (optional quadratic/cubic constitutive relations),
