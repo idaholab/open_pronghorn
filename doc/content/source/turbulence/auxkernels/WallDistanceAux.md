@@ -37,7 +37,7 @@ If any of the supplied boundary names is invalid (i.e., not present in the mesh)
 - Replicated meshes only: the object explicitly checks that the mesh is replicated and
   will error out if run on a distributed mesh.
 - Finite volume variables: the auxiliary variable associated with this kernel must be a
-  finite volume variable (`[MooseVariableFV.md]`). If a non-FV variable is supplied, the kernel
+  finite volume variable ([MooseVariableFV.md]). If a non-FV variable is supplied, the kernel
   emits a parameter error indicating that it is currently programmed to use FV machinery only.
 
 Standard MOOSE `block` and `boundary` restrictions can be used, as with any other `AuxKernel`,
