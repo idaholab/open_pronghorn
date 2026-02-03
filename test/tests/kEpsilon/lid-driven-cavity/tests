@@ -1,0 +1,134 @@
+[Tests]
+  design = 'kEpsilonViscosity.md kEpsilonTKEDSourceSink.md kEpsilonTKESourceSink.md WallDistanceAux.md'
+  issues = '#50'
+  [lid-driven_k_epsilon_standard]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_standard_horizontal_center_0002.csv lid-driven_k_epsilon_standard_vertical_center_0002.csv lid-driven_k_epsilon_standard_side_bottom_0002.csv lid-driven_k_epsilon_standard_side_top_0002.csv lid-driven_k_epsilon_standard_side_left_0002.csv lid-driven_k_epsilon_standard_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Standard LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standard'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using Standard variant.'
+  []
+  [lid-driven_k_epsilon_standard_lowreGprime]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_standard_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_standard_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_standard_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_standard_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_standard_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_standard_lowreGprime_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Standard LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standard_lowreGprime'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using Standard variant and Low-Re Gprime correction.'
+  []
+  [lid-driven_k_epsilon_standardlowre]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_standardlowre_horizontal_center_0002.csv lid-driven_k_epsilon_standardlowre_vertical_center_0002.csv lid-driven_k_epsilon_standardlowre_side_bottom_0002.csv lid-driven_k_epsilon_standardlowre_side_top_0002.csv lid-driven_k_epsilon_standardlowre_side_left_0002.csv lid-driven_k_epsilon_standardlowre_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardLowRe LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardLowRe LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardLowRe LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardlowre'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using StandardLowRe variant.'
+  []
+  [lid-driven_k_epsilon_standardlowre_lowreGprime]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_standardlowre_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_standardlowre_lowreGprime_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardLowRe LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardLowRe LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardLowRe LinearFVKernels/TKED_source_sink/use_low_re_Gprime=true Outputs/file_base=lid-driven_k_epsilon_standardlowre_lowreGprime'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using StandardLowRe variant and Low-Re Gprime correction.'
+  []
+  [lid-driven_k_epsilon_standardtwolayer]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_standardtwolayer_horizontal_center_0002.csv lid-driven_k_epsilon_standardtwolayer_vertical_center_0002.csv lid-driven_k_epsilon_standardtwolayer_side_bottom_0002.csv lid-driven_k_epsilon_standardtwolayer_side_top_0002.csv lid-driven_k_epsilon_standardtwolayer_side_left_0002.csv lid-driven_k_epsilon_standardtwolayer_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using StandardTwoLayer variant.'
+  []
+  [lid-driven_k_epsilon_standardtwolayer_lowreGprime]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_standardtwolayer_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_standardtwolayer_lowreGprime_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer_lowreGprime'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using StandardTwoLayer variant and Low-Re Gprime correction.'
+  []
+  [lid-driven_k_epsilon_realizable]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_realizable_horizontal_center_0002.csv lid-driven_k_epsilon_realizable_vertical_center_0002.csv lid-driven_k_epsilon_realizable_side_bottom_0002.csv lid-driven_k_epsilon_realizable_side_top_0002.csv lid-driven_k_epsilon_realizable_side_left_0002.csv lid-driven_k_epsilon_realizable_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizable'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using Realizable variant.'
+  []
+  [lid-driven_k_epsilon_realizable_lowreGprime]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_realizable_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_realizable_lowreGprime_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizable_lowreGprime'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using Realizable variant and Low-Re Gprime correction.'
+  []
+  [lid-driven_k_epsilon_realizabletwolayer]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_realizabletwolayer_horizontal_center_0002.csv lid-driven_k_epsilon_realizabletwolayer_vertical_center_0002.csv lid-driven_k_epsilon_realizabletwolayer_side_bottom_0002.csv lid-driven_k_epsilon_realizabletwolayer_side_top_0002.csv lid-driven_k_epsilon_realizabletwolayer_side_left_0002.csv lid-driven_k_epsilon_realizabletwolayer_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using RealizableTwoLayer variant.'
+  []
+  [lid-driven_k_epsilon_realizabletwolayer_lowreGprime]
+    type = 'CSVDiff'
+    input = 'lid-driven.i'
+    csvdiff = 'lid-driven_k_epsilon_realizabletwolayer_lowreGprime_horizontal_center_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_vertical_center_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_side_bottom_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_side_top_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_side_left_0002.csv lid-driven_k_epsilon_realizabletwolayer_lowreGprime_side_right_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    mesh_mode = 'replicated'
+    heavy = false
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer_lowreGprime'
+    requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using RealizableTwoLayer variant and Low-Re Gprime correction.'
+  []
+[]
