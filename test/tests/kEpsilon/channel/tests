@@ -346,6 +346,7 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
+    valgrind = 'HEAVY'
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/two_layer_flavor=Xu Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using RealizableTwoLayer variant and Xu two-layer flavor.'
   []
@@ -382,6 +383,7 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
+    valgrind = 'HEAVY'
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/two_layer_flavor=Xu LinearFVKernels/TKED_source_sink/use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_yap'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using RealizableTwoLayer variant, Xu two-layer flavor, and YAP correction.'
   []
@@ -418,6 +420,7 @@
     recover = false
     max_threads = 1
     mesh_mode = 'replicated'
+    valgrind = 'HEAVY'
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/two_layer_flavor=Xu Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using RealizableTwoLayer variant, Xu two-layer flavor, and quadratic non-linear model.'
   []
@@ -441,6 +444,7 @@
     rel_err = 1e-3
     recover = false
     max_threads = 1
+    valgrind = 'HEAVY'
     mesh_mode = 'replicated'
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/two_layer_flavor=Xu LinearFVKernels/TKED_source_sink/use_yap=true Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_xu_quadratic_yap'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using RealizableTwoLayer variant, Xu two-layer flavor, quadratic non-linear model, and YAP correction.'
