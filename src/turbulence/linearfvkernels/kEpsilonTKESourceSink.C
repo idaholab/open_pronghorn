@@ -85,6 +85,53 @@ kEpsilonTKESourceSink::validParams()
                              "Curvature / rotation correction model: "
                              "'none' (default) or 'standard' (Spalart–Shur style).");
 
+  params.addParam<Real>(
+      "k_min",
+      1e-8,
+      "Minimum k value used in the implicit destruction coefficient rho*eps/k to "
+      "prevent division by zero when k is near zero during early iterations.");
+
+  params.addParam<Real>(
+      "eps_min",
+      1e-10,
+      "Minimum epsilon used inside the C_pl production limiter "
+      "min(Gk, C_pl * rho * max(eps, eps_min)).  Prevents the limiter from "
+      "being trivially zero when eps is near zero at initialisation, which would "
+      "allow unbounded net TKE growth (C_pl-1 terms accumulate each iteration).");
+
+  params.addParam<Real>(
+      "mu_t_prod_max",
+      1e4,
+      "Maximum mu_t / mu ratio applied inside the production and wall-shear "
+      "computations.  Caps stale over-large mu_t values before k and epsilon "
+      "have converged to a consistent state.  Independently of the global "
+      "mu_t_ratio_max in kEpsilonViscosity, which only applies to the output field.");
+
+  params.addParam<Real>(
+      "C_pk",
+      0.0,
+      "Durbin realizability coefficient for the k-based production limiter: "
+      "G_k <= C_pk * rho * k * |S|.  A k-based bound that is effective even "
+      "when eps ~ 0 at start-up.  0 = disabled (default).  "
+      "Recommended value when enabled: 0.667 (= 2/3).");
+
+  params.addParam<bool>(
+      "use_kato_launder",
+      false,
+      "Replace the standard shear production G_k = mu_t S^2 with the "
+      "Kato–Launder (1993) form G_k = mu_t |S| |Omega|. This eliminates the "
+      "stagnation-point anomaly and significantly improves stability on coarse "
+      "or poorly-conditioned meshes.");
+
+  MooseEnum grad_method_enum("moose_functor local_least_squares", "moose_functor");
+  params.addParam<MooseEnum>(
+      "gradient_method",
+      grad_method_enum,
+      "Velocity gradient method used for turbulence production: "
+      "'moose_functor' (default, Green-Gauss or whatever the variable uses) or "
+      "'local_least_squares' (bypass MOOSE, reconstruct via face-neighbour "
+      "inverse-distance-weighted LS — recommended for poor-quality meshes).");
+
   return params;
 }
 
@@ -121,7 +168,15 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
     _has_c(params.isParamValid("speed_of_sound")),
     _nonlinear_model(
         getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
-    _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>())
+    _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>()),
+    _k_min(getParam<Real>("k_min")),
+    _eps_min(getParam<Real>("eps_min")),
+    _mu_t_prod_max(getParam<Real>("mu_t_prod_max")),
+    _C_pk(getParam<Real>("C_pk")),
+    _use_kato_launder(getParam<bool>("use_kato_launder")),
+    _grad_method(getParam<MooseEnum>("gradient_method") == "local_least_squares"
+                     ? NS::TurbVelocityGradientMethod::LocalLeastSquares
+                     : NS::TurbVelocityGradientMethod::MooseFunctor)
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
@@ -254,105 +309,24 @@ kEpsilonTKESourceSink::computeMatrixContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const Real rho = _rho(elem_arg, state);
 
-  // Near-wall formulation: treat production and destruction implicitly
+  // Near-wall formulation: destruction goes into the matrix (positive diagonal),
+  // production goes onto the explicit RHS via computeRightHandSideContribution.
+  // Previously both were combined as (destruction - production) in the matrix,
+  // which caused a NEGATIVE diagonal whenever wall production > destruction —
+  // the primary driver of TKE → ∞ on coarse / poorly-conditioned meshes.
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end())
   {
-    const Real mu = _mu(elem_arg, state);
-    const Real TKE = _var.getElemValue(*_current_elem_info, state);
-
-    Real production = 0.0;
-    Real destruction = 0.0;
-    Real tot_weight = 0.0;
-
-    // Local velocity vector at the cell centroid
-    RealVectorValue velocity(_u_var(elem_arg, state));
-    if (_v_var)
-      velocity(1) = (*_v_var)(elem_arg, state);
-    if (_w_var)
-      velocity(2) = (*_w_var)(elem_arg, state);
-
-    const auto & face_info_vec = libmesh_map_find(_face_infos, _current_elem_info->elem());
-    const auto & distance_vec = libmesh_map_find(_dist, _current_elem_info->elem());
-    mooseAssert(distance_vec.size(), "Wall-bounded element without distance data.");
-    mooseAssert(distance_vec.size() == face_info_vec.size(),
-                "Mismatch between face-info and distance data size.");
-
-    std::vector<Real> y_plus_vec;
-    std::vector<Real> vel_grad_norm_vec;
-    y_plus_vec.reserve(distance_vec.size());
-    vel_grad_norm_vec.reserve(distance_vec.size());
-
-    // Compute y+ and velocity-gradient norm at each wall-adjacent face
-    for (unsigned int i = 0; i < distance_vec.size(); ++i)
-    {
-      const auto * fi = face_info_vec[i];
-      const Real d = distance_vec[i];
-
-      const RealVectorValue tangential_velocity =
-          velocity - (velocity * fi->normal()) * fi->normal();
-      const Real parallel_speed = NS::computeSpeed<Real>(tangential_velocity);
-
-      Real y_plus = 0.0;
-      if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
-      {
-        // Non-equilibrium: u_tau estimated from local TKE
-        y_plus = d * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
-      }
-      else
-      {
-        // Equilibrium variants: solve for y+ using standard wall functions
-        const Real u_t = std::max(parallel_speed, 1e-10); // avoid divisions by zero in helper
-        y_plus = NS::findyPlus<Real>(mu, rho, u_t, d);
-      }
-
-      const Real vel_grad_norm = parallel_speed / d;
-
-      y_plus_vec.push_back(y_plus);
-      vel_grad_norm_vec.push_back(vel_grad_norm);
-      tot_weight += 1.0;
-    }
-
-    // Accumulate near-wall production/destruction across all wall faces
-    for (unsigned int i = 0; i < y_plus_vec.size(); ++i)
-    {
-      const Real y_plus = y_plus_vec[i];
-      const auto * fi = face_info_vec[i];
-
-      const bool defined_on_elem_side = _var.hasFaceSide(*fi, true);
-      const Elem * const loc_elem = defined_on_elem_side ? &fi->elem() : fi->neighborPtr();
-
-      Moose::FaceArg face_arg{
-          fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
-
-      const Real wall_mut = _mu_t(face_arg, state);
-      const Real wall_mu = _mu(face_arg, state);
-
-      const Real tau_w = (wall_mut + wall_mu) * vel_grad_norm_vec[i];
-      const Real d = distance_vec[i];
-
-      const Real destruction_visc = 2.0 * wall_mu / (d * d) / tot_weight;
-      const Real destruction_log =
-          std::pow(_C_mu, 0.75) * rho * std::sqrt(TKE) / (NS::von_karman_constant * d) / tot_weight;
-
-      if (y_plus < 11.25)
-        destruction += destruction_visc;
-      else
-      {
-        destruction += destruction_log;
-        production += tau_w * std::pow(_C_mu, 0.25) / std::sqrt(TKE) /
-                      (NS::von_karman_constant * d) / tot_weight;
-      }
-    }
-
-    // Implicit near-wall production/destruction (multiplied by TKE when applied)
-    return (destruction - production) * _current_elem_volume;
+    const auto [production, destruction] = computeWallTerms(elem_arg, state);
+    (void)production; // used in computeRightHandSideContribution
+    return destruction * _current_elem_volume;
   }
 
   // Bulk region: implicit destruction ρ epsilon / k
   const Real epsilon = _epsilon(elem_arg, state);
   const Real TKE = _var.getElemValue(*_current_elem_info, state);
 
-  const Real destruction_bulk = rho * epsilon / TKE;
+  // Guard k > k_min to prevent rho*eps/k from blowing up when k → 0
+  const Real destruction_bulk = rho * epsilon / std::max(TKE, _k_min);
   return destruction_bulk * _current_elem_volume;
 }
 
@@ -362,17 +336,25 @@ kEpsilonTKESourceSink::computeRightHandSideContribution()
   const auto state = determineState();
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
 
-  // No explicit RHS term in near-wall cells: everything handled in the matrix
+  // Near-wall cells: production is explicit (on RHS) to keep the matrix diagonal positive.
+  // The coefficient-of-k form means RHS = production_coeff * k_current * V.
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end())
-    return 0.0;
+  {
+    const auto [production_coeff, destruction_coeff] = computeWallTerms(elem_arg, state);
+    (void)destruction_coeff; // used in computeMatrixContribution
+    const Real TKE = std::max(_var.getElemValue(*_current_elem_info, state), _k_min);
+    return production_coeff * TKE * _current_elem_volume;
+  }
 
   // Bulk production term (with optional corrections)
   Real production = computeBulkProduction(elem_arg, state);
 
-  // Production limiter to avoid excessive TKE in stagnation zones
+  // Production limiter: C_pl * rho * max(eps, eps_min).
+  // Using eps_min prevents the limiter from being trivially zero at start-up
+  // (eps ≈ 0 at t=0 would allow unbounded net TKE growth otherwise).
   const Real rho = _rho(elem_arg, state);
   const Real eps = _epsilon(elem_arg, state);
-  const Real production_limit = _C_pl * rho * eps;
+  const Real production_limit = _C_pl * rho * std::max(eps, _eps_min);
   production = std::min(production, production_limit);
 
   return production * _current_elem_volume;
@@ -383,20 +365,25 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
                                              const Moose::StateArg & state) const
 {
   const Real rho = _rho(elem_arg, state);
-  const Real mu_t = _mu_t(elem_arg, state);
+  const Real mu  = _mu(elem_arg, state);
+  // Cap mu_t to _mu_t_prod_max * mu to guard against stale over-large values
+  // when k is large but epsilon has not yet caught up (common in early SIMPLE iterations).
+  const Real mu_t = std::min(_mu_t(elem_arg, state), _mu_t_prod_max * mu);
   const Real k = _var.getElemValue(*_current_elem_info, state);
+  const Real k_safe = std::max(k, _k_min);
   const Real eps = _epsilon(elem_arg, state);
 
-  // Strain/rotation invariants and divergence
-  auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
+  // Strain/rotation invariants and divergence — use the selected gradient method
+  const Elem * elem = elem_arg.elem;
+  auto inv = NS::computeStrainRotationInvariantsEx(
+      _u_var, _v_var, _w_var, elem, elem_arg, state, _grad_method);
 
-  // Baseline shear production G_k
-  Real Gk = NS::computeGk(mu_t,
-                          inv.S2,
-                          rho,
-                          k,
-                          inv.div_u,
-                          /*include_compressibility_terms*/ _switches.use_compressibility);
+  // Baseline shear production G_k (standard or Kato–Launder form)
+  Real Gk = _use_kato_launder
+                ? NS::computeGkKatoLaunder(mu_t, inv.S2, inv.W2, rho, k, inv.div_u,
+                                           _switches.use_compressibility)
+                : NS::computeGk(mu_t, inv.S2, rho, k, inv.div_u,
+                                _switches.use_compressibility);
 
   // Buoyancy production Gb
   Real Gb = 0.0;
@@ -411,7 +398,9 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
   Real Gnl = 0.0;
   if (_nonlinear_model != NS::NonlinearConstitutiveRelation::None)
   {
-    auto grad_u = NS::computeVelocityGradient(_u_var, _v_var, _w_var, elem_arg, state);
+    auto grad_u = (_grad_method == NS::TurbVelocityGradientMethod::LocalLeastSquares)
+                      ? NS::computeVelocityGradientLS(_u_var, _v_var, _w_var, elem, state)
+                      : NS::computeVelocityGradient(_u_var, _v_var, _w_var, elem_arg, state);
     Gnl = NS::computeGnl(_nonlinear_model, grad_u, inv, mu_t, k, eps);
   }
 
@@ -447,6 +436,97 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
       mooseError("kEpsilonTKESourceSink: unsupported k-epsilon variant.");
   }
 
-  // Total bulk production passed to the RHS
-  return shear_prod + Gb + Gnl - gamma_M;
+  Real total_prod = shear_prod + Gb + Gnl - gamma_M;
+
+  // Durbin (1996) k-based realizability limiter: G_k ≤ C_pk · ρ · k · |S|
+  // Effective even when ε ≈ 0 at start-up (unlike the ε-based C_pl limiter).
+  // Disabled by default (C_pk = 0); recommended value: 0.667.
+  if (_C_pk > 0.0)
+  {
+    const Real S_mag = std::sqrt(std::max(inv.S2, 0.0));
+    const Real durbin_limit = _C_pk * rho * k_safe * S_mag;
+    total_prod = std::min(total_prod, durbin_limit);
+  }
+
+  return total_prod;
+}
+
+std::pair<Real, Real>
+kEpsilonTKESourceSink::computeWallTerms(const Moose::ElemArg & elem_arg,
+                                        const Moose::StateArg & state) const
+{
+  const Real rho = _rho(elem_arg, state);
+  const Real mu = _mu(elem_arg, state);
+  // Use k_min guard so that sqrt(TKE) and 1/sqrt(TKE) are always finite
+  const Real TKE = std::max(_var.getElemValue(*_current_elem_info, state), _k_min);
+  // Maximum allowed mu_t for wall-shear computation (prevents stale over-large μ_t values)
+  const Real mu_t_cap = _mu_t_prod_max * mu;
+
+  const auto & face_info_vec = libmesh_map_find(_face_infos, _current_elem_info->elem());
+  const auto & distance_vec = libmesh_map_find(_dist, _current_elem_info->elem());
+  mooseAssert(distance_vec.size(), "Wall-bounded element without distance data.");
+  mooseAssert(distance_vec.size() == face_info_vec.size(),
+              "Mismatch between face-info and distance vectors.");
+
+  // Cell-centroid velocity
+  RealVectorValue velocity(_u_var(elem_arg, state));
+  if (_v_var)
+    velocity(1) = (*_v_var)(elem_arg, state);
+  if (_w_var)
+    velocity(2) = (*_w_var)(elem_arg, state);
+
+  const Real tot_weight = static_cast<Real>(distance_vec.size());
+  Real production = 0.0;
+  Real destruction = 0.0;
+
+  for (unsigned int i = 0; i < distance_vec.size(); ++i)
+  {
+    const Real d = distance_vec[i];
+    mooseAssert(d > 0.0, "Wall distance must be positive.");
+
+    const auto * fi = face_info_vec[i];
+    const RealVectorValue tangential_vel =
+        velocity - (velocity * fi->normal()) * fi->normal();
+    const Real parallel_speed = NS::computeSpeed<Real>(tangential_vel);
+
+    // y+ using either NEQ (non-iterative) or equilibrium (iterative) method
+    Real y_plus = 0.0;
+    if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
+      y_plus = d * std::sqrt(std::sqrt(_C_mu) * TKE) * rho / mu;
+    else
+      y_plus = NS::findyPlus<Real>(mu, rho, std::max(parallel_speed, 1e-10), d);
+
+    // Evaluate mu_t at the wall face (capped to avoid runaway)
+    const bool on_elem_side = _var.hasFaceSide(*fi, true);
+    const Elem * loc_elem = on_elem_side ? &fi->elem() : fi->neighborPtr();
+    const Moose::FaceArg facearg = {
+        fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
+    const Real wall_mu_t = std::min(_mu_t(facearg, state), mu_t_cap);
+    const Real wall_mu   = _mu(facearg, state);
+
+    // Wall shear stress τ_w = (μ_t + μ) * |du/dy|
+    const Real tau_w = (wall_mu_t + wall_mu) * (parallel_speed / d);
+
+    if (y_plus < 11.25)
+    {
+      // Viscous sublayer: no log-law production; purely viscous destruction coefficient
+      //   destruction_coeff = 2 μ / d²  (linearization of ε_wall = 2ν k / d² then ρε/k)
+      destruction += 2.0 * wall_mu / Utility::pow<2>(d) / tot_weight;
+    }
+    else
+    {
+      // Log-layer destruction coefficient: C_μ^{3/4} ρ √k / (κ d)  — coefficient of k
+      const Real k_half = std::sqrt(TKE);
+      destruction += std::pow(_C_mu, 0.75) * rho * k_half /
+                     (NS::von_karman_constant * d) / tot_weight;
+
+      // Log-layer production coefficient: τ_w C_μ^{1/4} / (√k κ d) — coefficient of k
+      // Bounded so it can never exceed the destruction coefficient (physical realizability)
+      const Real prod_coeff = tau_w * std::pow(_C_mu, 0.25) /
+                              (k_half * NS::von_karman_constant * d) / tot_weight;
+      production += prod_coeff;
+    }
+  }
+
+  return {production, destruction};
 }

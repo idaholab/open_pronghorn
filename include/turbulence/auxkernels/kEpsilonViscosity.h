@@ -112,4 +112,7 @@ protected:
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}
+
+  /// Minimum k used to guard the turbulent time scale k/eps in the viscosity computation.
+  const Real _k_min;
 };

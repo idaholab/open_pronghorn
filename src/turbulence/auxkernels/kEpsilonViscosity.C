@@ -97,6 +97,12 @@ kEpsilonViscosity::validParams()
       "wall_distance",
       "Distance to the closest wall; required for two-layer and Low-Re k-epsilon variants.");
 
+  params.addParam<Real>(
+      "k_min",
+      1e-8,
+      "Minimum k used to guard the turbulent time scale k/eps in the viscosity "
+      "computation. Prevents mu_t from becoming undefined when k → 0.");
+
   return params;
 }
 
@@ -128,7 +134,8 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
     _Ct(getParam<Real>("Ct")),
     _wall_distance_functor(
         params.isParamValid("wall_distance") ? &(getFunctor<Real>("wall_distance")) : nullptr),
-    _has_wall_distance(params.isParamValid("wall_distance"))
+    _has_wall_distance(params.isParamValid("wall_distance")),
+    _k_min(getParam<Real>("k_min"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
@@ -332,8 +339,9 @@ kEpsilonViscosity::computeValue()
     const Real k = _k(elem_arg, state);
     const Real eps = _epsilon(elem_arg, state);
 
-    // Large-eddy time scale T_e = k / epsilon
-    const Real Te = k / std::max(eps, 1e-20);
+    // Large-eddy time scale T_e = k / epsilon; guard k > k_min
+    const Real k_safe = std::max(k, _k_min);
+    const Real Te = k_safe / std::max(eps, 1e-20);
 
     // Time scale with optional limiter:
     //   T = max(Te, Ct * sqrt(nu/eps))  (STAR-CCM+ Eq. 1046)
@@ -350,7 +358,7 @@ kEpsilonViscosity::computeValue()
     if (_variant == NS::KEpsilonVariant::StandardLowRe)
     {
       const Real d = (*_wall_distance_functor)(elem_arg, state);
-      const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
+      const Real Red = std::sqrt(k_safe) * d / std::max(nu, 1e-12);
       const Real fmu = NS::fmu_SKE_LRe(_Cd0, _Cd1, _Cd2, Red);
       Cmu_eff = _C_mu * fmu;
     }
@@ -358,11 +366,11 @@ kEpsilonViscosity::computeValue()
              _variant == NS::KEpsilonVariant::RealizableTwoLayer)
     {
       auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
-      Cmu_eff = NS::Cmu_realizable(_Ca0, _Ca1, _Ca2, _Ca3, inv.S2, inv.W2, k, std::max(eps, 1e-20));
+      Cmu_eff = NS::Cmu_realizable(_Ca0, _Ca1, _Ca2, _Ca3, inv.S2, inv.W2, k_safe, std::max(eps, 1e-20));
     }
 
     // Base k-epsilon turbulent viscosity
-    const Real mu_t_ke = rho * Cmu_eff * k * time_scale;
+    const Real mu_t_ke = rho * Cmu_eff * k_safe * time_scale;
 
     // Two-layer blending if requested
     if (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
@@ -370,7 +378,7 @@ kEpsilonViscosity::computeValue()
     {
       mooseAssert(_has_wall_distance, "Two-layer variants require wall_distance functor.");
       const Real d = (*_wall_distance_functor)(elem_arg, state);
-      const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
+      const Real Red = std::sqrt(k_safe) * d / std::max(nu, 1e-12);
 
       // Two-layer mu ratio and epsilon length scale
       NS::TwoLayerLengths tl;

@@ -167,4 +167,34 @@ protected:
    * averaged across all adjacent wall faces.
    */
   Real computeWallEpsilon(const Moose::ElemArg & elem_arg, const Moose::StateArg & state) const;
+
+  // ---- Robustness controls ----
+
+  /// Minimum k used to guard time scale k/eps when k is near zero.
+  const Real _k_min;
+
+  /// Minimum epsilon used in C_pl production limiter: min(Pe, C_pl * rho * max(eps, eps_min)).
+  /// Prevents the limiter from being trivially zero when epsilon is near zero at start-up.
+  const Real _eps_min;
+
+  /// Maximum mu_t/mu ratio applied inside bulk production computation.
+  /// Caps stale over-large mu_t values before k and epsilon have converged.
+  const Real _mu_t_prod_max;
+
+  /// Durbin realizability coefficient C_pk for epsilon production limiter (default 0 = disabled).
+  /// When > 0, shear production is bounded by C_pk * rho * k * |S| — effective even at eps ≈ 0.
+  const Real _C_pk;
+
+  /// If true, apply a Kolmogorov time scale lower bound:
+  ///   T = max(k/eps,  C_t_kolmogorov * sqrt(nu/eps))
+  const bool _use_time_scale_limiter;
+
+  /// Kolmogorov bound coefficient (default 6.0 matching STAR-CCM+).
+  const Real _C_t_kolmogorov;
+
+  /// If true, use the Kato–Launder (1993) production form.
+  const bool _use_kato_launder;
+
+  /// Velocity gradient method for production.
+  NS::TurbVelocityGradientMethod _grad_method;
 };

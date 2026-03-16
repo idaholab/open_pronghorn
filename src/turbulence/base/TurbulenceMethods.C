@@ -31,8 +31,12 @@ computeStrainRotationInvariants(const Moose::Functor<Real> & u,
   const RankTwoTensor W = 0.5 * (grad_vel - grad_vel.transpose());
 
   // Invariants: S2 = 2 S_ij S_ij, W2 = 2 W_ij W_ij
-  const Real S2 = 2.0 * S.doubleContraction(S);
-  const Real W2 = 2.0 * W.doubleContraction(W);
+  // Both are double contractions of a tensor with itself and are analytically >= 0.
+  // Clamp here to guard against tiny negatives arising from ill-conditioned gradients
+  // (e.g. near stagnation points, skewed mesh cells, or poor convergence of the
+  // background velocity solution).
+  const Real S2 = std::max(2.0 * S.doubleContraction(S), 0.0);
+  const Real W2 = std::max(2.0 * W.doubleContraction(W), 0.0);
 
   StrainRotationInvariants out;
   out.S2 = S2;
@@ -53,7 +57,11 @@ twoLayerWolfstein(const Real Cmu, const Real d, const Real Re_d)
   const Real cl = cl_from_Cmu(Cmu);
   TwoLayerLengths out;
   out.l_eps = cl * d * (1.0 - std::exp(-Re_d / (2.0 * cl)));
-  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) * (1.0 - std::exp(-Re_d / 70.0));
+  // mu_t^{2L} = rho * C_mu^{1/4} * sqrt(k) * l_mu  where l_mu = c_l * d * (1 - exp(-Re_d/70))
+  // mu_t^{2L} / mu = C_mu^{1/4} * c_l * Re_d * (1 - exp(-Re_d/70))
+  //               = 0.42 * C_mu^{-1/2} * Re_d * (1 - exp(-Re_d/70))
+  // (STAR-CCM+ Wolfstein, Eq. 1074)
+  out.mu_ratio = std::pow(Cmu, 0.25) * cl * Re_d * (1.0 - std::exp(-Re_d / 70.0));
   return out;
 }
 
@@ -63,7 +71,9 @@ twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d)
   const Real cl = cl_from_Cmu(Cmu);
   TwoLayerLengths out;
   out.l_eps = cl * d * Re_d / (Re_d + 5.3);
-  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) * (1.0 - std::exp(-Re_d / 50.5));
+  // Same mu_t^{2L} form as Wolfstein but with A_mu = 50.5 (Norris-Reynolds).
+  // mu_t^{2L} / mu = C_mu^{1/4} * c_l * Re_d * (1 - exp(-Re_d/50.5))
+  out.mu_ratio = std::pow(Cmu, 0.25) * cl * Re_d * (1.0 - std::exp(-Re_d / 50.5));
   return out;
 }
 
@@ -106,8 +116,10 @@ Cmu_realizable(const Real Ca0,
                const Real eps)
 {
   const Real k_over_eps = k / eps;
-  const Real S_bar = k_over_eps * std::sqrt(S2);
-  const Real W_bar = k_over_eps * std::sqrt(W2);
+  // Clamp to non-negative: S2 = 2 S_ij S_ij should be >= 0 analytically,
+  // but ill-conditioned gradients can produce tiny negative values via FP arithmetic.
+  const Real S_bar = k_over_eps * std::sqrt(std::max(S2, 0.0));
+  const Real W_bar = k_over_eps * std::sqrt(std::max(W2, 0.0));
   return Ca0 / (Ca1 + Ca2 * S_bar + Ca3 * W_bar);
 }
 
@@ -138,7 +150,10 @@ computeGk(const Real mu_t,
           const Real div_u,
           const bool include_compressibility_terms)
 {
-  Real Gk = mu_t * S2;
+  // Clamp S2 >= 0: S2 = 2 S_ij S_ij is analytically non-negative, but ill-conditioned
+  // velocity gradients (e.g. near stagnation points, poor mesh quality) can produce tiny
+  // negative values via floating-point arithmetic. The clamp prevents negative production.
+  Real Gk = mu_t * std::max(S2, 0.0);
   if (include_compressibility_terms)
     Gk -= (2.0 / 3.0) * (rho * k * div_u + mu_t * div_u * div_u);
   return Gk;
@@ -376,6 +391,186 @@ computeCurvatureFactor(const CurvatureCorrectionModel model, const StrainRotatio
   const Real f_c = std::min(Cmax, 1.0 + f_rot);
 
   return f_c;
+}
+
+RankTwoTensor
+computeVelocityGradientLS(const Moose::Functor<Real> & u_var,
+                          const Moose::Functor<Real> * v_var,
+                          const Moose::Functor<Real> * w_var,
+                          const Elem * elem,
+                          const Moose::StateArg & state)
+{
+  // Dimensionality from supplied velocity components
+  const unsigned int ndim = (w_var ? 3u : (v_var ? 2u : 1u));
+
+  // Cell-centre value and position of the current element
+  const Moose::ElemArg P_arg{elem, /*correct_skewness=*/false};
+  const Real u_P = u_var(P_arg, state);
+  const Real v_P = v_var ? (*v_var)(P_arg, state) : 0.0;
+  const Real w_P = w_var ? (*w_var)(P_arg, state) : 0.0;
+  const Point xP = elem->vertex_average();
+
+  // Normal-equation matrix A (ndim × ndim) and RHS vectors b_u, b_v, b_w.
+  // A_ij = Σ_N  w_N * d_i * d_j
+  // b_i  = Σ_N  w_N * Δu_N * d_i
+  // Weight: w_N = 1 / |d|^2  (inverse distance squared)
+  Real A[3][3] = {};
+  Real bu[3] = {}, bv[3] = {}, bw[3] = {};
+  unsigned int n_nb = 0;
+
+  for (unsigned int s = 0; s < elem->n_sides(); ++s)
+  {
+    const Elem * nb = elem->neighbor_ptr(s);
+    if (!nb || !nb->active())
+      continue; // skip boundary faces and inactive (AMR) elements
+
+    const Point xN = nb->vertex_average();
+    const Point d  = xN - xP;
+    const Real dist2 = d.norm_sq();
+    if (dist2 < 1e-30)
+      continue;
+
+    const Real w = 1.0 / dist2;
+    const Moose::ElemArg N_arg{nb, false};
+
+    const Real du_u = u_var(N_arg, state) - u_P;
+    const Real du_v = v_var ? ((*v_var)(N_arg, state) - v_P) : 0.0;
+    const Real du_w = w_var ? ((*w_var)(N_arg, state) - w_P) : 0.0;
+
+    for (unsigned int i = 0; i < ndim; ++i)
+      for (unsigned int j = 0; j < ndim; ++j)
+        A[i][j] += w * d(i) * d(j);
+
+    for (unsigned int i = 0; i < ndim; ++i)
+    {
+      bu[i] += w * du_u * d(i);
+      bv[i] += w * du_v * d(i);
+      bw[i] += w * du_w * d(i);
+    }
+    ++n_nb;
+  }
+
+  // Fall back to MOOSE functor gradient when the stencil is insufficient
+  if (n_nb < ndim)
+    return computeVelocityGradient(u_var, v_var, w_var, P_arg, state);
+
+  // Solve the ndim × ndim system via explicit inverse
+  RankTwoTensor grad; // zero-initialised
+
+  if (ndim == 1)
+  {
+    if (std::abs(A[0][0]) < 1e-30)
+      return computeVelocityGradient(u_var, v_var, w_var, P_arg, state);
+    grad(0, 0) = bu[0] / A[0][0];
+  }
+  else if (ndim == 2)
+  {
+    const Real det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
+    // Condition check: relative determinant vs diagonal product
+    const Real scale = std::abs(A[0][0]) * std::abs(A[1][1]);
+    if (std::abs(det) < 1e-12 * std::max(scale, 1e-30))
+      return computeVelocityGradient(u_var, v_var, w_var, P_arg, state);
+
+    const Real inv_det = 1.0 / det;
+    // u-component gradient
+    grad(0, 0) = inv_det * ( A[1][1] * bu[0] - A[0][1] * bu[1]);
+    grad(0, 1) = inv_det * (-A[1][0] * bu[0] + A[0][0] * bu[1]);
+    // v-component gradient
+    grad(1, 0) = inv_det * ( A[1][1] * bv[0] - A[0][1] * bv[1]);
+    grad(1, 1) = inv_det * (-A[1][0] * bv[0] + A[0][0] * bv[1]);
+  }
+  else // ndim == 3: explicit cofactor expansion
+  {
+    const Real a00 = A[0][0], a01 = A[0][1], a02 = A[0][2];
+    const Real a10 = A[1][0], a11 = A[1][1], a12 = A[1][2];
+    const Real a20 = A[2][0], a21 = A[2][1], a22 = A[2][2];
+
+    // Cofactors (first row)
+    const Real c00 = a11 * a22 - a12 * a21;
+    const Real c01 = a12 * a20 - a10 * a22;
+    const Real c02 = a10 * a21 - a11 * a20;
+    const Real det = a00 * c00 + a01 * c01 + a02 * c02;
+
+    const Real scale = std::abs(a00) * std::abs(a11) * std::abs(a22);
+    if (std::abs(det) < 1e-12 * std::max(scale, 1e-30))
+      return computeVelocityGradient(u_var, v_var, w_var, P_arg, state);
+
+    const Real inv_det = 1.0 / det;
+    // Remaining cofactors
+    const Real c10 = a02 * a21 - a01 * a22;
+    const Real c11 = a00 * a22 - a02 * a20;
+    const Real c12 = a01 * a20 - a00 * a21;
+    const Real c20 = a01 * a12 - a02 * a11;
+    const Real c21 = a02 * a10 - a00 * a12;
+    const Real c22 = a00 * a11 - a01 * a10;
+
+    // u-component gradient
+    grad(0, 0) = inv_det * (c00 * bu[0] + c01 * bu[1] + c02 * bu[2]);
+    grad(0, 1) = inv_det * (c10 * bu[0] + c11 * bu[1] + c12 * bu[2]);
+    grad(0, 2) = inv_det * (c20 * bu[0] + c21 * bu[1] + c22 * bu[2]);
+    // v-component gradient
+    grad(1, 0) = inv_det * (c00 * bv[0] + c01 * bv[1] + c02 * bv[2]);
+    grad(1, 1) = inv_det * (c10 * bv[0] + c11 * bv[1] + c12 * bv[2]);
+    grad(1, 2) = inv_det * (c20 * bv[0] + c21 * bv[1] + c22 * bv[2]);
+    // w-component gradient
+    grad(2, 0) = inv_det * (c00 * bw[0] + c01 * bw[1] + c02 * bw[2]);
+    grad(2, 1) = inv_det * (c10 * bw[0] + c11 * bw[1] + c12 * bw[2]);
+    grad(2, 2) = inv_det * (c20 * bw[0] + c21 * bw[1] + c22 * bw[2]);
+  }
+
+  return grad;
+}
+
+StrainRotationInvariants
+computeStrainRotationInvariantsEx(const Moose::Functor<Real> & u,
+                                  const Moose::Functor<Real> * v,
+                                  const Moose::Functor<Real> * w,
+                                  const Elem * elem,
+                                  const Moose::ElemArg & elem_arg,
+                                  const Moose::StateArg & state,
+                                  TurbVelocityGradientMethod method)
+{
+  RankTwoTensor grad_vel;
+  if (method == TurbVelocityGradientMethod::LocalLeastSquares)
+    grad_vel = computeVelocityGradientLS(u, v, w, elem, state);
+  else
+    grad_vel = computeVelocityGradient(u, v, w, elem_arg, state);
+
+  const Real div_u = grad_vel(0, 0) + grad_vel(1, 1) + grad_vel(2, 2);
+  const RankTwoTensor S = 0.5 * (grad_vel + grad_vel.transpose());
+  const RankTwoTensor W = 0.5 * (grad_vel - grad_vel.transpose());
+
+  StrainRotationInvariants out;
+  out.S2    = std::max(2.0 * S.doubleContraction(S), 0.0);
+  out.W2    = std::max(2.0 * W.doubleContraction(W), 0.0);
+  out.div_u = div_u;
+  return out;
+}
+
+Real
+computeGkKatoLaunder(const Real mu_t,
+                     const Real S2,
+                     const Real W2,
+                     const Real rho,
+                     const Real k,
+                     const Real div_u,
+                     const bool include_compressibility_terms)
+{
+  // G_k^{KL} = μ_t |S| |Ω|   (Kato & Launder 1993)
+  // |S| = sqrt(S2),  |Ω| = sqrt(W2)
+  Real Gk = mu_t * std::sqrt(std::max(S2, 0.0)) * std::sqrt(std::max(W2, 0.0));
+  if (include_compressibility_terms)
+    Gk -= (2.0 / 3.0) * (rho * k * div_u + mu_t * div_u * div_u);
+  return Gk;
+}
+
+Real
+limitTurbTimeScale(const Real k, const Real eps, const Real nu, const Real Ct)
+{
+  const Real eps_safe = std::max(eps, 1e-20);
+  const Real Te = k / eps_safe;                          // large-eddy time scale
+  const Real Tr = Ct * std::sqrt(nu / eps_safe);         // Kolmogorov lower bound
+  return std::max(Te, Tr);
 }
 
 } // namespace NS
