@@ -155,6 +155,10 @@ protected:
   /// Minimum k for destruction coefficient guard (ρε/max(k,k_min)).
   const Real _k_min;
 
+  /// Maximum ε read from the TKED functor when computing the bulk destruction ρε/k.
+  /// Prevents large algebraic near-wall ε values from destroying k in adjacent bulk cells.
+  const Real _eps_functor_max;
+
   /// Minimum ε used inside the C_pl production limiter.
   /// Prevents the limiter from being trivially zero when ε ≈ 0 at initialisation.
   const Real _eps_min;
@@ -170,9 +174,20 @@ protected:
   /// Recommended: 0.667 (= 2/3).
   const Real _C_pk;
 
+  /// Physical lower bound on TKE. If the cell k drops below this value a strong
+  /// penalty source overrides the normal physics to drive k back above the floor.
+  const Real _tke_min_phys;
+
+  /// Physical upper bound on TKE. Analogous ceiling enforcement.
+  const Real _tke_max_phys;
+
   /// If true, use the Kato–Launder (1993) production form G_k = μ_t |S| |Ω|.
   const bool _use_kato_launder;
 
   /// Velocity gradient method for the turbulence production term.
   NS::TurbVelocityGradientMethod _grad_method;
+
+  /// Penalty coefficient used for physical bounds enforcement.
+  /// Must be large enough to dominate the normal matrix diagonal.
+  static constexpr Real _bounds_penalty = 1e8;
 };

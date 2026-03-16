@@ -101,11 +101,37 @@ kEpsilonTKESourceSink::validParams()
 
   params.addParam<Real>(
       "mu_t_prod_max",
-      1e4,
+      5000.0,
       "Maximum mu_t / mu ratio applied inside the production and wall-shear "
-      "computations.  Caps stale over-large mu_t values before k and epsilon "
-      "have converged to a consistent state.  Independently of the global "
-      "mu_t_ratio_max in kEpsilonViscosity, which only applies to the output field.");
+      "computations.  Should match (or be <= to) the mu_t_ratio_max set in "
+      "kEpsilonViscosity.  Caps stale over-large mu_t values before k and epsilon "
+      "have converged to a consistent state.");
+
+  params.addParam<Real>(
+      "eps_functor_max",
+      1e6,
+      "Maximum epsilon value read from the TKED functor when computing the TKE bulk "
+      "destruction coefficient rho*eps/k.  Near-wall cells in the TKED two-layer "
+      "region carry large algebraic eps values (physically correct near the wall, "
+      "but potentially problematic for immediately adjacent bulk k-cells).  Setting "
+      "this to a reasonable physical upper bound (e.g. 1e4–1e6) prevents runaway "
+      "destruction in those bulk cells.  Should match or exceed tked_max_phys "
+      "used in kEpsilonTKEDSourceSink.");
+
+  params.addParam<Real>(
+      "tke_min_phys",
+      1e-10,
+      "Physical lower bound on TKE (k). When the current cell k falls below this "
+      "value a strong penalty source is injected to drive it back to tke_min_phys. "
+      "This prevents negative k values from the linear solver causing NaN/Inf in "
+      "subsequent iterations.");
+
+  params.addParam<Real>(
+      "tke_max_phys",
+      1e4,
+      "Physical upper bound on TKE (k). When the current cell k exceeds this value "
+      "a strong penalty source drives it back. Default 1e4 m²/s² covers most "
+      "industrial flows; raise for supersonic/very-high-speed cases.");
 
   params.addParam<Real>(
       "C_pk",
@@ -170,9 +196,12 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
         getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
     _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>()),
     _k_min(getParam<Real>("k_min")),
+    _eps_functor_max(getParam<Real>("eps_functor_max")),
     _eps_min(getParam<Real>("eps_min")),
     _mu_t_prod_max(getParam<Real>("mu_t_prod_max")),
     _C_pk(getParam<Real>("C_pk")),
+    _tke_min_phys(getParam<Real>("tke_min_phys")),
+    _tke_max_phys(getParam<Real>("tke_max_phys")),
     _use_kato_launder(getParam<bool>("use_kato_launder")),
     _grad_method(getParam<MooseEnum>("gradient_method") == "local_least_squares"
                      ? NS::TurbVelocityGradientMethod::LocalLeastSquares
@@ -307,6 +336,14 @@ kEpsilonTKESourceSink::computeMatrixContribution()
 
   const auto state = determineState();
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
+
+  // Physical bounds enforcement: if k is out of [tke_min_phys, tke_max_phys] inject
+  // a large penalty diagonal so the next iterate is driven back inside the bounds.
+  // The matching RHS penalty is in computeRightHandSideContribution.
+  const Real k_old = _var.getElemValue(*_current_elem_info, state);
+  if (k_old < _tke_min_phys || k_old > _tke_max_phys)
+    return _bounds_penalty * _current_elem_volume;
+
   const Real rho = _rho(elem_arg, state);
 
   // Near-wall formulation: destruction goes into the matrix (positive diagonal),
@@ -321,8 +358,11 @@ kEpsilonTKESourceSink::computeMatrixContribution()
     return destruction * _current_elem_volume;
   }
 
-  // Bulk region: implicit destruction ρ epsilon / k
-  const Real epsilon = _epsilon(elem_arg, state);
+  // Bulk region: implicit destruction ρ epsilon / k.
+  // Cap eps read from the functor by _eps_functor_max so that large algebraic
+  // epsilon values in adjacent TKED two-layer cells cannot destroy all TKE in
+  // neighboring bulk cells within a single iteration.
+  const Real epsilon = std::min(_epsilon(elem_arg, state), _eps_functor_max);
   const Real TKE = _var.getElemValue(*_current_elem_info, state);
 
   // Guard k > k_min to prevent rho*eps/k from blowing up when k → 0
@@ -335,6 +375,16 @@ kEpsilonTKESourceSink::computeRightHandSideContribution()
 {
   const auto state = determineState();
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
+
+  // Physical bounds enforcement (must mirror the check in computeMatrixContribution):
+  // Return penalty * target so that the combined system drives k → target.
+  {
+    const Real k_old = _var.getElemValue(*_current_elem_info, state);
+    if (k_old < _tke_min_phys)
+      return _bounds_penalty * _tke_min_phys * _current_elem_volume;
+    if (k_old > _tke_max_phys)
+      return _bounds_penalty * _tke_max_phys * _current_elem_volume;
+  }
 
   // Near-wall cells: production is explicit (on RHS) to keep the matrix diagonal positive.
   // The coefficient-of-k form means RHS = production_coeff * k_current * V.

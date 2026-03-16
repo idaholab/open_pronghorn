@@ -116,9 +116,23 @@ kEpsilonTKEDSourceSink::validParams()
 
   params.addParam<Real>(
       "mu_t_prod_max",
-      1e4,
+      5000.0,
       "Maximum mu_t / mu ratio applied inside the bulk production computation. "
-      "Caps stale over-large mu_t values before k and epsilon have converged.");
+      "Should match (or be <= to) the mu_t_ratio_max in kEpsilonViscosity.");
+
+  params.addParam<Real>(
+      "tked_min_phys",
+      1e-10,
+      "Physical lower bound on epsilon. When the current cell epsilon falls below "
+      "this value a strong penalty source drives it back to tked_min_phys, "
+      "preventing negative epsilon from the linear solver.");
+
+  params.addParam<Real>(
+      "tked_max_phys",
+      1e6,
+      "Physical upper bound on epsilon. Applied to both the solution variable "
+      "and the algebraic two-layer/wall-function target values.  Default 1e6 m²/s³ "
+      "covers most industrial flows at high Re; lower for low-Re or fine-mesh cases.");
 
   params.addParam<Real>(
       "C_pk",
@@ -205,6 +219,8 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _eps_min(getParam<Real>("eps_min")),
     _mu_t_prod_max(getParam<Real>("mu_t_prod_max")),
     _C_pk(getParam<Real>("C_pk")),
+    _tked_min_phys(getParam<Real>("tked_min_phys")),
+    _tked_max_phys(getParam<Real>("tked_max_phys")),
     _use_time_scale_limiter(getParam<bool>("use_time_scale_limiter")),
     _C_t_kolmogorov(getParam<Real>("C_t_kolmogorov")),
     _use_kato_launder(getParam<bool>("use_kato_launder")),
@@ -330,6 +346,12 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const Elem * elem = _current_elem_info->elem();
 
+  // Physical bounds enforcement: if epsilon is out of [tked_min_phys, tked_max_phys],
+  // inject a large penalty diagonal so the next iterate is pulled back inside bounds.
+  const Real eps_old = _var.getElemValue(*_current_elem_info, state);
+  if (eps_old < _tked_min_phys || eps_old > _tked_max_phys)
+    return _bounds_penalty * _current_elem_volume;
+
   // ---------------------------------------------------------------------------
   // Two-layer epsilon: algebraic epsilon in the internal near-wall region
   // ---------------------------------------------------------------------------
@@ -348,10 +370,12 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
     // Same wall-distance Reynolds threshold used in the two-layer μ_t blending
     const Real Rey_star = 60.0; // if you change this in kEpsilonViscosity, change it here too
 
-    // Viscosity-dominated two-layer region: impose epsilon algebraically
+    // Viscosity-dominated two-layer region: impose epsilon algebraically.
+    // Use _bounds_penalty (not just 1) to make this a near-hard Dirichlet so
+    // advection and diffusion from neighboring cells cannot overwhelm the
+    // algebraic constraint and inflate eps in the two-layer zone.
     if (Red <= Rey_star)
-      // Matrix coefficient = 1, but in FV we multiply by the cell volume
-      return _current_elem_volume;
+      return _bounds_penalty * _current_elem_volume;
   }
 
   // ---------------------------------------------------------------------------
@@ -361,7 +385,7 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
   if (_wall_bounded.find(elem) != _wall_bounded.end() &&
       !(_variant == NS::KEpsilonVariant::StandardTwoLayer ||
         _variant == NS::KEpsilonVariant::RealizableTwoLayer))
-    return _current_elem_volume;
+    return _bounds_penalty * _current_elem_volume;
 
   // ---------------------------------------------------------------------------
   // Bulk: implicit destruction term C2_eps f2 rho / T_e
@@ -394,6 +418,15 @@ kEpsilonTKEDSourceSink::computeRightHandSideContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const Elem * elem = _current_elem_info->elem();
 
+  // Physical bounds enforcement (must mirror computeMatrixContribution check):
+  {
+    const Real eps_old = _var.getElemValue(*_current_elem_info, state);
+    if (eps_old < _tked_min_phys)
+      return _bounds_penalty * _tked_min_phys * _current_elem_volume;
+    if (eps_old > _tked_max_phys)
+      return _bounds_penalty * _tked_max_phys * _current_elem_volume;
+  }
+
   // ---------------------------------------------------------------------------
   // Two-layer epsilon: algebraic epsilon in the internal near-wall region
   // ---------------------------------------------------------------------------
@@ -424,11 +457,22 @@ kEpsilonTKEDSourceSink::computeRightHandSideContribution()
       // near the wall because it omits the C_mu^{3/4}/c_l = C_mu^{3/2}/kappa factor.
       const Real c_l = NS::cl_from_Cmu(_C_mu);
       const Real A_eps = 2.0 * c_l;
+      // l_eps → 0 faster than k^(3/2) → 0 for very small d, causing eps_2layer → ∞.
+      // Use k_safe to prevent division issues when k is near zero (early iterations).
+      const Real k_safe = std::max(k, _k_min);
       const Real l_eps =
           c_l * d * (1.0 - std::exp(-Red / std::max(A_eps, 1e-12)));
-      const Real eps_2layer = std::pow(k, 1.5) / std::max(l_eps, 1e-12);
+      const Real eps_2layer_raw = std::pow(k_safe, 1.5) / std::max(l_eps, 1e-12);
 
-      return eps_2layer * _current_elem_volume;
+      // Clamp the algebraic eps to the physical upper bound.
+      // For very fine near-wall cells this formula can give huge values that,
+      // if left unchecked, would dominate the linear system and propagate
+      // large values into the bulk via diffusion.
+      const Real eps_2layer = std::clamp(eps_2layer_raw, _tked_min_phys, _tked_max_phys);
+
+      // Return penalty * target to mirror the matrix contribution (penalty * V),
+      // creating a near-hard Dirichlet for the algebraic two-layer constraint.
+      return _bounds_penalty * eps_2layer * _current_elem_volume;
     }
   }
 
@@ -441,7 +485,8 @@ kEpsilonTKEDSourceSink::computeRightHandSideContribution()
         _variant == NS::KEpsilonVariant::RealizableTwoLayer))
   {
     const Real eps_wall = computeWallEpsilon(elem_arg, state);
-    return eps_wall * _current_elem_volume;
+    // Match the penalty used in the matrix contribution for this branch
+    return _bounds_penalty * eps_wall * _current_elem_volume;
   }
 
   // ---------------------------------------------------------------------------
@@ -482,7 +527,8 @@ kEpsilonTKEDSourceSink::computeWallEpsilon(const Moose::ElemArg & elem_arg,
 
   const Real rho = _rho(elem_arg, state);
   const Real mu = _mu(elem_arg, state);
-  const Real k = _k(elem_arg, state);
+  // Guard k to prevent sqrt(k) and k^(3/2) from giving zero/negative results
+  const Real k = std::max(_k(elem_arg, state), _k_min);
 
   // Velocity at the cell centroid (for equilibrium wall treatments)
   RealVectorValue velocity(_u_var(elem_arg, state), 0.0, 0.0);
@@ -518,11 +564,14 @@ kEpsilonTKEDSourceSink::computeWallEpsilon(const Moose::ElemArg & elem_arg,
 
     Real eps_i = 0.0;
     if (y_plus < 11.25)
-      // viscous sublayer branch from LinearFVTKEDSourceSink
+      // viscous sublayer: eps = 2 nu k / d^2
       eps_i = 2.0 * k * mu / rho / (d * d);
     else
-      // log-layer epsilon
+      // log-layer: eps = C_mu^(3/4) k^(3/2) / (kappa d)
       eps_i = std::pow(_C_mu, 0.75) * std::pow(k, 1.5) / (NS::von_karman_constant * d);
+
+    // Cap individual wall-face contribution by physical bounds
+    eps_i = std::clamp(eps_i, _tked_min_phys, _tked_max_phys);
 
     eps_sum += eps_i;
     tot_weight += 1.0;

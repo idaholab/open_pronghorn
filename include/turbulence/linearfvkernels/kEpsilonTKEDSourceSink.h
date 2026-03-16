@@ -185,6 +185,15 @@ protected:
   /// When > 0, shear production is bounded by C_pk * rho * k * |S| — effective even at eps ≈ 0.
   const Real _C_pk;
 
+  /// Physical lower bound on epsilon. Penalty source enforces eps >= tked_min_phys.
+  const Real _tked_min_phys;
+
+  /// Physical upper bound on epsilon. Penalty source enforces eps <= tked_max_phys.
+  const Real _tked_max_phys;
+
+  /// Penalty coefficient for physical bounds enforcement.
+  static constexpr Real _bounds_penalty = 1e8;
+
   /// If true, apply a Kolmogorov time scale lower bound:
   ///   T = max(k/eps,  C_t_kolmogorov * sqrt(nu/eps))
   const bool _use_time_scale_limiter;
