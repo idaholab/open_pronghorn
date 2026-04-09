@@ -23,7 +23,7 @@ LinearFVSRFSource::validParams()
       "from the metacenter (inertial) reference frame to the body reference frame.");
 
   params.addRequiredParam<MooseFunctorName>("source_density_vector", "The source density vector in the metacenter (inertial) reference frame.");
-  params.addRequiredParam<MooseFunctorName>("scaling_factor", "Coefficient to multiply the body force term with.");
+  params.addParam<MooseFunctorName>("scaling_factor", 1.0,"Coefficient to multiply the body force term with.");
     MooseEnum momentum_component("x=0 y=1 z=2");
   params.addRequiredParam<MooseEnum>("momentum_component",momentum_component,"The component in the body reference frame of the momentum equation that this kernel applies to.");
   params.addRequiredParam<MooseFunctorName>("pitch_angle", "The pitch angle of rotation between the metacenter and the body reference frame.");

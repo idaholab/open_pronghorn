@@ -31,7 +31,7 @@ LinearFVSRFAccelerations::validParams()
 
   params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
   params.addRequiredParam<SolverVariableName>("v", "The velocity in the y direction.");
-  params.addRequiredParam<SolverVariableName>("w", "The velocity in the z direction.");
+  params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
 
   params.addParam<bool>("add_coriolis", true, "Add Coriolis terms or not.");
   return params;
@@ -46,7 +46,7 @@ LinearFVSRFAccelerations::LinearFVSRFAccelerations(const InputParameters & param
     _r_mc(getFunctor<RealVectorValue>("r_mc")),
     _u_var(getFunctor<Real>("u")),
     _v_var(getFunctor<Real>("v")),
-    _w_var(getFunctor<Real>("w")),
+    _w_var(params.isParamValid("w") ? &(getFunctor<Real>("w")) : nullptr),
     _coriolis(getParam<bool>("add_coriolis"))
 {
 }
@@ -75,7 +75,7 @@ LinearFVSRFAccelerations::computeRightHandSideContribution()
   // Coriolis effect
   const RealVectorValue vel(_u_var(elem_arg, state_arg),
                             _v_var(elem_arg, state_arg),
-                            _w_var(elem_arg, state_arg));
+                            _w_var ? (*_w_var)(elem_arg, state_arg) : 0.0);
   const RealVectorValue coriolis = 2.0 * omega.cross(vel);
 
   return -rho * (omega_x_omega_x_r(_index) + omega_dot_x_r(_index) + coriolis(_index)) * _current_elem_volume;
