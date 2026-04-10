@@ -4,18 +4,21 @@
 ##### LOAD MODULES ###############
 import numpy as np
 import matplotlib.pyplot as plt
-exp_centerline = np.genfromtxt("experimental_centerline.csv", skip_header=0, delimiter=',')
+##################################
+##### Centerline velocity ########
+exp_centerline = np.genfromtxt("exp_centerline.csv", skip_header=0, delimiter=',')
 default_centerline = np.genfromtxt("default_centerline.csv", skip_header=0, delimiter=',')
 calibrated_centerline = np.genfromtxt("calibrated_centerline.csv", skip_header=0, delimiter=',')
 Balajee_centerline = np.genfromtxt("Balajee_centerline.csv", skip_header=0, delimiter=',')
 lumley_centerline = np.genfromtxt("lumley_centerline.csv", skip_header=0, delimiter=',')
 Mi_centerline = np.genfromtxt("Mi_centerline.csv", skip_header=0, delimiter=',')
+# opgh_RTL_centerline = np.genfromtxt("jet_out_centerline_RTL.csv", skip_header=1, delimiter=',')
+# opgh_SKE_centerline = np.genfromtxt("jet_out_centerline_SKE.csv", skip_header=1, delimiter=',')
+#####
 exp_halfwidth = np.genfromtxt("exp_halfwidth.csv", skip_header=0, delimiter=',')
-opgh_RTL_halfwidth = np.genfromtxt("combined_halfwidths.csv", skip_header=1, delimiter=',')
+# opgh_RTL_halfwidth = np.genfromtxt("combined_halfwidths.csv", skip_header=1, delimiter=',')
 lumley_halfwidth = np.genfromtxt("lumley_halfwidth.csv", skip_header=0, delimiter=',')
 Mi_halfwidth = np.genfromtxt("Mi_halfwidth.csv", skip_header=0, delimiter=',')
-opgh_RTL_centerline = np.genfromtxt("jet_out_centerline_RTL.csv", skip_header=1, delimiter=',')
-opgh_SKE_centerline = np.genfromtxt("jet_out_centerline_SKE.csv", skip_header=1, delimiter=',')
 calibrated_IP_RSM_halfwidth = np.genfromtxt("calibrated_IP_RSM_halfwidth.csv", skip_header=0, delimiter=',')
 default_IP_RSM_halfwidth = np.genfromtxt("default_IP_RSM_halfwidth.csv", skip_header=0, delimiter=',')
 ############### MAKE PRETTY ###################
@@ -23,7 +26,7 @@ plt.rcParams["font.family"] = "serif"
 plt.rcParams["mathtext.fontset"] = "dejavuserif"
 ###############################################
 
-plt.figure()
+# plt.figure()
 
 # --- Experimental data: Turutoglu, et al. 2024 ---
 plt.plot(
@@ -34,29 +37,29 @@ plt.plot(
     markerfacecolor='none',   # see-through
     markeredgecolor='k',      # black edge
     markeredgewidth=1.2,
-    label="Turutoglu, et al. 2024, Re = 10000"
+    label="Experiment, Turutoglu et al. 2024"
 )
 
 
-# --- Simulation results RTL ---
-plt.plot(
-    opgh_RTL_centerline[:, -2] / 0.01,
-    opgh_RTL_centerline[0, -1] / opgh_RTL_centerline[:, -1],
-    linestyle='-',
-    color='red',
-    label="openPronghorn (RealizableTwoLayer, Wolfstein)",
-    zorder=1
-)
+# # --- Simulation results RTL ---
+# plt.plot(
+#     opgh_RTL_centerline[:, -2] / 0.01,
+#     opgh_RTL_centerline[0, -1] / opgh_RTL_centerline[:, -1],
+#     linestyle='-',
+#     color='red',
+#     label="openPronghorn (RealizableTwoLayer, Wolfstein)",
+#     zorder=1
+# )
 
-# --- Simulation results SKE ---
-plt.plot(
-    opgh_SKE_centerline[:, -2] / 0.01,
-    opgh_SKE_centerline[0, -1] / opgh_SKE_centerline[:, -1],
-    linestyle='-',
-    color='black',
-    label="openPronghorn (Standard K-E)",
-    zorder=1
-)
+# # --- Simulation results SKE ---
+# plt.plot(
+#     opgh_SKE_centerline[:, -2] / 0.01,
+#     opgh_SKE_centerline[0, -1] / opgh_SKE_centerline[:, -1],
+#     linestyle='-',
+#     color='black',
+#     label="openPronghorn (Standard K-E)",
+#     zorder=1
+# )
 
 # --- Default IP-RSM ---
 plt.plot(
@@ -64,7 +67,7 @@ plt.plot(
     linestyle='-',
     linewidth=2.0,
     color='blue',
-    label="default IP-RSM",
+    label="default IP-RSM, Turutoglu et al. 2024",
     zorder=1
 )
 
@@ -74,7 +77,7 @@ plt.plot(
     linestyle='-',
     linewidth=2.0,
     color='orange',
-    label="calibrated IP-RSM",
+    label="calibrated IP-RSM, Turutoglu et al. 2024",
     zorder=1
 )
 
@@ -139,7 +142,7 @@ plt.plot(
     markerfacecolor='none',   # see-through
     markeredgecolor='k',      # black edge
     markeredgewidth=1.2,
-    label="Experimental, Turutoglu et al. 2024"
+    label="Experiment, Turutoglu et al. 2024"
 )
 
 # --- Lumley correlation ---
@@ -170,7 +173,7 @@ plt.plot(
     linestyle='-',
     linewidth=2.0,
     color='blue',
-    label="default IP-RSM",
+    label="default IP-RSM, Turutoglu et al. 2024",
     zorder=1
 )
 
@@ -180,19 +183,19 @@ plt.plot(
     linestyle='-',
     linewidth=2.0,
     color='orange',
-    label="calibrated IP-RSM",
+    label="calibrated IP-RSM, Turutoglu et al. 2024",
     zorder=1
 )
 
-# --- Pronghorn RTL ---
-plt.plot(
-    opgh_RTL_halfwidth[:, 2]/0.01, opgh_RTL_halfwidth[:, 3]/0.01,
-    linestyle='-',
-    linewidth=2.0,
-    color='red',
-    label="openPronghorn (RealizableTwoLayer, Wolfstein)",
-    zorder=1
-)
+# # --- Pronghorn RTL ---
+# plt.plot(
+#     opgh_RTL_halfwidth[:, 2]/0.01, opgh_RTL_halfwidth[:, 3]/0.01,
+#     linestyle='-',
+#     linewidth=2.0,
+#     color='red',
+#     label="openPronghorn (RealizableTwoLayer, Wolfstein)",
+#     zorder=1
+# )
 
 # --- Titles and labels ---
 plt.title(

@@ -4,7 +4,7 @@
 # Open-Pronghorn simulation of a steady state incompressible turbulent flow of a jet into a big space/tank.
 # Reference: https://pubs.aip.org/aip/pof/article/36/11/115133/3319195/Calibration-of-the-Reynolds-stress-model-for
 # Author: Dr. Kyriakopoulos Vasileios
-# Idaho Falls, INL, December 17, 2025
+# Idaho Falls, INL, April 10, 2026
 # ================================================================================================================
 # MODEL PARAMETERS
 # ================================================================================================================
