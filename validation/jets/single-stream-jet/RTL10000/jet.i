@@ -13,11 +13,13 @@
 H = 0.2 # Height/width of the tank (m).
 L = 0.3 # Total tank length (m)
 Dh = 0.01 # Inlet Pipe diameter (m)
-nz = 100 # number of cells in the axial direction
+nz = 150 # number of cells in the axial direction
 n1 = 8 # number of radial cells per ring in the cross-section
 n2 = 8 # number of radial cells per ring in the cross-section
 n3 = 8 # number of radial cells per ring in the cross-section
-n4 = 16 # number of radial cells per ring in the cross-section
+n4 = 8 # number of radial cells per ring in the cross-section
+n5 = 8 # number of radial cells per ring in the cross-section
+ny = ${fparse n1 + n2 + n3 + n4 + n5}
 # A = '${fparse pi*Dh*Dh/4}' # Cross-section area of the inlet (m2)
 # ================================================================================================================
 # Air properties
@@ -61,8 +63,8 @@ outlet = 'back bottom top left right'
   [front_face]
     type = ConcentricCircleMeshGenerator
     num_sectors = 8
-    radii = '${fparse Dh/2.0} ${Dh} ${fparse Dh*2.0}'
-    rings = '${n1} ${n2} ${n3} ${n4}'
+    radii = '${fparse Dh/2.0} ${Dh} ${fparse Dh*2.0} ${fparse Dh*4.0}'
+    rings = '${n1} ${n2} ${n3} ${n4} ${n5}'
     has_outer_square = on
     pitch = ${H}
     preserve_volumes = off
@@ -87,7 +89,7 @@ outlet = 'back bottom top left right'
     type = ParsedGenerateSideset
     input = inlet
     combinatorial_geometry = 'abs(z) < 1e-6'
-    included_subdomains = '2 3 4'
+    included_subdomains = '2 3 4 5'
     normal = '0 0 -1'
     new_sideset_name = front
   []
@@ -95,7 +97,7 @@ outlet = 'back bottom top left right'
     type = ParsedGenerateSideset
     input = front
     combinatorial_geometry = 'abs(z) > ${fparse L - 1e-6}'
-    included_subdomains = '1 2 3 4'
+    included_subdomains = '1 2 3 4 5'
     normal = '0 0 1'
     new_sideset_name = back
   []
@@ -108,8 +110,8 @@ outlet = 'back bottom top left right'
   [rename]
     type = RenameBlockGenerator
     input = delete_surfaces
-    old_block = '1 2 3 4'
-    new_block = 'air air air air'
+    old_block = '1 2 3 4 5'
+    new_block = 'air air air air air'
   []
 []
 
@@ -551,7 +553,7 @@ outlet = 'back bottom top left right'
     type = LineValueSampler
     start_point = '0 0 0'
     end_point = '0 0 0.3'
-    num_points = 300
+    num_points = ${fparse nz + 1}
     variable = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
     sort_by = 'z'
     execute_on = 'FINAL'
