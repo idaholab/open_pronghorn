@@ -1,1510 +1,1500 @@
   [radial_000]
     type = LineValueSampler
-    start_point = '0 0.0 0.000000'
-    end_point   = '0 0.100000 0.000000'
+    start_point = '${eps} ${eps} 0.001000'
+    end_point   = '${eps} 0.100000 0.001000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_001]
     type = LineValueSampler
-    start_point = '0 0.0 0.002000'
-    end_point   = '0 0.100000 0.002000'
+    start_point = '${eps} ${eps} 0.003000'
+    end_point   = '${eps} 0.100000 0.003000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_002]
     type = LineValueSampler
-    start_point = '0 0.0 0.004000'
-    end_point   = '0 0.100000 0.004000'
+    start_point = '${eps} ${eps} 0.005000'
+    end_point   = '${eps} 0.100000 0.005000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_003]
     type = LineValueSampler
-    start_point = '0 0.0 0.006000'
-    end_point   = '0 0.100000 0.006000'
+    start_point = '${eps} ${eps} 0.007000'
+    end_point   = '${eps} 0.100000 0.007000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_004]
     type = LineValueSampler
-    start_point = '0 0.0 0.008000'
-    end_point   = '0 0.100000 0.008000'
+    start_point = '${eps} ${eps} 0.009000'
+    end_point   = '${eps} 0.100000 0.009000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_005]
     type = LineValueSampler
-    start_point = '0 0.0 0.010000'
-    end_point   = '0 0.100000 0.010000'
+    start_point = '${eps} ${eps} 0.011000'
+    end_point   = '${eps} 0.100000 0.011000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_006]
     type = LineValueSampler
-    start_point = '0 0.0 0.012000'
-    end_point   = '0 0.100000 0.012000'
+    start_point = '${eps} ${eps} 0.013000'
+    end_point   = '${eps} 0.100000 0.013000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_007]
     type = LineValueSampler
-    start_point = '0 0.0 0.014000'
-    end_point   = '0 0.100000 0.014000'
+    start_point = '${eps} ${eps} 0.015000'
+    end_point   = '${eps} 0.100000 0.015000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_008]
     type = LineValueSampler
-    start_point = '0 0.0 0.016000'
-    end_point   = '0 0.100000 0.016000'
+    start_point = '${eps} ${eps} 0.017000'
+    end_point   = '${eps} 0.100000 0.017000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_009]
     type = LineValueSampler
-    start_point = '0 0.0 0.018000'
-    end_point   = '0 0.100000 0.018000'
+    start_point = '${eps} ${eps} 0.019000'
+    end_point   = '${eps} 0.100000 0.019000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_010]
     type = LineValueSampler
-    start_point = '0 0.0 0.020000'
-    end_point   = '0 0.100000 0.020000'
+    start_point = '${eps} ${eps} 0.021000'
+    end_point   = '${eps} 0.100000 0.021000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_011]
     type = LineValueSampler
-    start_point = '0 0.0 0.022000'
-    end_point   = '0 0.100000 0.022000'
+    start_point = '${eps} ${eps} 0.023000'
+    end_point   = '${eps} 0.100000 0.023000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_012]
     type = LineValueSampler
-    start_point = '0 0.0 0.024000'
-    end_point   = '0 0.100000 0.024000'
+    start_point = '${eps} ${eps} 0.025000'
+    end_point   = '${eps} 0.100000 0.025000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_013]
     type = LineValueSampler
-    start_point = '0 0.0 0.026000'
-    end_point   = '0 0.100000 0.026000'
+    start_point = '${eps} ${eps} 0.027000'
+    end_point   = '${eps} 0.100000 0.027000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_014]
     type = LineValueSampler
-    start_point = '0 0.0 0.028000'
-    end_point   = '0 0.100000 0.028000'
+    start_point = '${eps} ${eps} 0.029000'
+    end_point   = '${eps} 0.100000 0.029000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_015]
     type = LineValueSampler
-    start_point = '0 0.0 0.030000'
-    end_point   = '0 0.100000 0.030000'
+    start_point = '${eps} ${eps} 0.031000'
+    end_point   = '${eps} 0.100000 0.031000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_016]
     type = LineValueSampler
-    start_point = '0 0.0 0.032000'
-    end_point   = '0 0.100000 0.032000'
+    start_point = '${eps} ${eps} 0.033000'
+    end_point   = '${eps} 0.100000 0.033000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_017]
     type = LineValueSampler
-    start_point = '0 0.0 0.034000'
-    end_point   = '0 0.100000 0.034000'
+    start_point = '${eps} ${eps} 0.035000'
+    end_point   = '${eps} 0.100000 0.035000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_018]
     type = LineValueSampler
-    start_point = '0 0.0 0.036000'
-    end_point   = '0 0.100000 0.036000'
+    start_point = '${eps} ${eps} 0.037000'
+    end_point   = '${eps} 0.100000 0.037000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_019]
     type = LineValueSampler
-    start_point = '0 0.0 0.038000'
-    end_point   = '0 0.100000 0.038000'
+    start_point = '${eps} ${eps} 0.039000'
+    end_point   = '${eps} 0.100000 0.039000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_020]
     type = LineValueSampler
-    start_point = '0 0.0 0.040000'
-    end_point   = '0 0.100000 0.040000'
+    start_point = '${eps} ${eps} 0.041000'
+    end_point   = '${eps} 0.100000 0.041000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_021]
     type = LineValueSampler
-    start_point = '0 0.0 0.042000'
-    end_point   = '0 0.100000 0.042000'
+    start_point = '${eps} ${eps} 0.043000'
+    end_point   = '${eps} 0.100000 0.043000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_022]
     type = LineValueSampler
-    start_point = '0 0.0 0.044000'
-    end_point   = '0 0.100000 0.044000'
+    start_point = '${eps} ${eps} 0.045000'
+    end_point   = '${eps} 0.100000 0.045000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_023]
     type = LineValueSampler
-    start_point = '0 0.0 0.046000'
-    end_point   = '0 0.100000 0.046000'
+    start_point = '${eps} ${eps} 0.047000'
+    end_point   = '${eps} 0.100000 0.047000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_024]
     type = LineValueSampler
-    start_point = '0 0.0 0.048000'
-    end_point   = '0 0.100000 0.048000'
+    start_point = '${eps} ${eps} 0.049000'
+    end_point   = '${eps} 0.100000 0.049000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_025]
     type = LineValueSampler
-    start_point = '0 0.0 0.050000'
-    end_point   = '0 0.100000 0.050000'
+    start_point = '${eps} ${eps} 0.051000'
+    end_point   = '${eps} 0.100000 0.051000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_026]
     type = LineValueSampler
-    start_point = '0 0.0 0.052000'
-    end_point   = '0 0.100000 0.052000'
+    start_point = '${eps} ${eps} 0.053000'
+    end_point   = '${eps} 0.100000 0.053000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_027]
     type = LineValueSampler
-    start_point = '0 0.0 0.054000'
-    end_point   = '0 0.100000 0.054000'
+    start_point = '${eps} ${eps} 0.055000'
+    end_point   = '${eps} 0.100000 0.055000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_028]
     type = LineValueSampler
-    start_point = '0 0.0 0.056000'
-    end_point   = '0 0.100000 0.056000'
+    start_point = '${eps} ${eps} 0.057000'
+    end_point   = '${eps} 0.100000 0.057000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_029]
     type = LineValueSampler
-    start_point = '0 0.0 0.058000'
-    end_point   = '0 0.100000 0.058000'
+    start_point = '${eps} ${eps} 0.059000'
+    end_point   = '${eps} 0.100000 0.059000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_030]
     type = LineValueSampler
-    start_point = '0 0.0 0.060000'
-    end_point   = '0 0.100000 0.060000'
+    start_point = '${eps} ${eps} 0.061000'
+    end_point   = '${eps} 0.100000 0.061000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_031]
     type = LineValueSampler
-    start_point = '0 0.0 0.062000'
-    end_point   = '0 0.100000 0.062000'
+    start_point = '${eps} ${eps} 0.063000'
+    end_point   = '${eps} 0.100000 0.063000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_032]
     type = LineValueSampler
-    start_point = '0 0.0 0.064000'
-    end_point   = '0 0.100000 0.064000'
+    start_point = '${eps} ${eps} 0.065000'
+    end_point   = '${eps} 0.100000 0.065000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_033]
     type = LineValueSampler
-    start_point = '0 0.0 0.066000'
-    end_point   = '0 0.100000 0.066000'
+    start_point = '${eps} ${eps} 0.067000'
+    end_point   = '${eps} 0.100000 0.067000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_034]
     type = LineValueSampler
-    start_point = '0 0.0 0.068000'
-    end_point   = '0 0.100000 0.068000'
+    start_point = '${eps} ${eps} 0.069000'
+    end_point   = '${eps} 0.100000 0.069000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_035]
     type = LineValueSampler
-    start_point = '0 0.0 0.070000'
-    end_point   = '0 0.100000 0.070000'
+    start_point = '${eps} ${eps} 0.071000'
+    end_point   = '${eps} 0.100000 0.071000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_036]
     type = LineValueSampler
-    start_point = '0 0.0 0.072000'
-    end_point   = '0 0.100000 0.072000'
+    start_point = '${eps} ${eps} 0.073000'
+    end_point   = '${eps} 0.100000 0.073000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_037]
     type = LineValueSampler
-    start_point = '0 0.0 0.074000'
-    end_point   = '0 0.100000 0.074000'
+    start_point = '${eps} ${eps} 0.075000'
+    end_point   = '${eps} 0.100000 0.075000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_038]
     type = LineValueSampler
-    start_point = '0 0.0 0.076000'
-    end_point   = '0 0.100000 0.076000'
+    start_point = '${eps} ${eps} 0.077000'
+    end_point   = '${eps} 0.100000 0.077000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_039]
     type = LineValueSampler
-    start_point = '0 0.0 0.078000'
-    end_point   = '0 0.100000 0.078000'
+    start_point = '${eps} ${eps} 0.079000'
+    end_point   = '${eps} 0.100000 0.079000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_040]
     type = LineValueSampler
-    start_point = '0 0.0 0.080000'
-    end_point   = '0 0.100000 0.080000'
+    start_point = '${eps} ${eps} 0.081000'
+    end_point   = '${eps} 0.100000 0.081000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_041]
     type = LineValueSampler
-    start_point = '0 0.0 0.082000'
-    end_point   = '0 0.100000 0.082000'
+    start_point = '${eps} ${eps} 0.083000'
+    end_point   = '${eps} 0.100000 0.083000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_042]
     type = LineValueSampler
-    start_point = '0 0.0 0.084000'
-    end_point   = '0 0.100000 0.084000'
+    start_point = '${eps} ${eps} 0.085000'
+    end_point   = '${eps} 0.100000 0.085000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_043]
     type = LineValueSampler
-    start_point = '0 0.0 0.086000'
-    end_point   = '0 0.100000 0.086000'
+    start_point = '${eps} ${eps} 0.087000'
+    end_point   = '${eps} 0.100000 0.087000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_044]
     type = LineValueSampler
-    start_point = '0 0.0 0.088000'
-    end_point   = '0 0.100000 0.088000'
+    start_point = '${eps} ${eps} 0.089000'
+    end_point   = '${eps} 0.100000 0.089000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_045]
     type = LineValueSampler
-    start_point = '0 0.0 0.090000'
-    end_point   = '0 0.100000 0.090000'
+    start_point = '${eps} ${eps} 0.091000'
+    end_point   = '${eps} 0.100000 0.091000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_046]
     type = LineValueSampler
-    start_point = '0 0.0 0.092000'
-    end_point   = '0 0.100000 0.092000'
+    start_point = '${eps} ${eps} 0.093000'
+    end_point   = '${eps} 0.100000 0.093000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_047]
     type = LineValueSampler
-    start_point = '0 0.0 0.094000'
-    end_point   = '0 0.100000 0.094000'
+    start_point = '${eps} ${eps} 0.095000'
+    end_point   = '${eps} 0.100000 0.095000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_048]
     type = LineValueSampler
-    start_point = '0 0.0 0.096000'
-    end_point   = '0 0.100000 0.096000'
+    start_point = '${eps} ${eps} 0.097000'
+    end_point   = '${eps} 0.100000 0.097000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_049]
     type = LineValueSampler
-    start_point = '0 0.0 0.098000'
-    end_point   = '0 0.100000 0.098000'
+    start_point = '${eps} ${eps} 0.099000'
+    end_point   = '${eps} 0.100000 0.099000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_050]
     type = LineValueSampler
-    start_point = '0 0.0 0.100000'
-    end_point   = '0 0.100000 0.100000'
+    start_point = '${eps} ${eps} 0.101000'
+    end_point   = '${eps} 0.100000 0.101000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_051]
     type = LineValueSampler
-    start_point = '0 0.0 0.102000'
-    end_point   = '0 0.100000 0.102000'
+    start_point = '${eps} ${eps} 0.103000'
+    end_point   = '${eps} 0.100000 0.103000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_052]
     type = LineValueSampler
-    start_point = '0 0.0 0.104000'
-    end_point   = '0 0.100000 0.104000'
+    start_point = '${eps} ${eps} 0.105000'
+    end_point   = '${eps} 0.100000 0.105000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_053]
     type = LineValueSampler
-    start_point = '0 0.0 0.106000'
-    end_point   = '0 0.100000 0.106000'
+    start_point = '${eps} ${eps} 0.107000'
+    end_point   = '${eps} 0.100000 0.107000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_054]
     type = LineValueSampler
-    start_point = '0 0.0 0.108000'
-    end_point   = '0 0.100000 0.108000'
+    start_point = '${eps} ${eps} 0.109000'
+    end_point   = '${eps} 0.100000 0.109000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_055]
     type = LineValueSampler
-    start_point = '0 0.0 0.110000'
-    end_point   = '0 0.100000 0.110000'
+    start_point = '${eps} ${eps} 0.111000'
+    end_point   = '${eps} 0.100000 0.111000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_056]
     type = LineValueSampler
-    start_point = '0 0.0 0.112000'
-    end_point   = '0 0.100000 0.112000'
+    start_point = '${eps} ${eps} 0.113000'
+    end_point   = '${eps} 0.100000 0.113000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_057]
     type = LineValueSampler
-    start_point = '0 0.0 0.114000'
-    end_point   = '0 0.100000 0.114000'
+    start_point = '${eps} ${eps} 0.115000'
+    end_point   = '${eps} 0.100000 0.115000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_058]
     type = LineValueSampler
-    start_point = '0 0.0 0.116000'
-    end_point   = '0 0.100000 0.116000'
+    start_point = '${eps} ${eps} 0.117000'
+    end_point   = '${eps} 0.100000 0.117000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_059]
     type = LineValueSampler
-    start_point = '0 0.0 0.118000'
-    end_point   = '0 0.100000 0.118000'
+    start_point = '${eps} ${eps} 0.119000'
+    end_point   = '${eps} 0.100000 0.119000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_060]
     type = LineValueSampler
-    start_point = '0 0.0 0.120000'
-    end_point   = '0 0.100000 0.120000'
+    start_point = '${eps} ${eps} 0.121000'
+    end_point   = '${eps} 0.100000 0.121000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_061]
     type = LineValueSampler
-    start_point = '0 0.0 0.122000'
-    end_point   = '0 0.100000 0.122000'
+    start_point = '${eps} ${eps} 0.123000'
+    end_point   = '${eps} 0.100000 0.123000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_062]
     type = LineValueSampler
-    start_point = '0 0.0 0.124000'
-    end_point   = '0 0.100000 0.124000'
+    start_point = '${eps} ${eps} 0.125000'
+    end_point   = '${eps} 0.100000 0.125000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_063]
     type = LineValueSampler
-    start_point = '0 0.0 0.126000'
-    end_point   = '0 0.100000 0.126000'
+    start_point = '${eps} ${eps} 0.127000'
+    end_point   = '${eps} 0.100000 0.127000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_064]
     type = LineValueSampler
-    start_point = '0 0.0 0.128000'
-    end_point   = '0 0.100000 0.128000'
+    start_point = '${eps} ${eps} 0.129000'
+    end_point   = '${eps} 0.100000 0.129000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_065]
     type = LineValueSampler
-    start_point = '0 0.0 0.130000'
-    end_point   = '0 0.100000 0.130000'
+    start_point = '${eps} ${eps} 0.131000'
+    end_point   = '${eps} 0.100000 0.131000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_066]
     type = LineValueSampler
-    start_point = '0 0.0 0.132000'
-    end_point   = '0 0.100000 0.132000'
+    start_point = '${eps} ${eps} 0.133000'
+    end_point   = '${eps} 0.100000 0.133000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_067]
     type = LineValueSampler
-    start_point = '0 0.0 0.134000'
-    end_point   = '0 0.100000 0.134000'
+    start_point = '${eps} ${eps} 0.135000'
+    end_point   = '${eps} 0.100000 0.135000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_068]
     type = LineValueSampler
-    start_point = '0 0.0 0.136000'
-    end_point   = '0 0.100000 0.136000'
+    start_point = '${eps} ${eps} 0.137000'
+    end_point   = '${eps} 0.100000 0.137000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_069]
     type = LineValueSampler
-    start_point = '0 0.0 0.138000'
-    end_point   = '0 0.100000 0.138000'
+    start_point = '${eps} ${eps} 0.139000'
+    end_point   = '${eps} 0.100000 0.139000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_070]
     type = LineValueSampler
-    start_point = '0 0.0 0.140000'
-    end_point   = '0 0.100000 0.140000'
+    start_point = '${eps} ${eps} 0.141000'
+    end_point   = '${eps} 0.100000 0.141000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_071]
     type = LineValueSampler
-    start_point = '0 0.0 0.142000'
-    end_point   = '0 0.100000 0.142000'
+    start_point = '${eps} ${eps} 0.143000'
+    end_point   = '${eps} 0.100000 0.143000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_072]
     type = LineValueSampler
-    start_point = '0 0.0 0.144000'
-    end_point   = '0 0.100000 0.144000'
+    start_point = '${eps} ${eps} 0.145000'
+    end_point   = '${eps} 0.100000 0.145000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_073]
     type = LineValueSampler
-    start_point = '0 0.0 0.146000'
-    end_point   = '0 0.100000 0.146000'
+    start_point = '${eps} ${eps} 0.147000'
+    end_point   = '${eps} 0.100000 0.147000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_074]
     type = LineValueSampler
-    start_point = '0 0.0 0.148000'
-    end_point   = '0 0.100000 0.148000'
+    start_point = '${eps} ${eps} 0.149000'
+    end_point   = '${eps} 0.100000 0.149000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_075]
     type = LineValueSampler
-    start_point = '0 0.0 0.150000'
-    end_point   = '0 0.100000 0.150000'
+    start_point = '${eps} ${eps} 0.151000'
+    end_point   = '${eps} 0.100000 0.151000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_076]
     type = LineValueSampler
-    start_point = '0 0.0 0.152000'
-    end_point   = '0 0.100000 0.152000'
+    start_point = '${eps} ${eps} 0.153000'
+    end_point   = '${eps} 0.100000 0.153000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_077]
     type = LineValueSampler
-    start_point = '0 0.0 0.154000'
-    end_point   = '0 0.100000 0.154000'
+    start_point = '${eps} ${eps} 0.155000'
+    end_point   = '${eps} 0.100000 0.155000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_078]
     type = LineValueSampler
-    start_point = '0 0.0 0.156000'
-    end_point   = '0 0.100000 0.156000'
+    start_point = '${eps} ${eps} 0.157000'
+    end_point   = '${eps} 0.100000 0.157000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_079]
     type = LineValueSampler
-    start_point = '0 0.0 0.158000'
-    end_point   = '0 0.100000 0.158000'
+    start_point = '${eps} ${eps} 0.159000'
+    end_point   = '${eps} 0.100000 0.159000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_080]
     type = LineValueSampler
-    start_point = '0 0.0 0.160000'
-    end_point   = '0 0.100000 0.160000'
+    start_point = '${eps} ${eps} 0.161000'
+    end_point   = '${eps} 0.100000 0.161000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_081]
     type = LineValueSampler
-    start_point = '0 0.0 0.162000'
-    end_point   = '0 0.100000 0.162000'
+    start_point = '${eps} ${eps} 0.163000'
+    end_point   = '${eps} 0.100000 0.163000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_082]
     type = LineValueSampler
-    start_point = '0 0.0 0.164000'
-    end_point   = '0 0.100000 0.164000'
+    start_point = '${eps} ${eps} 0.165000'
+    end_point   = '${eps} 0.100000 0.165000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_083]
     type = LineValueSampler
-    start_point = '0 0.0 0.166000'
-    end_point   = '0 0.100000 0.166000'
+    start_point = '${eps} ${eps} 0.167000'
+    end_point   = '${eps} 0.100000 0.167000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_084]
     type = LineValueSampler
-    start_point = '0 0.0 0.168000'
-    end_point   = '0 0.100000 0.168000'
+    start_point = '${eps} ${eps} 0.169000'
+    end_point   = '${eps} 0.100000 0.169000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_085]
     type = LineValueSampler
-    start_point = '0 0.0 0.170000'
-    end_point   = '0 0.100000 0.170000'
+    start_point = '${eps} ${eps} 0.171000'
+    end_point   = '${eps} 0.100000 0.171000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_086]
     type = LineValueSampler
-    start_point = '0 0.0 0.172000'
-    end_point   = '0 0.100000 0.172000'
+    start_point = '${eps} ${eps} 0.173000'
+    end_point   = '${eps} 0.100000 0.173000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_087]
     type = LineValueSampler
-    start_point = '0 0.0 0.174000'
-    end_point   = '0 0.100000 0.174000'
+    start_point = '${eps} ${eps} 0.175000'
+    end_point   = '${eps} 0.100000 0.175000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_088]
     type = LineValueSampler
-    start_point = '0 0.0 0.176000'
-    end_point   = '0 0.100000 0.176000'
+    start_point = '${eps} ${eps} 0.177000'
+    end_point   = '${eps} 0.100000 0.177000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_089]
     type = LineValueSampler
-    start_point = '0 0.0 0.178000'
-    end_point   = '0 0.100000 0.178000'
+    start_point = '${eps} ${eps} 0.179000'
+    end_point   = '${eps} 0.100000 0.179000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_090]
     type = LineValueSampler
-    start_point = '0 0.0 0.180000'
-    end_point   = '0 0.100000 0.180000'
+    start_point = '${eps} ${eps} 0.181000'
+    end_point   = '${eps} 0.100000 0.181000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_091]
     type = LineValueSampler
-    start_point = '0 0.0 0.182000'
-    end_point   = '0 0.100000 0.182000'
+    start_point = '${eps} ${eps} 0.183000'
+    end_point   = '${eps} 0.100000 0.183000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_092]
     type = LineValueSampler
-    start_point = '0 0.0 0.184000'
-    end_point   = '0 0.100000 0.184000'
+    start_point = '${eps} ${eps} 0.185000'
+    end_point   = '${eps} 0.100000 0.185000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_093]
     type = LineValueSampler
-    start_point = '0 0.0 0.186000'
-    end_point   = '0 0.100000 0.186000'
+    start_point = '${eps} ${eps} 0.187000'
+    end_point   = '${eps} 0.100000 0.187000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_094]
     type = LineValueSampler
-    start_point = '0 0.0 0.188000'
-    end_point   = '0 0.100000 0.188000'
+    start_point = '${eps} ${eps} 0.189000'
+    end_point   = '${eps} 0.100000 0.189000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_095]
     type = LineValueSampler
-    start_point = '0 0.0 0.190000'
-    end_point   = '0 0.100000 0.190000'
+    start_point = '${eps} ${eps} 0.191000'
+    end_point   = '${eps} 0.100000 0.191000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_096]
     type = LineValueSampler
-    start_point = '0 0.0 0.192000'
-    end_point   = '0 0.100000 0.192000'
+    start_point = '${eps} ${eps} 0.193000'
+    end_point   = '${eps} 0.100000 0.193000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_097]
     type = LineValueSampler
-    start_point = '0 0.0 0.194000'
-    end_point   = '0 0.100000 0.194000'
+    start_point = '${eps} ${eps} 0.195000'
+    end_point   = '${eps} 0.100000 0.195000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_098]
     type = LineValueSampler
-    start_point = '0 0.0 0.196000'
-    end_point   = '0 0.100000 0.196000'
+    start_point = '${eps} ${eps} 0.197000'
+    end_point   = '${eps} 0.100000 0.197000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_099]
     type = LineValueSampler
-    start_point = '0 0.0 0.198000'
-    end_point   = '0 0.100000 0.198000'
+    start_point = '${eps} ${eps} 0.199000'
+    end_point   = '${eps} 0.100000 0.199000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_100]
     type = LineValueSampler
-    start_point = '0 0.0 0.200000'
-    end_point   = '0 0.100000 0.200000'
+    start_point = '${eps} ${eps} 0.201000'
+    end_point   = '${eps} 0.100000 0.201000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_101]
     type = LineValueSampler
-    start_point = '0 0.0 0.202000'
-    end_point   = '0 0.100000 0.202000'
+    start_point = '${eps} ${eps} 0.203000'
+    end_point   = '${eps} 0.100000 0.203000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_102]
     type = LineValueSampler
-    start_point = '0 0.0 0.204000'
-    end_point   = '0 0.100000 0.204000'
+    start_point = '${eps} ${eps} 0.205000'
+    end_point   = '${eps} 0.100000 0.205000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_103]
     type = LineValueSampler
-    start_point = '0 0.0 0.206000'
-    end_point   = '0 0.100000 0.206000'
+    start_point = '${eps} ${eps} 0.207000'
+    end_point   = '${eps} 0.100000 0.207000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_104]
     type = LineValueSampler
-    start_point = '0 0.0 0.208000'
-    end_point   = '0 0.100000 0.208000'
+    start_point = '${eps} ${eps} 0.209000'
+    end_point   = '${eps} 0.100000 0.209000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_105]
     type = LineValueSampler
-    start_point = '0 0.0 0.210000'
-    end_point   = '0 0.100000 0.210000'
+    start_point = '${eps} ${eps} 0.211000'
+    end_point   = '${eps} 0.100000 0.211000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_106]
     type = LineValueSampler
-    start_point = '0 0.0 0.212000'
-    end_point   = '0 0.100000 0.212000'
+    start_point = '${eps} ${eps} 0.213000'
+    end_point   = '${eps} 0.100000 0.213000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_107]
     type = LineValueSampler
-    start_point = '0 0.0 0.214000'
-    end_point   = '0 0.100000 0.214000'
+    start_point = '${eps} ${eps} 0.215000'
+    end_point   = '${eps} 0.100000 0.215000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_108]
     type = LineValueSampler
-    start_point = '0 0.0 0.216000'
-    end_point   = '0 0.100000 0.216000'
+    start_point = '${eps} ${eps} 0.217000'
+    end_point   = '${eps} 0.100000 0.217000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_109]
     type = LineValueSampler
-    start_point = '0 0.0 0.218000'
-    end_point   = '0 0.100000 0.218000'
+    start_point = '${eps} ${eps} 0.219000'
+    end_point   = '${eps} 0.100000 0.219000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_110]
     type = LineValueSampler
-    start_point = '0 0.0 0.220000'
-    end_point   = '0 0.100000 0.220000'
+    start_point = '${eps} ${eps} 0.221000'
+    end_point   = '${eps} 0.100000 0.221000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_111]
     type = LineValueSampler
-    start_point = '0 0.0 0.222000'
-    end_point   = '0 0.100000 0.222000'
+    start_point = '${eps} ${eps} 0.223000'
+    end_point   = '${eps} 0.100000 0.223000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_112]
     type = LineValueSampler
-    start_point = '0 0.0 0.224000'
-    end_point   = '0 0.100000 0.224000'
+    start_point = '${eps} ${eps} 0.225000'
+    end_point   = '${eps} 0.100000 0.225000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_113]
     type = LineValueSampler
-    start_point = '0 0.0 0.226000'
-    end_point   = '0 0.100000 0.226000'
+    start_point = '${eps} ${eps} 0.227000'
+    end_point   = '${eps} 0.100000 0.227000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_114]
     type = LineValueSampler
-    start_point = '0 0.0 0.228000'
-    end_point   = '0 0.100000 0.228000'
+    start_point = '${eps} ${eps} 0.229000'
+    end_point   = '${eps} 0.100000 0.229000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_115]
     type = LineValueSampler
-    start_point = '0 0.0 0.230000'
-    end_point   = '0 0.100000 0.230000'
+    start_point = '${eps} ${eps} 0.231000'
+    end_point   = '${eps} 0.100000 0.231000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_116]
     type = LineValueSampler
-    start_point = '0 0.0 0.232000'
-    end_point   = '0 0.100000 0.232000'
+    start_point = '${eps} ${eps} 0.233000'
+    end_point   = '${eps} 0.100000 0.233000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_117]
     type = LineValueSampler
-    start_point = '0 0.0 0.234000'
-    end_point   = '0 0.100000 0.234000'
+    start_point = '${eps} ${eps} 0.235000'
+    end_point   = '${eps} 0.100000 0.235000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_118]
     type = LineValueSampler
-    start_point = '0 0.0 0.236000'
-    end_point   = '0 0.100000 0.236000'
+    start_point = '${eps} ${eps} 0.237000'
+    end_point   = '${eps} 0.100000 0.237000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_119]
     type = LineValueSampler
-    start_point = '0 0.0 0.238000'
-    end_point   = '0 0.100000 0.238000'
+    start_point = '${eps} ${eps} 0.239000'
+    end_point   = '${eps} 0.100000 0.239000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_120]
     type = LineValueSampler
-    start_point = '0 0.0 0.240000'
-    end_point   = '0 0.100000 0.240000'
+    start_point = '${eps} ${eps} 0.241000'
+    end_point   = '${eps} 0.100000 0.241000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_121]
     type = LineValueSampler
-    start_point = '0 0.0 0.242000'
-    end_point   = '0 0.100000 0.242000'
+    start_point = '${eps} ${eps} 0.243000'
+    end_point   = '${eps} 0.100000 0.243000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_122]
     type = LineValueSampler
-    start_point = '0 0.0 0.244000'
-    end_point   = '0 0.100000 0.244000'
+    start_point = '${eps} ${eps} 0.245000'
+    end_point   = '${eps} 0.100000 0.245000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_123]
     type = LineValueSampler
-    start_point = '0 0.0 0.246000'
-    end_point   = '0 0.100000 0.246000'
+    start_point = '${eps} ${eps} 0.247000'
+    end_point   = '${eps} 0.100000 0.247000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_124]
     type = LineValueSampler
-    start_point = '0 0.0 0.248000'
-    end_point   = '0 0.100000 0.248000'
+    start_point = '${eps} ${eps} 0.249000'
+    end_point   = '${eps} 0.100000 0.249000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_125]
     type = LineValueSampler
-    start_point = '0 0.0 0.250000'
-    end_point   = '0 0.100000 0.250000'
+    start_point = '${eps} ${eps} 0.251000'
+    end_point   = '${eps} 0.100000 0.251000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_126]
     type = LineValueSampler
-    start_point = '0 0.0 0.252000'
-    end_point   = '0 0.100000 0.252000'
+    start_point = '${eps} ${eps} 0.253000'
+    end_point   = '${eps} 0.100000 0.253000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_127]
     type = LineValueSampler
-    start_point = '0 0.0 0.254000'
-    end_point   = '0 0.100000 0.254000'
+    start_point = '${eps} ${eps} 0.255000'
+    end_point   = '${eps} 0.100000 0.255000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_128]
     type = LineValueSampler
-    start_point = '0 0.0 0.256000'
-    end_point   = '0 0.100000 0.256000'
+    start_point = '${eps} ${eps} 0.257000'
+    end_point   = '${eps} 0.100000 0.257000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_129]
     type = LineValueSampler
-    start_point = '0 0.0 0.258000'
-    end_point   = '0 0.100000 0.258000'
+    start_point = '${eps} ${eps} 0.259000'
+    end_point   = '${eps} 0.100000 0.259000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_130]
     type = LineValueSampler
-    start_point = '0 0.0 0.260000'
-    end_point   = '0 0.100000 0.260000'
+    start_point = '${eps} ${eps} 0.261000'
+    end_point   = '${eps} 0.100000 0.261000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_131]
     type = LineValueSampler
-    start_point = '0 0.0 0.262000'
-    end_point   = '0 0.100000 0.262000'
+    start_point = '${eps} ${eps} 0.263000'
+    end_point   = '${eps} 0.100000 0.263000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_132]
     type = LineValueSampler
-    start_point = '0 0.0 0.264000'
-    end_point   = '0 0.100000 0.264000'
+    start_point = '${eps} ${eps} 0.265000'
+    end_point   = '${eps} 0.100000 0.265000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_133]
     type = LineValueSampler
-    start_point = '0 0.0 0.266000'
-    end_point   = '0 0.100000 0.266000'
+    start_point = '${eps} ${eps} 0.267000'
+    end_point   = '${eps} 0.100000 0.267000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_134]
     type = LineValueSampler
-    start_point = '0 0.0 0.268000'
-    end_point   = '0 0.100000 0.268000'
+    start_point = '${eps} ${eps} 0.269000'
+    end_point   = '${eps} 0.100000 0.269000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_135]
     type = LineValueSampler
-    start_point = '0 0.0 0.270000'
-    end_point   = '0 0.100000 0.270000'
+    start_point = '${eps} ${eps} 0.271000'
+    end_point   = '${eps} 0.100000 0.271000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_136]
     type = LineValueSampler
-    start_point = '0 0.0 0.272000'
-    end_point   = '0 0.100000 0.272000'
+    start_point = '${eps} ${eps} 0.273000'
+    end_point   = '${eps} 0.100000 0.273000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_137]
     type = LineValueSampler
-    start_point = '0 0.0 0.274000'
-    end_point   = '0 0.100000 0.274000'
+    start_point = '${eps} ${eps} 0.275000'
+    end_point   = '${eps} 0.100000 0.275000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_138]
     type = LineValueSampler
-    start_point = '0 0.0 0.276000'
-    end_point   = '0 0.100000 0.276000'
+    start_point = '${eps} ${eps} 0.277000'
+    end_point   = '${eps} 0.100000 0.277000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_139]
     type = LineValueSampler
-    start_point = '0 0.0 0.278000'
-    end_point   = '0 0.100000 0.278000'
+    start_point = '${eps} ${eps} 0.279000'
+    end_point   = '${eps} 0.100000 0.279000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_140]
     type = LineValueSampler
-    start_point = '0 0.0 0.280000'
-    end_point   = '0 0.100000 0.280000'
+    start_point = '${eps} ${eps} 0.281000'
+    end_point   = '${eps} 0.100000 0.281000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_141]
     type = LineValueSampler
-    start_point = '0 0.0 0.282000'
-    end_point   = '0 0.100000 0.282000'
+    start_point = '${eps} ${eps} 0.283000'
+    end_point   = '${eps} 0.100000 0.283000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_142]
     type = LineValueSampler
-    start_point = '0 0.0 0.284000'
-    end_point   = '0 0.100000 0.284000'
+    start_point = '${eps} ${eps} 0.285000'
+    end_point   = '${eps} 0.100000 0.285000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_143]
     type = LineValueSampler
-    start_point = '0 0.0 0.286000'
-    end_point   = '0 0.100000 0.286000'
+    start_point = '${eps} ${eps} 0.287000'
+    end_point   = '${eps} 0.100000 0.287000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_144]
     type = LineValueSampler
-    start_point = '0 0.0 0.288000'
-    end_point   = '0 0.100000 0.288000'
+    start_point = '${eps} ${eps} 0.289000'
+    end_point   = '${eps} 0.100000 0.289000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_145]
     type = LineValueSampler
-    start_point = '0 0.0 0.290000'
-    end_point   = '0 0.100000 0.290000'
+    start_point = '${eps} ${eps} 0.291000'
+    end_point   = '${eps} 0.100000 0.291000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_146]
     type = LineValueSampler
-    start_point = '0 0.0 0.292000'
-    end_point   = '0 0.100000 0.292000'
+    start_point = '${eps} ${eps} 0.293000'
+    end_point   = '${eps} 0.100000 0.293000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_147]
     type = LineValueSampler
-    start_point = '0 0.0 0.294000'
-    end_point   = '0 0.100000 0.294000'
+    start_point = '${eps} ${eps} 0.295000'
+    end_point   = '${eps} 0.100000 0.295000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_148]
     type = LineValueSampler
-    start_point = '0 0.0 0.296000'
-    end_point   = '0 0.100000 0.296000'
+    start_point = '${eps} ${eps} 0.297000'
+    end_point   = '${eps} 0.100000 0.297000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 
   [radial_149]
     type = LineValueSampler
-    start_point = '0 0.0 0.298000'
-    end_point   = '0 0.100000 0.298000'
+    start_point = '${eps} ${eps} 0.299000'
+    end_point   = '${eps} 0.100000 0.299000'
     num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
+    variable    = 'vel_z'
     sort_by     = 'y'
-    execute_on  = 'timestep_end'
-  []
-
-  [radial_150]
-    type = LineValueSampler
-    start_point = '0 0.0 0.300000'
-    end_point   = '0 0.100000 0.300000'
-    num_points  = ${ny}
-    variable    = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
-    sort_by     = 'y'
-    execute_on  = 'timestep_end'
+    execute_on  = 'FINAL'
   []
 

@@ -45,6 +45,7 @@ C2_eps = 1.92
 C_mu = 0.09
 walls = 'front'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
+eps = 1e-4
 # ================================================================================================================
 # Modeling parameters: Turbulence-model knobs (optional)
 # ================================================================================================================
@@ -297,9 +298,9 @@ outlet = 'back bottom top left right'
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
     curvature_model          = ${curvature_model}
-    Pr_t                     = 0.9
-    C_M                      = 1.0
-    gravity                  = '0 0 0'                 # leave 0 for BFS
+    # Pr_t                     = 0.9
+    # C_M                      = 1.0
+    # gravity                  = '0 0 0'                 # leave 0 for BFS
 
     # if/when you have these fields:
     # temperature       = T
@@ -518,9 +519,9 @@ outlet = 'back bottom top left right'
     # NEW (optional) – choose model and options
     k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
     two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
-    Cd0 = 0.091      # defaults, can omit if you keep Standard
-    Cd1 = 0.0042
-    Cd2 = 0.00011
+    # Cd0 = 0.091      # defaults, can omit if you keep Standard
+    # Cd1 = 0.0042
+    # Cd2 = 0.00011
     Ca0 = 0.667      # Realizable C_mu coefficients
     Ca1 = 1.25
     Ca2 = 1.0
@@ -551,12 +552,12 @@ outlet = 'back bottom top left right'
 [VectorPostprocessors]
   [centerline]
     type = LineValueSampler
-    start_point = '0 0 0'
-    end_point = '0 0 0.3'
-    num_points = ${fparse nz + 1}
-    variable = 'mu_eff mu_t pressure TKE TKED vel_x vel_y vel_z yplus'
-    sort_by = 'z'
-    execute_on = 'FINAL'
+    start_point = '${eps} ${eps} ${fparse 0.5 * L / nz}'
+    end_point   = '${eps} ${eps} ${fparse L - 0.5 * L / nz}'
+    num_points  = ${nz}
+    variable    = vel_z
+    sort_by     = 'z'
+    execute_on  = 'FINAL'
   []
   !include radial.i
 []
@@ -580,7 +581,7 @@ outlet = 'back bottom top left right'
   pressure_variable_relaxation = 0.25
   turbulence_equation_relaxation = '0.4 0.4'
   turbulence_field_relaxation = '0.4 0.4'
-  num_iterations = 10
+  num_iterations = 1500
   pressure_absolute_tolerance = 1e-7
   momentum_absolute_tolerance = 1e-7
   turbulence_absolute_tolerance = '1e-7 1e-7'
@@ -601,7 +602,7 @@ outlet = 'back bottom top left right'
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
   [out]
     type = CSV
     execute_on = FINAL

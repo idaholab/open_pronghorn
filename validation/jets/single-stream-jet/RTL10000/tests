@@ -1,0 +1,15 @@
+[Tests]
+  issues = '#67'
+  design = 'bfs.md'
+  [single-stream-jet]
+    type = CSVDiff
+    input = 'jet_RTL10000.i'
+    csvdiff = 'jet_RTL10000_out_centerline_0002.csv'
+    requirement = 'The system should be able to accurately simulate turbulent flow in a single stream jet'
+    min_parallel = 24
+    # Tolerance for comparison to gold files
+    rel_err = 1e-4
+    abs_zero = 1e-6
+    cli_args = 'Executioner/num_iterations=5 VectorPostprocessors/active=centerline'
+  []
+[]
