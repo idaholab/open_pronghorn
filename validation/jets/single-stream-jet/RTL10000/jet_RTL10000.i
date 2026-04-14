@@ -602,7 +602,7 @@ outlet = 'back bottom top left right'
 []
 
 [Outputs]
-  exodus = false
+  exodus = true
   [out]
     type = CSV
     execute_on = FINAL
