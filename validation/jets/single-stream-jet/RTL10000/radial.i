@@ -7,7 +7,6 @@
     sort_by     = 'y'
     execute_on  = 'FINAL'
   []
-
   [radial_001]
     type = LineValueSampler
     start_point = '${eps} ${eps} 0.003000'
@@ -1497,4 +1496,3 @@
     sort_by     = 'y'
     execute_on  = 'FINAL'
   []
-
