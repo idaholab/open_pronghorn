@@ -1,0 +1,20 @@
+[Tests]
+  [jet_RTL10000]
+    type = CSVDiff
+    input = 'jet_RTL10000.i'
+    csvdiff = 'jet_RTL10000_out_centerline_0002.csv combined_halfwidths.csv'
+    requirement = 'The system should accurately predict centerline decay and half-width growth for a turbulent free jet at Re = 10000.'
+    min_parallel = 96
+    max_time = 1200
+    custom_evaluation_script = 'jet_RTL10000_postprocess.py'
+    validation_test = 'jet_RTL10000_vnv.py'
+
+    # Allow current error to stay within +/- 2% of reference error
+    validation_lower_bound = -0.02
+    validation_upper_bound = 0.02
+
+    # CSVDiff tolerance for direct file comparison to gold
+    rel_err = 1e-3
+    # Gold data generated from converged SIMPLE solution after 1500 iterations.
+  []
+[]
