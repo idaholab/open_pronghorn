@@ -425,7 +425,7 @@ computeVelocityGradientLS(const Moose::Functor<Real> & u_var,
       continue; // skip boundary faces and inactive (AMR) elements
 
     const Point xN = nb->vertex_average();
-    const Point d  = xN - xP;
+    const Point d = xN - xP;
     const Real dist2 = d.norm_sq();
     if (dist2 < 1e-30)
       continue;
@@ -473,10 +473,10 @@ computeVelocityGradientLS(const Moose::Functor<Real> & u_var,
 
     const Real inv_det = 1.0 / det;
     // u-component gradient
-    grad(0, 0) = inv_det * ( A[1][1] * bu[0] - A[0][1] * bu[1]);
+    grad(0, 0) = inv_det * (A[1][1] * bu[0] - A[0][1] * bu[1]);
     grad(0, 1) = inv_det * (-A[1][0] * bu[0] + A[0][0] * bu[1]);
     // v-component gradient
-    grad(1, 0) = inv_det * ( A[1][1] * bv[0] - A[0][1] * bv[1]);
+    grad(1, 0) = inv_det * (A[1][1] * bv[0] - A[0][1] * bv[1]);
     grad(1, 1) = inv_det * (-A[1][0] * bv[0] + A[0][0] * bv[1]);
   }
   else // ndim == 3: explicit cofactor expansion
@@ -541,8 +541,8 @@ computeStrainRotationInvariantsEx(const Moose::Functor<Real> & u,
   const RankTwoTensor W = 0.5 * (grad_vel - grad_vel.transpose());
 
   StrainRotationInvariants out;
-  out.S2    = std::max(2.0 * S.doubleContraction(S), 0.0);
-  out.W2    = std::max(2.0 * W.doubleContraction(W), 0.0);
+  out.S2 = std::max(2.0 * S.doubleContraction(S), 0.0);
+  out.W2 = std::max(2.0 * W.doubleContraction(W), 0.0);
   out.div_u = div_u;
   return out;
 }
@@ -568,8 +568,8 @@ Real
 limitTurbTimeScale(const Real k, const Real eps, const Real nu, const Real Ct)
 {
   const Real eps_safe = std::max(eps, 1e-20);
-  const Real Te = k / eps_safe;                          // large-eddy time scale
-  const Real Tr = Ct * std::sqrt(nu / eps_safe);         // Kolmogorov lower bound
+  const Real Te = k / eps_safe;                  // large-eddy time scale
+  const Real Tr = Ct * std::sqrt(nu / eps_safe); // Kolmogorov lower bound
   return std::max(Te, Tr);
 }
 

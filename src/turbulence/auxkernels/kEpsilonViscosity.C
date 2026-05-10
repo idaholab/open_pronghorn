@@ -39,13 +39,12 @@ kEpsilonViscosity::validParams()
       "this AuxKernel and also consumed by the TKE/TKED production kernels. "
       "Reduce during start-up if blow-up still occurs; increase for fully-developed flows.");
 
-  params.addParam<Real>(
-      "mu_t_ratio_initial",
-      100.0,
-      "Starting mu_t / mu cap applied on the first outer iteration. "
-      "The cap is linearly ramped from this value up to mu_t_ratio_max over "
-      "mu_t_ramp_steps outer iterations, providing a soft start-up that prevents "
-      "the turbulence equations from blowing up in early SIMPLE iterations.");
+  params.addParam<Real>("mu_t_ratio_initial",
+                        100.0,
+                        "Starting mu_t / mu cap applied on the first outer iteration. "
+                        "The cap is linearly ramped from this value up to mu_t_ratio_max over "
+                        "mu_t_ramp_steps outer iterations, providing a soft start-up that prevents "
+                        "the turbulence equations from blowing up in early SIMPLE iterations.");
 
   params.addParam<unsigned int>(
       "mu_t_ramp_steps",
@@ -118,11 +117,10 @@ kEpsilonViscosity::validParams()
       "wall_distance",
       "Distance to the closest wall; required for two-layer and Low-Re k-epsilon variants.");
 
-  params.addParam<Real>(
-      "k_min",
-      1e-8,
-      "Minimum k used to guard the turbulent time scale k/eps in the viscosity "
-      "computation. Prevents mu_t from becoming undefined when k → 0.");
+  params.addParam<Real>("k_min",
+                        1e-8,
+                        "Minimum k used to guard the turbulent time scale k/eps in the viscosity "
+                        "computation. Prevents mu_t from becoming undefined when k → 0.");
 
   params.addParam<Real>(
       "k_max",
@@ -406,7 +404,8 @@ kEpsilonViscosity::computeValue()
              _variant == NS::KEpsilonVariant::RealizableTwoLayer)
     {
       auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
-      Cmu_eff = NS::Cmu_realizable(_Ca0, _Ca1, _Ca2, _Ca3, inv.S2, inv.W2, k_safe, std::max(eps, 1e-20));
+      Cmu_eff =
+          NS::Cmu_realizable(_Ca0, _Ca1, _Ca2, _Ca3, inv.S2, inv.W2, k_safe, std::max(eps, 1e-20));
     }
 
     // Base k-epsilon turbulent viscosity

@@ -383,14 +383,13 @@ RankTwoTensor computeVelocityGradientLS(const Moose::Functor<Real> & u_var,
  * When method == LocalLeastSquares the velocity gradient is computed by
  * computeVelocityGradientLS; otherwise computeVelocityGradient is used.
  */
-StrainRotationInvariants
-computeStrainRotationInvariantsEx(const Moose::Functor<Real> & u,
-                                  const Moose::Functor<Real> * v,
-                                  const Moose::Functor<Real> * w,
-                                  const Elem * elem,
-                                  const Moose::ElemArg & elem_arg,
-                                  const Moose::StateArg & state,
-                                  TurbVelocityGradientMethod method);
+StrainRotationInvariants computeStrainRotationInvariantsEx(const Moose::Functor<Real> & u,
+                                                           const Moose::Functor<Real> * v,
+                                                           const Moose::Functor<Real> * w,
+                                                           const Elem * elem,
+                                                           const Moose::ElemArg & elem_arg,
+                                                           const Moose::StateArg & state,
+                                                           TurbVelocityGradientMethod method);
 
 /**
  * Kato–Launder (1993) modified shear production.
@@ -405,12 +404,12 @@ computeStrainRotationInvariantsEx(const Moose::Functor<Real> & u,
  * Optional compressibility corrections are applied identically to computeGk.
  */
 Real computeGkKatoLaunder(const Real mu_t,
-                           const Real S2,
-                           const Real W2,
-                           const Real rho,
-                           const Real k,
-                           const Real div_u,
-                           const bool include_compressibility_terms);
+                          const Real S2,
+                          const Real W2,
+                          const Real rho,
+                          const Real k,
+                          const Real div_u,
+                          const bool include_compressibility_terms);
 
 /**
  * Turbulent time scale with Kolmogorov lower bound (Durbin 1996).

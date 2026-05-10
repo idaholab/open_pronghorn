@@ -103,22 +103,18 @@ kEpsilonTKEDSourceSink::validParams()
                              "'none' (default) or 'standard' (Spalart–Shur style).");
 
   params.addParam<Real>(
-      "k_min",
-      1e-8,
-      "Minimum k value used to guard the turbulent time scale k/eps.");
+      "k_min", 1e-8, "Minimum k value used to guard the turbulent time scale k/eps.");
 
-  params.addParam<Real>(
-      "eps_min",
-      1e-10,
-      "Minimum epsilon used inside the C_pl production limiter "
-      "min(Pe, C_pl * rho * max(eps, eps_min)).  Prevents the limiter from "
-      "being trivially zero when epsilon is near zero at initialisation.");
+  params.addParam<Real>("eps_min",
+                        1e-10,
+                        "Minimum epsilon used inside the C_pl production limiter "
+                        "min(Pe, C_pl * rho * max(eps, eps_min)).  Prevents the limiter from "
+                        "being trivially zero when epsilon is near zero at initialisation.");
 
-  params.addParam<Real>(
-      "mu_t_prod_max",
-      5000.0,
-      "Maximum mu_t / mu ratio applied inside the bulk production computation. "
-      "Should match (or be <= to) the mu_t_ratio_max in kEpsilonViscosity.");
+  params.addParam<Real>("mu_t_prod_max",
+                        5000.0,
+                        "Maximum mu_t / mu ratio applied inside the bulk production computation. "
+                        "Should match (or be <= to) the mu_t_ratio_max in kEpsilonViscosity.");
 
   params.addParam<Real>(
       "tked_min_phys",
@@ -154,18 +150,16 @@ kEpsilonTKEDSourceSink::validParams()
       "Coefficient for the Kolmogorov lower bound on the turbulent time scale "
       "(used when use_time_scale_limiter = true). Default 6.0 matches STAR-CCM+.");
 
-  params.addParam<bool>(
-      "use_kato_launder",
-      false,
-      "Replace G_k = mu_t S^2 with Kato–Launder G_k = mu_t |S| |Omega|. "
-      "Must match the setting used in the kEpsilonTKESourceSink kernel.");
+  params.addParam<bool>("use_kato_launder",
+                        false,
+                        "Replace G_k = mu_t S^2 with Kato–Launder G_k = mu_t |S| |Omega|. "
+                        "Must match the setting used in the kEpsilonTKESourceSink kernel.");
 
   MooseEnum grad_method_enum2("moose_functor local_least_squares", "moose_functor");
-  params.addParam<MooseEnum>(
-      "gradient_method",
-      grad_method_enum2,
-      "Velocity gradient method for turbulence production terms. "
-      "Must match the setting used in the kEpsilonTKESourceSink kernel.");
+  params.addParam<MooseEnum>("gradient_method",
+                             grad_method_enum2,
+                             "Velocity gradient method for turbulence production terms. "
+                             "Must match the setting used in the kEpsilonTKESourceSink kernel.");
 
   return params;
 }
@@ -214,7 +208,8 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _has_wall_distance(params.isParamValid("wall_distance")),
     _nonlinear_model(
         getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
-    _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>()),
+    _curvature_model(
+        getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>()),
     _k_min(getParam<Real>("k_min")),
     _eps_min(getParam<Real>("eps_min")),
     _mu_t_prod_max(getParam<Real>("mu_t_prod_max")),
@@ -460,8 +455,7 @@ kEpsilonTKEDSourceSink::computeRightHandSideContribution()
       // l_eps → 0 faster than k^(3/2) → 0 for very small d, causing eps_2layer → ∞.
       // Use k_safe to prevent division issues when k is near zero (early iterations).
       const Real k_safe = std::max(k, _k_min);
-      const Real l_eps =
-          c_l * d * (1.0 - std::exp(-Red / std::max(A_eps, 1e-12)));
+      const Real l_eps = c_l * d * (1.0 - std::exp(-Red / std::max(A_eps, 1e-12)));
       const Real eps_2layer_raw = std::pow(k_safe, 1.5) / std::max(l_eps, 1e-12);
 
       // Clamp the algebraic eps to the physical upper bound.
@@ -503,9 +497,9 @@ Real
 kEpsilonTKEDSourceSink::computeTimeScale(const Moose::ElemArg & elem_arg,
                                          const Moose::StateArg & state) const
 {
-  const Real k   = std::max(_k(elem_arg, state), _k_min);
+  const Real k = std::max(_k(elem_arg, state), _k_min);
   const Real eps = _var.getElemValue(*_current_elem_info, state);
-  const Real nu  = _mu(elem_arg, state) / std::max(_rho(elem_arg, state), 1e-20);
+  const Real nu = _mu(elem_arg, state) / std::max(_rho(elem_arg, state), 1e-20);
 
   if (_use_time_scale_limiter)
     return NS::limitTurbTimeScale(k, eps, nu, _C_t_kolmogorov);
@@ -588,7 +582,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
                                       const Moose::StateArg & state)
 {
   const Real rho = _rho(elem_arg, state);
-  const Real mu  = _mu(elem_arg, state);
+  const Real mu = _mu(elem_arg, state);
   // Cap mu_t to avoid stale over-large values before k/eps have converged
   const Real mu_t = std::min(_mu_t(elem_arg, state), _mu_t_prod_max * mu);
   const Real k = _k(elem_arg, state);
@@ -602,10 +596,9 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
 
   // Shear production G_k (standard or Kato–Launder form)
   Real Gk = _use_kato_launder
-                ? NS::computeGkKatoLaunder(mu_t, inv.S2, inv.W2, rho, k, inv.div_u,
-                                           _switches.use_compressibility)
-                : NS::computeGk(mu_t, inv.S2, rho, k, inv.div_u,
-                                _switches.use_compressibility);
+                ? NS::computeGkKatoLaunder(
+                      mu_t, inv.S2, inv.W2, rho, k, inv.div_u, _switches.use_compressibility)
+                : NS::computeGk(mu_t, inv.S2, rho, k, inv.div_u, _switches.use_compressibility);
 
   // For Realizable Pe we also need the pure shear production S_k = mu_t S^2
   const Real Sk = mu_t * inv.S2;

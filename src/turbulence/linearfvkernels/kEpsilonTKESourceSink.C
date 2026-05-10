@@ -85,19 +85,17 @@ kEpsilonTKESourceSink::validParams()
                              "Curvature / rotation correction model: "
                              "'none' (default) or 'standard' (Spalart–Shur style).");
 
-  params.addParam<Real>(
-      "k_min",
-      1e-8,
-      "Minimum k value used in the implicit destruction coefficient rho*eps/k to "
-      "prevent division by zero when k is near zero during early iterations.");
+  params.addParam<Real>("k_min",
+                        1e-8,
+                        "Minimum k value used in the implicit destruction coefficient rho*eps/k to "
+                        "prevent division by zero when k is near zero during early iterations.");
 
-  params.addParam<Real>(
-      "eps_min",
-      1e-10,
-      "Minimum epsilon used inside the C_pl production limiter "
-      "min(Gk, C_pl * rho * max(eps, eps_min)).  Prevents the limiter from "
-      "being trivially zero when eps is near zero at initialisation, which would "
-      "allow unbounded net TKE growth (C_pl-1 terms accumulate each iteration).");
+  params.addParam<Real>("eps_min",
+                        1e-10,
+                        "Minimum epsilon used inside the C_pl production limiter "
+                        "min(Gk, C_pl * rho * max(eps, eps_min)).  Prevents the limiter from "
+                        "being trivially zero when eps is near zero at initialisation, which would "
+                        "allow unbounded net TKE growth (C_pl-1 terms accumulate each iteration).");
 
   params.addParam<Real>(
       "mu_t_prod_max",
@@ -133,21 +131,19 @@ kEpsilonTKESourceSink::validParams()
       "a strong penalty source drives it back. Default 1e4 m²/s² covers most "
       "industrial flows; raise for supersonic/very-high-speed cases.");
 
-  params.addParam<Real>(
-      "C_pk",
-      0.0,
-      "Durbin realizability coefficient for the k-based production limiter: "
-      "G_k <= C_pk * rho * k * |S|.  A k-based bound that is effective even "
-      "when eps ~ 0 at start-up.  0 = disabled (default).  "
-      "Recommended value when enabled: 0.667 (= 2/3).");
+  params.addParam<Real>("C_pk",
+                        0.0,
+                        "Durbin realizability coefficient for the k-based production limiter: "
+                        "G_k <= C_pk * rho * k * |S|.  A k-based bound that is effective even "
+                        "when eps ~ 0 at start-up.  0 = disabled (default).  "
+                        "Recommended value when enabled: 0.667 (= 2/3).");
 
-  params.addParam<bool>(
-      "use_kato_launder",
-      false,
-      "Replace the standard shear production G_k = mu_t S^2 with the "
-      "Kato–Launder (1993) form G_k = mu_t |S| |Omega|. This eliminates the "
-      "stagnation-point anomaly and significantly improves stability on coarse "
-      "or poorly-conditioned meshes.");
+  params.addParam<bool>("use_kato_launder",
+                        false,
+                        "Replace the standard shear production G_k = mu_t S^2 with the "
+                        "Kato–Launder (1993) form G_k = mu_t |S| |Omega|. This eliminates the "
+                        "stagnation-point anomaly and significantly improves stability on coarse "
+                        "or poorly-conditioned meshes.");
 
   MooseEnum grad_method_enum("moose_functor local_least_squares", "moose_functor");
   params.addParam<MooseEnum>(
@@ -194,7 +190,8 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
     _has_c(params.isParamValid("speed_of_sound")),
     _nonlinear_model(
         getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
-    _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>()),
+    _curvature_model(
+        getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>()),
     _k_min(getParam<Real>("k_min")),
     _eps_functor_max(getParam<Real>("eps_functor_max")),
     _eps_min(getParam<Real>("eps_min")),
@@ -415,7 +412,7 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
                                              const Moose::StateArg & state) const
 {
   const Real rho = _rho(elem_arg, state);
-  const Real mu  = _mu(elem_arg, state);
+  const Real mu = _mu(elem_arg, state);
   // Cap mu_t to _mu_t_prod_max * mu to guard against stale over-large values
   // when k is large but epsilon has not yet caught up (common in early SIMPLE iterations).
   const Real mu_t = std::min(_mu_t(elem_arg, state), _mu_t_prod_max * mu);
@@ -430,10 +427,9 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
 
   // Baseline shear production G_k (standard or Kato–Launder form)
   Real Gk = _use_kato_launder
-                ? NS::computeGkKatoLaunder(mu_t, inv.S2, inv.W2, rho, k, inv.div_u,
-                                           _switches.use_compressibility)
-                : NS::computeGk(mu_t, inv.S2, rho, k, inv.div_u,
-                                _switches.use_compressibility);
+                ? NS::computeGkKatoLaunder(
+                      mu_t, inv.S2, inv.W2, rho, k, inv.div_u, _switches.use_compressibility)
+                : NS::computeGk(mu_t, inv.S2, rho, k, inv.div_u, _switches.use_compressibility);
 
   // Buoyancy production Gb
   Real Gb = 0.0;
@@ -535,8 +531,7 @@ kEpsilonTKESourceSink::computeWallTerms(const Moose::ElemArg & elem_arg,
     mooseAssert(d > 0.0, "Wall distance must be positive.");
 
     const auto * fi = face_info_vec[i];
-    const RealVectorValue tangential_vel =
-        velocity - (velocity * fi->normal()) * fi->normal();
+    const RealVectorValue tangential_vel = velocity - (velocity * fi->normal()) * fi->normal();
     const Real parallel_speed = NS::computeSpeed<Real>(tangential_vel);
 
     // y+ using either NEQ (non-iterative) or equilibrium (iterative) method
@@ -552,7 +547,7 @@ kEpsilonTKESourceSink::computeWallTerms(const Moose::ElemArg & elem_arg,
     const Moose::FaceArg facearg = {
         fi, Moose::FV::LimiterType::CentralDifference, false, false, loc_elem, nullptr};
     const Real wall_mu_t = std::min(_mu_t(facearg, state), mu_t_cap);
-    const Real wall_mu   = _mu(facearg, state);
+    const Real wall_mu = _mu(facearg, state);
 
     // Wall shear stress τ_w = (μ_t + μ) * |du/dy|
     const Real tau_w = (wall_mu_t + wall_mu) * (parallel_speed / d);
@@ -567,13 +562,13 @@ kEpsilonTKESourceSink::computeWallTerms(const Moose::ElemArg & elem_arg,
     {
       // Log-layer destruction coefficient: C_μ^{3/4} ρ √k / (κ d)  — coefficient of k
       const Real k_half = std::sqrt(TKE);
-      destruction += std::pow(_C_mu, 0.75) * rho * k_half /
-                     (NS::von_karman_constant * d) / tot_weight;
+      destruction +=
+          std::pow(_C_mu, 0.75) * rho * k_half / (NS::von_karman_constant * d) / tot_weight;
 
       // Log-layer production coefficient: τ_w C_μ^{1/4} / (√k κ d) — coefficient of k
       // Bounded so it can never exceed the destruction coefficient (physical realizability)
-      const Real prod_coeff = tau_w * std::pow(_C_mu, 0.25) /
-                              (k_half * NS::von_karman_constant * d) / tot_weight;
+      const Real prod_coeff =
+          tau_w * std::pow(_C_mu, 0.25) / (k_half * NS::von_karman_constant * d) / tot_weight;
       production += prod_coeff;
     }
   }
