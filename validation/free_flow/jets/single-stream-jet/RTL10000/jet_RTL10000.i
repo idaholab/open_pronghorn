@@ -3,7 +3,7 @@
 # ================================================================================================================
 # Open-Pronghorn simulation of a steady state incompressible turbulent flow of a jet into a big space/tank.
 # Reference: https://pubs.aip.org/aip/pof/article/36/11/115133/3319195/Calibration-of-the-Reynolds-stress-model-for
-# Author: Dr. Kyriakopoulos Vasileios
+# Author: Dr. Kyriakopoulos Vasileios, Dr. Mauricio Tano
 # Idaho Falls, INL, April 10, 2026
 # ================================================================================================================
 # MODEL PARAMETERS
@@ -68,7 +68,7 @@ outlet = 'back bottom top left right'
     rings = '${n1} ${n2} ${n3} ${n4} ${n5}'
     has_outer_square = on
     pitch = ${H}
-    preserve_volumes = off
+    preserve_volumes = on
     smoothing_max_it = 3
   []
   [extrude]
@@ -177,19 +177,14 @@ outlet = 'back bottom top left right'
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu_t'
+    mu = 'mu_eff'
     u = vel_x
     v = vel_y
     w = vel_z
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
     use_deviatoric_terms = no
-  []
-  [u_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_x
-    diffusion_coeff = '${mu}'
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -202,19 +197,14 @@ outlet = 'back bottom top left right'
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu_t'
+    mu = 'mu_eff'
     u = vel_x
     v = vel_y
     w = vel_z
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
     use_deviatoric_terms = no
-  []
-  [v_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_y
-    diffusion_coeff = '${mu}'
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -227,19 +217,14 @@ outlet = 'back bottom top left right'
     type = LinearWCNSFVMomentumFlux
     variable = vel_z
     advected_interp_method = ${advected_interp_method}
-    mu = 'mu_t'
+    mu = 'mu_eff'
     u = vel_x
     v = vel_y
     w = vel_z
     momentum_component = 'z'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
     use_deviatoric_terms = no
-  []
-  [w_diffusion]
-    type = LinearFVDiffusion
-    variable = vel_z
-    diffusion_coeff = '${mu}'
   []
   [w_pressure]
     type = LinearFVMomentumPressure
@@ -252,7 +237,7 @@ outlet = 'back bottom top left right'
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = Ainv
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [HbyA_divergence]
     type = LinearFVDivergence
@@ -269,14 +254,14 @@ outlet = 'back bottom top left right'
     type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [TKE_turb_diffusion]
     type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_k}
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [TKE_source_sink]
     type = kEpsilonTKESourceSink
@@ -298,10 +283,6 @@ outlet = 'back bottom top left right'
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
     curvature_model          = ${curvature_model}
-    # Pr_t                     = 0.9
-    # C_M                      = 1.0
-    # gravity                  = '0 0 0'                 # leave 0 for BFS
-
     # if/when you have these fields:
     # temperature       = T
     # beta              = beta
@@ -319,7 +300,7 @@ outlet = 'back bottom top left right'
     type = LinearFVTurbulentDiffusion
     variable = TKED
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
     walls = ${walls}
   []
   [TKED_turb_diffusion]
@@ -327,7 +308,7 @@ outlet = 'back bottom top left right'
     variable = TKED
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_eps}
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
     walls = ${walls}
   []
   [TKED_source_sink]
@@ -355,10 +336,6 @@ outlet = 'back bottom top left right'
     curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
-
-    Pr_t = 0.9
-    C_M  = 1.0
-    gravity = '0 -9.81 0'
 
     # same functors as for TKE if you use them:
     # temperature       = T
@@ -485,7 +462,7 @@ outlet = 'back bottom top left right'
   []
   [mu_eff]
     type = MooseVariableFVReal
-    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init}'
+    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init + mu}'
     two_term_boundary_expansion = false
   []
 []
@@ -495,7 +472,7 @@ outlet = 'back bottom top left right'
     type = WallDistanceAux
     variable = wall_distance
     walls = ${walls}
-    execute_on = 'INITIAL NONLINEAR'
+    execute_on = 'INITIAL'
   []
   [compute_mu_t]
     type = kEpsilonViscosity
@@ -546,6 +523,7 @@ outlet = 'back bottom top left right'
     variable = 'mu_eff'
     coupled_variables = 'mu_t'
     expression = 'mu_t + ${mu}'
+    execute_on = 'NONLINEAR'
   []
 []
 

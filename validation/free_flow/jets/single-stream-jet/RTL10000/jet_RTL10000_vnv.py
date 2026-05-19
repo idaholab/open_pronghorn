@@ -70,11 +70,11 @@ class TestCase(ValidationCase):
             current_centerline, gold_centerline, rel_err, abs_zero
         ) and csv_matches_gold(current_halfwidth, gold_halfwidth, rel_err, abs_zero):
             repo_root = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), "../../../..")
+                os.path.join(os.path.dirname(__file__), "../../../../..")
             )
             plot_script = os.path.join(
                 repo_root,
-                "doc/content/media/validation/jets/single-stream-jet/plot_results.py",
+                "doc/content/media/validation/free_flow/jets/single-stream-jet/plot_results.py",
             )
             subprocess.run([sys.executable, plot_script], check=True)
 
