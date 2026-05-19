@@ -1,7 +1,7 @@
 # Single-stream-jet flow in still tank
 
 !tag name=Single-stream-jet flow in still tank
-     image=../media/validation/jets/single-stream-jet/jet.png
+     image=../../media/validation/free_flow/jets/single-stream-jet/jet.png
      description=Single-stream turbulent free jet discharging into a still-air tank
      pairs=flow_configuration:free-flow
            compressibility:incompressible
@@ -18,7 +18,7 @@ Free jet flows have been extensively examined through both experimental and nume
 
 In this experiment, a free jet flows into a large tank filled with still air. The experimental setup consists of a jet flow unit that generates a round free jet discharging from a nozzle and an air supply system. Compressed air used to generate the jet flow is stored in a tank. Flow is obtained by passing the pressurized air through a pressure regulator and then directing it into a stagnation chamber. After the stagnation chamber, flow is discharged into the atmosphere through a nozzle. The exit diameter of the nozzle is 12 mm. The contraction ratio of the jet nozzle is 4. Jet velocity is controlled by adjusting the pressure inside the stagnation chamber with a closed-loop algorithm in the jet flow unit system. Velocity and turbulence profiles are measured by moving the probe in the radial direction. In addition, jet centerline velocities and turbulence intensities are measured along the jet centerline to examine the change in speed and turbulence intensity on the jet axis with increasing distance from the jet exit plane.
 
-!media media/validation/jets/single-stream-jet/jet.png
+!media media/validation/free_flow/jets/single-stream-jet/jet.png
        style=width:100%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:geom
        caption=Jet in still tank.
@@ -43,7 +43,7 @@ The air properties used are given in [tab:matprops].
 
 In the geometry created for the CFD analyses, the jet outlet diameter D was set to 10 mm to match the value in the source document. Additionally, Faghani et al. [!cite](faghani2011effect) noted that a uniform inlet velocity profile shows better agreement with experimental data from similar studies on jet flow. The turbulence intensity at the inlet surface was set to 5% to align with the experimental data. This validation case demonstrates the simulation of a round free jet in a still tank using the `OpenPronghorn` K-Epsilon model with the realizable two-layer variation and Wolfstein two-layer model. The mesh is generated using the MOOSE mesh generator system.
 
-!media media/validation/jets/single-stream-jet/mesh.png
+!media media/validation/free_flow/jets/single-stream-jet/mesh.png
        style=width:70%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:mesh
        caption=Mesh showing the fluid and increased discretization around the jet centerline.
@@ -52,19 +52,19 @@ Altogether, the mesh has 150 cells axially and about 40 cells laterally on avera
 The simulation employs a +SIMPLE solver+ to obtain the steady state solution.
 The input file for this case is embedded below.
 
-!listing /validation/jets/single-stream-jet/RTL10000/jet_RTL10000.i
+!listing /validation/free_flow/jets/single-stream-jet/RTL10000/jet_RTL10000.i
 
 ## Results
 
 The velocity and jet half-width profiles obtained across the jet centerline for Re=10,000 using experimental methods are compared with `OpenPronghorn` CFD results and other simulations from the open literature. The jet half-width is defined as the distance on the y-axis from the centerline at any point x along the jet axis where the velocity is equal to half of the centerline velocity at that point.
 
-!media media/validation/jets/single-stream-jet/plot_results.py
+!media media/validation/free_flow/jets/single-stream-jet/plot_results.py
        image_name=jet_CL_normal_velocity.png
        style=width:70%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:velprofile
        caption=Jet centerline velocity distribution.
 
-!media media/validation/jets/single-stream-jet/plot_results.py
+!media media/validation/free_flow/jets/single-stream-jet/plot_results.py
        image_name=jet_halfwidth.png
        style=width:70%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:halfprofile
@@ -72,4 +72,6 @@ The velocity and jet half-width profiles obtained across the jet centerline for 
 
 ## Discussion of results
 
-In both plots, the red line presents the `OpenPronghorn` results. IP-RSM stands for isotropization by production Reynolds stress model, and it is the turbulence model chosen by Turutoglu et al. in their numerical simulation. For the axial-velocity prediction, the `OpenPronghorn` simulation yields better results than both the default and calibrated IP-RSM, even though K-Epsilon is considered a lower-fidelity turbulence model. For the half-width prediction, the `OpenPronghorn` simulation sits between the two IP-RSM versions in terms of agreement with the experimental data.
+In both plots, the red line presents the `OpenPronghorn` results. IP-RSM stands for isotropization by production Reynolds stress model, and it is the turbulence model chosen by Turutoglu et al. in their numerical simulation. For the axial-velocity prediction, the `OpenPronghorn` simulation yields better results than both the default and calibrated IP-RSM, even though K-Epsilon is considered a lower-fidelity turbulence model. This should not be interpreted as evidence that K-Epsilon is generally more accurate than IP-RSM for free jets. The centerline velocity decay is mainly controlled by the modeled turbulent entrainment from the surrounding still fluid, and the realizable K-Epsilon closure with the selected inlet turbulence level and uniform inlet profile appears to reproduce that dominant decay rate well for this case.
+
+The half-width comparison is less favorable, with the `OpenPronghorn` simulation sitting between the two IP-RSM versions in terms of agreement with the experimental data. This mixed behavior suggests that the improved centerline agreement is likely case-specific and may include cancellation of errors between the turbulence closure, inlet conditions, and mesh/discretization effects, rather than a uniformly better representation of the full Reynolds-stress field. In addition, the calibrated IP-RSM data from Turutoglu et al. [!cite](turutoglu2024calibration) were calibrated using jet half-width, so the centerline velocity comparison is not necessarily the quantity most directly optimized by that calibration.

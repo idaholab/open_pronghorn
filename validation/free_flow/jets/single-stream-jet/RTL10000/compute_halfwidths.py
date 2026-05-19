@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Stable half-width detection:
-- halfwidth = smallest y>0 where vel_z < 0.5*Vc and stays below for min_consecutive points
-- applies light smoothing (Gaussian-like convolution) to vel_z(y) before detection
+Half-width detection:
+- halfwidth = interpolated y > 0 where smoothed vel_z first crosses below 0.5*Vc
+- crossing is accepted only when smoothed vel_z stays below for min_consecutive points
 - writes combined_halfwidths.csv
 """
 
@@ -13,7 +13,6 @@ import pandas as pd
 
 OUTFILE = "combined_halfwidths.csv"
 
-# Parameters (tune if needed)
 SMOOTH_WINDOW = 7  # smoothing kernel size in samples (odd int >=3)
 SMOOTH_PAD_MODE = "edge"  # mode for np.pad
 MIN_CONSECUTIVE = (
@@ -61,7 +60,7 @@ def centerline_velocity(g):
 
 
 def smooth_signal(y, v, window=7, pad_mode="edge"):
-    """Simple symmetric moving-average (Gaussian-like) smoothing with odd window."""
+    """Smooth the radial profile before threshold detection."""
     if window <= 1:
         return v.copy()
     if window % 2 == 0:
@@ -72,8 +71,7 @@ def smooth_signal(y, v, window=7, pad_mode="edge"):
     kernel = kernel / kernel.sum()
     pad = window // 2
     vpad = np.pad(v, pad, mode=pad_mode)
-    vsmooth = np.convolve(vpad, kernel, mode="valid")
-    return vsmooth
+    return np.convolve(vpad, kernel, mode="valid")
 
 
 def interp_y(v0, y0, v1, y1, vt):
@@ -85,7 +83,7 @@ def interp_y(v0, y0, v1, y1, vt):
 
 def halfwidth_stable(g, vc, smooth_window=7, min_consec=5, min_span_y=None):
     """
-    Returns smallest y>0 where smoothed vel_z crosses below 0.5*vc and remains below
+    Returns the first y > 0 where smoothed vel_z crosses below 0.5*vc and remains below
     for at least min_consec samples (and optional min_span_y in physical units).
     """
     if np.isnan(vc):
@@ -98,19 +96,20 @@ def halfwidth_stable(g, vc, smooth_window=7, min_consec=5, min_span_y=None):
     y = gpos["y"].values
     v = gpos["vel_z"].values
 
-    # smoothing
+    # Use smoothing only to make threshold detection insensitive to local oscillations.
+    # The output remains a single interpolated half-width value, not a smoothed profile.
     vs = smooth_signal(y, v, window=smooth_window, pad_mode=SMOOTH_PAD_MODE)
 
     n = len(vs)
-    # iterate over consecutive pairs (i,i+1) where smoothed falls from >=target to <target
+    # iterate over consecutive pairs (i,i+1) where the smoothed profile crosses below target
     for i in range(n - 1):
         if vs[i] >= target and vs[i + 1] < target:
             # check that vs[i+1 : i+1+min_consec] are all < target
-            end = min(n, i + 1 + min_consec)
+            end = i + 1 + min_consec
+            if end > n:
+                continue
             if np.all(vs[i + 1 : end] < target):
-                y_cross = interp_y(
-                    vs[i], y[i], vs[i + 1], y[i + 1], target
-                )  # interpolate using smoothed v vs y
+                y_cross = interp_y(vs[i], y[i], vs[i + 1], y[i + 1], target)
                 # optionally require that span from y_cross to y[end-1] >= min_span_y
                 if min_span_y is not None:
                     span_y = y[end - 1] - y_cross if end - 1 >= 0 else 0.0
