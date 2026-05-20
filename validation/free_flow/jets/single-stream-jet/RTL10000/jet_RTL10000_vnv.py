@@ -18,8 +18,8 @@ def csv_matches_gold(current, gold, rel_err, abs_zero):
         gold_numeric = pd.to_numeric(gold_values, errors="coerce")
 
         if current_numeric.notna().all() and gold_numeric.notna().all():
-            current_array = current_numeric.to_numpy(dtype=float)
-            gold_array = gold_numeric.to_numpy(dtype=float)
+            current_array = current_numeric.to_numpy(dtype=float, copy=True)
+            gold_array = gold_numeric.to_numpy(dtype=float, copy=True)
             current_array[np.abs(current_array) < abs_zero] = 0.0
             gold_array[np.abs(gold_array) < abs_zero] = 0.0
             if not np.allclose(

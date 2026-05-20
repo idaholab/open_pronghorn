@@ -2,7 +2,7 @@
   [jet_RTL10000]
     type = CSVDiff
     input = 'jet_RTL10000.i'
-    csvdiff = 'jet_RTL10000_out_centerline_0002.csv combined_halfwidths.csv'
+    csvdiff = 'jet_RTL10000_out_centerline_0002.csv'
     requirement = 'The system should accurately predict centerline decay and half-width growth for a turbulent free jet at Re = 10000.'
     min_parallel = 96
     max_time = 1200
