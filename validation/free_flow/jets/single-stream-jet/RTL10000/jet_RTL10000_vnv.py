@@ -75,6 +75,7 @@ class TestCase(ValidationCase):
 
         self.lower_bound = float(self.getParam("validation_lower_bound"))
         self.upper_bound = float(self.getParam("validation_upper_bound"))
+        validation_abs_tol = float(self.getParam("validation_abs_tol"))
 
         self.reference_sim_error_centerline = np.abs(
             ref_centerline - gold_centerline_norm
@@ -88,25 +89,33 @@ class TestCase(ValidationCase):
             ref_halfwidth - current_halfwidth_norm
         )
 
-        self.min_error_centerline = (
-            1.0 + self.lower_bound
-        ) * self.reference_sim_error_centerline
+        self.min_error_centerline = np.maximum(
+            0.0,
+            (1.0 + self.lower_bound) * self.reference_sim_error_centerline
+            - validation_abs_tol,
+        )
         self.max_error_centerline = (
             1.0 + self.upper_bound
-        ) * self.reference_sim_error_centerline
+        ) * self.reference_sim_error_centerline + validation_abs_tol
 
-        self.min_error_halfwidth = (
-            1.0 + self.lower_bound
-        ) * self.reference_sim_error_halfwidth
+        self.min_error_halfwidth = np.maximum(
+            0.0,
+            (1.0 + self.lower_bound) * self.reference_sim_error_halfwidth
+            - validation_abs_tol,
+        )
         self.max_error_halfwidth = (
             1.0 + self.upper_bound
-        ) * self.reference_sim_error_halfwidth
+        ) * self.reference_sim_error_halfwidth + validation_abs_tol
 
     @staticmethod
     def validParams():
         params = ValidationCase.validParams()
         params.addRequiredParam("validation_lower_bound", "Lower bound")
         params.addRequiredParam("validation_upper_bound", "Upper bound")
+        params.addRequiredParam(
+            "validation_abs_tol",
+            "Absolute tolerance for validation error bounds near zero reference error",
+        )
         return params
 
     def testValidation(self):
