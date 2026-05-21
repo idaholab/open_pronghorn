@@ -1,39 +1,7 @@
 from TestHarness.validation import ValidationCase
 
-import os
-import subprocess
-import sys
 import numpy as np
 import pandas as pd
-
-
-def csv_matches_gold(current, gold, rel_err, abs_zero):
-    if list(current.columns) != list(gold.columns) or len(current) != len(gold):
-        return False
-
-    for column in current.columns:
-        current_values = current[column]
-        gold_values = gold[column]
-        current_numeric = pd.to_numeric(current_values, errors="coerce")
-        gold_numeric = pd.to_numeric(gold_values, errors="coerce")
-
-        if current_numeric.notna().all() and gold_numeric.notna().all():
-            current_array = current_numeric.to_numpy(dtype=float, copy=True)
-            gold_array = gold_numeric.to_numpy(dtype=float, copy=True)
-            current_array[np.abs(current_array) < abs_zero] = 0.0
-            gold_array[np.abs(gold_array) < abs_zero] = 0.0
-            if not np.allclose(
-                current_array,
-                gold_array,
-                rtol=rel_err,
-                atol=abs_zero,
-                equal_nan=False,
-            ):
-                return False
-        elif not current_values.equals(gold_values):
-            return False
-
-    return True
 
 
 class TestCase(ValidationCase):
@@ -63,20 +31,6 @@ class TestCase(ValidationCase):
             .sort_values("z")
             .reset_index(drop=True)
         )
-
-        rel_err = float(self.getParam("rel_err"))
-        abs_zero = float(self.getParam("abs_zero"))
-        if csv_matches_gold(
-            current_centerline, gold_centerline, rel_err, abs_zero
-        ) and csv_matches_gold(current_halfwidth, gold_halfwidth, rel_err, abs_zero):
-            repo_root = os.path.abspath(
-                os.path.join(os.path.dirname(__file__), "../../../../..")
-            )
-            plot_script = os.path.join(
-                repo_root,
-                "doc/content/media/validation/free_flow/jets/single-stream-jet/plot_results.py",
-            )
-            subprocess.run([sys.executable, plot_script], check=True)
 
         exp_centerline = pd.read_csv(
             "reference/exp_centerline.csv",
