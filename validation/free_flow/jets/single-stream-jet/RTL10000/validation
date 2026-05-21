@@ -12,6 +12,7 @@
     # Allow current error to stay within +/- 2% of reference error
     validation_lower_bound = -0.02
     validation_upper_bound = 0.02
+    validation_abs_tol = 1e-3
 
     # CSVDiff tolerance for direct file comparison to gold
     rel_err = 1e-3
