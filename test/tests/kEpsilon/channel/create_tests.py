@@ -20,7 +20,6 @@ Then include the generated [Tests] block into your MOOSE tests file.
 
 import itertools
 
-
 # ---------------------------------------------------------------------------
 # CONFIGURATION
 # ---------------------------------------------------------------------------
