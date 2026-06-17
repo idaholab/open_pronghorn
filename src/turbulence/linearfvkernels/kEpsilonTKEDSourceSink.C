@@ -102,6 +102,65 @@ kEpsilonTKEDSourceSink::validParams()
                              "Curvature / rotation correction model: "
                              "'none' (default) or 'standard' (Spalart–Shur style).");
 
+  params.addParam<Real>(
+      "k_min", 1e-8, "Minimum k value used to guard the turbulent time scale k/eps.");
+
+  params.addParam<Real>("eps_min",
+                        1e-10,
+                        "Minimum epsilon used inside the C_pl production limiter "
+                        "min(Pe, C_pl * rho * max(eps, eps_min)).  Prevents the limiter from "
+                        "being trivially zero when epsilon is near zero at initialisation.");
+
+  params.addParam<Real>("mu_t_prod_max",
+                        5000.0,
+                        "Maximum mu_t / mu ratio applied inside the bulk production computation. "
+                        "Should match (or be <= to) the mu_t_ratio_max in kEpsilonViscosity.");
+
+  params.addParam<Real>(
+      "tked_min_phys",
+      1e-10,
+      "Physical lower bound on epsilon. When the current cell epsilon falls below "
+      "this value a strong penalty source drives it back to tked_min_phys, "
+      "preventing negative epsilon from the linear solver.");
+
+  params.addParam<Real>(
+      "tked_max_phys",
+      1e6,
+      "Physical upper bound on epsilon. Applied to both the solution variable "
+      "and the algebraic two-layer/wall-function target values.  Default 1e6 m²/s³ "
+      "covers most industrial flows at high Re; lower for low-Re or fine-mesh cases.");
+
+  params.addParam<Real>(
+      "C_pk",
+      0.0,
+      "Durbin realizability coefficient for the k-based epsilon production limiter: "
+      "Pe <= C_pk * rho * k * |S|.  A k-based bound effective when eps ~ 0 at start-up. "
+      "0 = disabled (default).  Recommended when enabled: 0.667 (= 2/3).");
+
+  params.addParam<bool>(
+      "use_time_scale_limiter",
+      true,
+      "Apply a Kolmogorov time scale lower bound T = max(k/eps, C_t*sqrt(nu/eps)). "
+      "Prevents the implicit epsilon destruction from becoming unboundedly large in "
+      "near-wall or highly-dissipative cells. Strongly recommended for stability.");
+
+  params.addParam<Real>(
+      "C_t_kolmogorov",
+      6.0,
+      "Coefficient for the Kolmogorov lower bound on the turbulent time scale "
+      "(used when use_time_scale_limiter = true). Default 6.0 matches STAR-CCM+.");
+
+  params.addParam<bool>("use_kato_launder",
+                        false,
+                        "Replace G_k = mu_t S^2 with Kato–Launder G_k = mu_t |S| |Omega|. "
+                        "Must match the setting used in the kEpsilonTKESourceSink kernel.");
+
+  MooseEnum grad_method_enum2("moose_functor local_least_squares", "moose_functor");
+  params.addParam<MooseEnum>("gradient_method",
+                             grad_method_enum2,
+                             "Velocity gradient method for turbulence production terms. "
+                             "Must match the setting used in the kEpsilonTKESourceSink kernel.");
+
   return params;
 }
 
@@ -149,7 +208,20 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _has_wall_distance(params.isParamValid("wall_distance")),
     _nonlinear_model(
         getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
-    _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>())
+    _curvature_model(
+        getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>()),
+    _k_min(getParam<Real>("k_min")),
+    _eps_min(getParam<Real>("eps_min")),
+    _mu_t_prod_max(getParam<Real>("mu_t_prod_max")),
+    _C_pk(getParam<Real>("C_pk")),
+    _tked_min_phys(getParam<Real>("tked_min_phys")),
+    _tked_max_phys(getParam<Real>("tked_max_phys")),
+    _use_time_scale_limiter(getParam<bool>("use_time_scale_limiter")),
+    _C_t_kolmogorov(getParam<Real>("C_t_kolmogorov")),
+    _use_kato_launder(getParam<bool>("use_kato_launder")),
+    _grad_method(getParam<MooseEnum>("gradient_method") == "local_least_squares"
+                     ? NS::TurbVelocityGradientMethod::LocalLeastSquares
+                     : NS::TurbVelocityGradientMethod::MooseFunctor)
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
@@ -269,6 +341,12 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const Elem * elem = _current_elem_info->elem();
 
+  // Physical bounds enforcement: if epsilon is out of [tked_min_phys, tked_max_phys],
+  // inject a large penalty diagonal so the next iterate is pulled back inside bounds.
+  const Real eps_old = _var.getElemValue(*_current_elem_info, state);
+  if (eps_old < _tked_min_phys || eps_old > _tked_max_phys)
+    return _bounds_penalty * _current_elem_volume;
+
   // ---------------------------------------------------------------------------
   // Two-layer epsilon: algebraic epsilon in the internal near-wall region
   // ---------------------------------------------------------------------------
@@ -287,10 +365,12 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
     // Same wall-distance Reynolds threshold used in the two-layer μ_t blending
     const Real Rey_star = 60.0; // if you change this in kEpsilonViscosity, change it here too
 
-    // Viscosity-dominated two-layer region: impose epsilon algebraically
+    // Viscosity-dominated two-layer region: impose epsilon algebraically.
+    // Use _bounds_penalty (not just 1) to make this a near-hard Dirichlet so
+    // advection and diffusion from neighboring cells cannot overwhelm the
+    // algebraic constraint and inflate eps in the two-layer zone.
     if (Red <= Rey_star)
-      // Matrix coefficient = 1, but in FV we multiply by the cell volume
-      return _current_elem_volume;
+      return _bounds_penalty * _current_elem_volume;
   }
 
   // ---------------------------------------------------------------------------
@@ -300,7 +380,7 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
   if (_wall_bounded.find(elem) != _wall_bounded.end() &&
       !(_variant == NS::KEpsilonVariant::StandardTwoLayer ||
         _variant == NS::KEpsilonVariant::RealizableTwoLayer))
-    return _current_elem_volume;
+    return _bounds_penalty * _current_elem_volume;
 
   // ---------------------------------------------------------------------------
   // Bulk: implicit destruction term C2_eps f2 rho / T_e
@@ -333,6 +413,15 @@ kEpsilonTKEDSourceSink::computeRightHandSideContribution()
   const auto elem_arg = makeElemArg(_current_elem_info->elem());
   const Elem * elem = _current_elem_info->elem();
 
+  // Physical bounds enforcement (must mirror computeMatrixContribution check):
+  {
+    const Real eps_old = _var.getElemValue(*_current_elem_info, state);
+    if (eps_old < _tked_min_phys)
+      return _bounds_penalty * _tked_min_phys * _current_elem_volume;
+    if (eps_old > _tked_max_phys)
+      return _bounds_penalty * _tked_max_phys * _current_elem_volume;
+  }
+
   // ---------------------------------------------------------------------------
   // Two-layer epsilon: algebraic epsilon in the internal near-wall region
   // ---------------------------------------------------------------------------
@@ -352,13 +441,32 @@ kEpsilonTKEDSourceSink::computeRightHandSideContribution()
 
     if (Red <= Rey_star)
     {
-      // Algebraic two-layer epsilon:
-      //   epsilon_2L ≈ C_mu^(3/4) k^(3/2) / (kappa * d)
-      // This follows the structure of Eq. (1073): epsilon ∝ k^(3/2)/l_eps.
-      const Real eps_2layer =
-          std::pow(_C_mu, 0.75) * std::pow(k, 1.5) / (NS::von_karman_constant * std::max(d, 1e-12));
+      // Algebraic two-layer epsilon (STAR-CCM+ Eq. 1073):
+      //   eps_2L = C_mu^(3/4) * k^(3/2) / l_eps
+      //   l_eps  = c_l * d * (1 - exp(-Re_d / (2 * c_l)))
+      //   c_l    = kappa * C_mu^{-3/4}  (= 0.42 * C_mu^{-3/4})
+      //
+      // Using the full l_eps with damping function correctly captures the inner
+      // near-wall epsilon profile, which grows larger as d -> 0 (l_eps -> 0 faster
+      // than k^(3/2) -> 0). The simplified formula kappa*d underestimates epsilon
+      // near the wall because it omits the C_mu^{3/4}/c_l = C_mu^{3/2}/kappa factor.
+      const Real c_l = NS::cl_from_Cmu(_C_mu);
+      const Real A_eps = 2.0 * c_l;
+      // l_eps → 0 faster than k^(3/2) → 0 for very small d, causing eps_2layer → ∞.
+      // Use k_safe to prevent division issues when k is near zero (early iterations).
+      const Real k_safe = std::max(k, _k_min);
+      const Real l_eps = c_l * d * (1.0 - std::exp(-Red / std::max(A_eps, 1e-12)));
+      const Real eps_2layer_raw = std::pow(k_safe, 1.5) / std::max(l_eps, 1e-12);
 
-      return eps_2layer * _current_elem_volume;
+      // Clamp the algebraic eps to the physical upper bound.
+      // For very fine near-wall cells this formula can give huge values that,
+      // if left unchecked, would dominate the linear system and propagate
+      // large values into the bulk via diffusion.
+      const Real eps_2layer = std::clamp(eps_2layer_raw, _tked_min_phys, _tked_max_phys);
+
+      // Return penalty * target to mirror the matrix contribution (penalty * V),
+      // creating a near-hard Dirichlet for the algebraic two-layer constraint.
+      return _bounds_penalty * eps_2layer * _current_elem_volume;
     }
   }
 
@@ -371,7 +479,8 @@ kEpsilonTKEDSourceSink::computeRightHandSideContribution()
         _variant == NS::KEpsilonVariant::RealizableTwoLayer))
   {
     const Real eps_wall = computeWallEpsilon(elem_arg, state);
-    return eps_wall * _current_elem_volume;
+    // Match the penalty used in the matrix contribution for this branch
+    return _bounds_penalty * eps_wall * _current_elem_volume;
   }
 
   // ---------------------------------------------------------------------------
@@ -388,9 +497,13 @@ Real
 kEpsilonTKEDSourceSink::computeTimeScale(const Moose::ElemArg & elem_arg,
                                          const Moose::StateArg & state) const
 {
-  // Classic high-Re time scale T_e = k / eps.
-  const Real k = _k(elem_arg, state);
+  const Real k = std::max(_k(elem_arg, state), _k_min);
   const Real eps = _var.getElemValue(*_current_elem_info, state);
+  const Real nu = _mu(elem_arg, state) / std::max(_rho(elem_arg, state), 1e-20);
+
+  if (_use_time_scale_limiter)
+    return NS::limitTurbTimeScale(k, eps, nu, _C_t_kolmogorov);
+
   return k / std::max(eps, 1e-20);
 }
 
@@ -408,7 +521,8 @@ kEpsilonTKEDSourceSink::computeWallEpsilon(const Moose::ElemArg & elem_arg,
 
   const Real rho = _rho(elem_arg, state);
   const Real mu = _mu(elem_arg, state);
-  const Real k = _k(elem_arg, state);
+  // Guard k to prevent sqrt(k) and k^(3/2) from giving zero/negative results
+  const Real k = std::max(_k(elem_arg, state), _k_min);
 
   // Velocity at the cell centroid (for equilibrium wall treatments)
   RealVectorValue velocity(_u_var(elem_arg, state), 0.0, 0.0);
@@ -444,11 +558,14 @@ kEpsilonTKEDSourceSink::computeWallEpsilon(const Moose::ElemArg & elem_arg,
 
     Real eps_i = 0.0;
     if (y_plus < 11.25)
-      // viscous sublayer branch from LinearFVTKEDSourceSink
+      // viscous sublayer: eps = 2 nu k / d^2
       eps_i = 2.0 * k * mu / rho / (d * d);
     else
-      // log-layer epsilon
+      // log-layer: eps = C_mu^(3/4) k^(3/2) / (kappa d)
       eps_i = std::pow(_C_mu, 0.75) * std::pow(k, 1.5) / (NS::von_karman_constant * d);
+
+    // Cap individual wall-face contribution by physical bounds
+    eps_i = std::clamp(eps_i, _tked_min_phys, _tked_max_phys);
 
     eps_sum += eps_i;
     tot_weight += 1.0;
@@ -466,20 +583,22 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
 {
   const Real rho = _rho(elem_arg, state);
   const Real mu = _mu(elem_arg, state);
-  const Real mu_t = _mu_t(elem_arg, state);
+  // Cap mu_t to avoid stale over-large values before k/eps have converged
+  const Real mu_t = std::min(_mu_t(elem_arg, state), _mu_t_prod_max * mu);
   const Real k = _k(elem_arg, state);
+  const Real k_safe = std::max(k, _k_min);
   const Real eps = _var.getElemValue(*_current_elem_info, state);
 
-  // Invariants of strain, rotation and divergence
-  auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
+  // Invariants of strain, rotation and divergence — use the selected gradient method
+  const Elem * elem = elem_arg.elem;
+  auto inv = NS::computeStrainRotationInvariantsEx(
+      _u_var, _v_var, _w_var, elem, elem_arg, state, _grad_method);
 
-  // Shear production G_k
-  Real Gk = NS::computeGk(mu_t,
-                          inv.S2,
-                          rho,
-                          k,
-                          inv.div_u,
-                          /*include_compressibility_terms*/ _switches.use_compressibility);
+  // Shear production G_k (standard or Kato–Launder form)
+  Real Gk = _use_kato_launder
+                ? NS::computeGkKatoLaunder(
+                      mu_t, inv.S2, inv.W2, rho, k, inv.div_u, _switches.use_compressibility)
+                : NS::computeGk(mu_t, inv.S2, rho, k, inv.div_u, _switches.use_compressibility);
 
   // For Realizable Pe we also need the pure shear production S_k = mu_t S^2
   const Real Sk = mu_t * inv.S2;
@@ -518,7 +637,9 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
   Real Gnl = 0.0;
   if (_nonlinear_model != NS::NonlinearConstitutiveRelation::None)
   {
-    auto grad_u = NS::computeVelocityGradient(_u_var, _v_var, _w_var, elem_arg, state);
+    auto grad_u = (_grad_method == NS::TurbVelocityGradientMethod::LocalLeastSquares)
+                      ? NS::computeVelocityGradientLS(_u_var, _v_var, _w_var, elem, state)
+                      : NS::computeVelocityGradient(_u_var, _v_var, _w_var, elem_arg, state);
     Gnl = NS::computeGnl(_nonlinear_model, grad_u, inv, mu_t, k, eps);
   }
 
@@ -563,6 +684,10 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     yap_source = rho / _Ct * gamma_y;
   }
 
+  // C_pl production limiter (applied consistently across all variants).
+  // Use eps_min so the limiter is never trivially zero at start-up (eps ≈ 0).
+  const Real production_limit = _C_pl * rho * std::max(eps, _eps_min);
+
   // Variant-dependent Pe definition
   Real Pe = 0.0;
 
@@ -570,39 +695,53 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
   {
     case NS::KEpsilonVariant::Standard:
     {
-      // Match old LinearFVTKEDSourceSink for Standard:
-      // - Gk = mu_t S2
-      // - apply C_pl limiter on Gk (production)
-      const Real production_limit = _C_pl * rho * eps;
       const Real Gk_limited = std::min(Gk, production_limit);
-
-      // Legacy Standard model had no Gb/Gnl/etc., but we allow them if enabled.
       Pe = Gk_limited + Gnl + C3_eps_local * Gb;
       break;
     }
 
     case NS::KEpsilonVariant::StandardTwoLayer:
-      // Pepsilon = Gk + Gnl + C3_eps Gb + rho/Ct gamma_y
-      Pe = Gk + Gnl + C3_eps_local * Gb + yap_source;
+    {
+      // Apply C_pl limiter to Gk for robustness; Yap term is already bounded.
+      const Real Gk_limited = std::min(Gk, production_limit);
+      Pe = Gk_limited + Gnl + C3_eps_local * Gb + yap_source;
       break;
+    }
 
     case NS::KEpsilonVariant::StandardLowRe:
-      // Pepsilon = Gk + Gnl + G' + C3_eps Gb + rho/Ct gamma_y
-      Pe = Gk + Gnl + Gprime + C3_eps_local * Gb + yap_source;
+    {
+      const Real Gk_limited = std::min(Gk, production_limit);
+      Pe = Gk_limited + Gnl + Gprime + C3_eps_local * Gb + yap_source;
       break;
+    }
 
     case NS::KEpsilonVariant::Realizable:
-      // Realizable: Pe = f_c S_k + C3_eps Gb  (Eq. 1058)
-      Pe = fc * Sk + C3_eps_local * Gb;
+    {
+      // Realizable: Pe = f_c S_k + C3_eps Gb  (STAR-CCM+ Eq. 1058)
+      const Real Sk_limited = std::min(fc * Sk, production_limit);
+      Pe = Sk_limited + C3_eps_local * Gb;
       break;
+    }
 
     case NS::KEpsilonVariant::RealizableTwoLayer:
-      // Realizable two-layer: same, with optional Yap term
-      Pe = fc * Sk + C3_eps_local * Gb + yap_source;
+    {
+      const Real Sk_limited = std::min(fc * Sk, production_limit);
+      Pe = Sk_limited + C3_eps_local * Gb + yap_source;
       break;
+    }
 
     default:
       mooseError("kEpsilonTKEDSourceSink: unsupported k-epsilon variant.");
+  }
+
+  // Durbin (1996) k-based realizability limiter applied to the epsilon production:
+  //   Pe ≤ C_pk · ρ · k · |S|
+  // Effective even when ε ≈ 0 at start-up. Disabled by default (C_pk = 0).
+  if (_C_pk > 0.0)
+  {
+    const Real S_mag = std::sqrt(std::max(inv.S2, 0.0));
+    const Real durbin_limit = _C_pk * rho * k_safe * S_mag;
+    Pe = std::min(Pe, durbin_limit);
   }
 
   return Pe;

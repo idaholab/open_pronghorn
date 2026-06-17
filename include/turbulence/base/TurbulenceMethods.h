@@ -17,9 +17,32 @@
 #include "FEProblemBase.h"
 #include "SubProblem.h"
 #include "RankTwoTensor.h"
+#include "libmesh/elem.h"
 
 namespace NS
 {
+
+/**
+ * NOTE ON GRADIENT QUALITY IN TURBULENCE MODELS
+ * -----------------------------------------------
+ * All production terms (G_k, S2, W2, ...) are computed from the velocity gradient
+ * tensor obtained via MOOSE's functor `.gradient()` interface. The underlying
+ * gradient reconstruction method (Green-Gauss or Least-Squares) is configured at
+ * the variable level via the mesh/system settings and is shared with the
+ * Navier-Stokes momentum equations.
+ *
+ * For improved robustness in cells with ill-conditioned geometry or near
+ * stagnation points, it is recommended to select the Least-Squares gradient
+ * method (or a Mixed/Gradient-Limited scheme) for the velocity variables in
+ * the input file.  Locally overriding the gradient method inside these kernels
+ * is not practical without bypassing the MOOSE functor framework entirely, which
+ * would require custom neighbor-cell iteration and is intentionally avoided here.
+ *
+ * The S2 and W2 invariants are clamped to [0, ∞) at every evaluation point to
+ * prevent NaN propagation from floating-point noise in ill-conditioned cells.
+ * Production is further bounded by the C_pl limiter (C_pl * rho * eps) to prevent
+ * blow-up during early iterations when the background solution is far from converged.
+ */
 
 /**
  * Enumeration of the supported k-epsilon model variants.
@@ -117,11 +140,19 @@ Real cl_from_Cmu(const Real Cmu);
 
 /**
  * Two-layer length scales (epsilon length and viscosity ratio).
+ *
+ * The viscosity ratio is defined as:
+ *   mu_ratio = mu_t^{2L} / mu  = C_mu^{1/4} * c_l * Re_d * f_mu(Re_d)
+ *
+ * where c_l = 0.42 * C_mu^{-3/4} and f_mu is a variant-specific damping function.
+ * This matches STAR-CCM+ (Eq. 1074 Wolfstein / 1076 Norris-Reynolds).
+ *
+ * Note: the (mu_t / mu) ratio scales linearly with Re_d (first power), not Re_d^{1/4}.
  */
 struct TwoLayerLengths
 {
-  Real l_eps;    ///< length scale used for epsilon, l_epsilon
-  Real mu_ratio; ///< (mu_t / mu)_2layer
+  Real l_eps;    ///< length scale for epsilon: l_eps = c_l * d * f_eps(Re_d)
+  Real mu_ratio; ///< (mu_t / mu)_2layer = C_mu^{1/4} * c_l * Re_d * f_mu(Re_d)
 };
 
 /**
@@ -301,5 +332,100 @@ Real computeGnl(const NonlinearConstitutiveRelation model,
  */
 Real computeCurvatureFactor(const CurvatureCorrectionModel model,
                             const StrainRotationInvariants & inv);
+
+/**
+ * Gradient method selector for turbulence production terms.
+ *
+ * MooseFunctor  – use the gradient cached by MOOSE (Green-Gauss by default).
+ * LocalLeastSquares – reconstruct a local inverse-distance-weighted least-squares
+ *                     gradient from face-adjacent cell values.  Bypasses the MOOSE
+ *                     gradient cache entirely and is therefore insensitive to the
+ *                     gradient method configured at the variable level.  Falls back
+ *                     to the MOOSE functor gradient when the local stencil is
+ *                     degenerate (boundary cell with too few neighbors, singular LS
+ *                     matrix, etc.).
+ */
+enum class TurbVelocityGradientMethod
+{
+  MooseFunctor,
+  LocalLeastSquares
+};
+
+/**
+ * Local inverse-distance-weighted least-squares velocity gradient.
+ *
+ * For each face-adjacent neighbor N of element P:
+ *   (u_N - u_P) ≈ ∇u · (x_N - x_P)
+ *
+ * The overdetermined system is solved in the least-squares sense with
+ * weights w = 1/|x_N - x_P|^2.  The analytical 2×2 / 3×3 matrix
+ * inverse is used so that no external dense-algebra library is needed.
+ *
+ * Falls back to the MOOSE functor gradient when:
+ *   - the element has no interior (non-boundary) neighbors, or
+ *   - the resulting normal-equation matrix is nearly singular.
+ *
+ * @param u_var   x-velocity functor
+ * @param v_var   y-velocity functor (nullptr in 1D)
+ * @param w_var   z-velocity functor (nullptr in 1D/2D)
+ * @param elem    raw libMesh element (needed for neighbor traversal)
+ * @param state   solution state
+ */
+RankTwoTensor computeVelocityGradientLS(const Moose::Functor<Real> & u_var,
+                                        const Moose::Functor<Real> * v_var,
+                                        const Moose::Functor<Real> * w_var,
+                                        const Elem * elem,
+                                        const Moose::StateArg & state);
+
+/**
+ * Compute strain/rotation invariants using the chosen gradient method.
+ *
+ * When method == LocalLeastSquares the velocity gradient is computed by
+ * computeVelocityGradientLS; otherwise computeVelocityGradient is used.
+ */
+StrainRotationInvariants computeStrainRotationInvariantsEx(const Moose::Functor<Real> & u,
+                                                           const Moose::Functor<Real> * v,
+                                                           const Moose::Functor<Real> * w,
+                                                           const Elem * elem,
+                                                           const Moose::ElemArg & elem_arg,
+                                                           const Moose::StateArg & state,
+                                                           TurbVelocityGradientMethod method);
+
+/**
+ * Kato–Launder (1993) modified shear production.
+ *
+ *   G_k^{KL} = μ_t |S| |Ω|
+ *            = μ_t √S2 · √W2
+ *
+ * This eliminates the stagnation-point anomaly: in regions of pure
+ * irrotational strain |Ω| → 0, so production → 0, preventing the
+ * unphysical k blow-up at stagnation points.
+ *
+ * Optional compressibility corrections are applied identically to computeGk.
+ */
+Real computeGkKatoLaunder(const Real mu_t,
+                          const Real S2,
+                          const Real W2,
+                          const Real rho,
+                          const Real k,
+                          const Real div_u,
+                          const bool include_compressibility_terms);
+
+/**
+ * Turbulent time scale with Kolmogorov lower bound (Durbin 1996).
+ *
+ *   T = max(k/ε,  C_t √(ν/ε))
+ *
+ * The Kolmogorov lower bound prevents the time scale from collapsing to
+ * zero as ε → ∞ in near-wall / highly dissipative cells, which would
+ * otherwise make the implicit destruction coefficient in the ε-equation
+ * arbitrarily large and cause convergence failure.
+ *
+ * @param k    turbulent kinetic energy
+ * @param eps  turbulent dissipation rate
+ * @param nu   kinematic viscosity
+ * @param Ct   model constant (default 6.0 in STAR-CCM+)
+ */
+Real limitTurbTimeScale(const Real k, const Real eps, const Real nu, const Real Ct);
 
 } // namespace NS
