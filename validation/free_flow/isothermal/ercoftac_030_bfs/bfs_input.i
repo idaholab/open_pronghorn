@@ -53,7 +53,6 @@ bulk_wall_treatment = false
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  advected_interp_method = ${advected_interp_method}
 []
 
 [UserObjects]
@@ -119,11 +118,17 @@ bulk_wall_treatment = false
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_t'
     u = vel_x
     v = vel_y
@@ -147,7 +152,7 @@ bulk_wall_treatment = false
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_t'
     u = vel_x
     v = vel_y
@@ -169,7 +174,7 @@ bulk_wall_treatment = false
     momentum_component = 'y'
   []
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -183,6 +188,7 @@ bulk_wall_treatment = false
   [TKE_advection]
     type = LinearFVTurbulentAdvection
     variable = TKE
+    advected_interp_method_name = ${advected_interp_method}
   []
   [TKE_diffusion]
     type = LinearFVTurbulentDiffusion
@@ -221,6 +227,7 @@ bulk_wall_treatment = false
   [TKED_advection]
     type = LinearFVTurbulentAdvection
     variable = TKED
+    advected_interp_method_name = ${advected_interp_method}
     walls = ${walls}
   []
   [TKED_diffusion]
