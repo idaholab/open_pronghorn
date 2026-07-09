@@ -44,6 +44,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     #    old_boundary = '0'
     #    new_boundary = 'wall'
     #  []
+
+    parallel_type = distributed
 []
 
 [Problem]
@@ -557,7 +559,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [Outputs]
-  [v4_out]
+  [out]
     type = Exodus
   []
   [csv]
