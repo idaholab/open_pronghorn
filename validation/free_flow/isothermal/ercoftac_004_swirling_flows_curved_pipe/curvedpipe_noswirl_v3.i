@@ -556,6 +556,36 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   pressure_l_tol = 0.0
   turbulence_l_tol = 0.0
   print_fields = false
+
+  continue_on_max_its = true
+
+[]
+
+### Sampling stations ###
+# Geometry derived directly from curvedpipe_noswirl_lam_out.e (verified via circle fit
+# on the wall node coordinates, not assumed):
+#   pipe radius a = 0.0381 m (D = 0.0762 m)
+#   bend center   = (x=-0.4953, y=0, z=0), bend radius R = 0.4953 m, bend plane = X-Z
+#   outlet leg    = straight run at x=-0.9906, z in [-1.3716, 0], flow in -z direction
+#   => s/D = n downstream of the bend exit (z=0) is at z = -n*D
+#   y is the "vertical plane BB" direction used for the paper's Fig. 9 comparison
+[VectorPostprocessors]
+  [bev00_sp01]
+    type = PointValueSampler
+    points = '-0.9906 0.0000000 -0.0762
+              -0.9906 0.0047625 -0.0762
+              -0.9906 0.0095250 -0.0762
+              -0.9906 0.0142875 -0.0762
+              -0.9906 0.0190500 -0.0762
+              -0.9906 0.0238125 -0.0762
+              -0.9906 0.0269748 -0.0762
+              -0.9906 0.0303657 -0.0762
+              -0.9906 0.0333375 -0.0762
+              -0.9906 0.0357378 -0.0762'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'FINAL'
+  []
 []
 
 [Outputs]

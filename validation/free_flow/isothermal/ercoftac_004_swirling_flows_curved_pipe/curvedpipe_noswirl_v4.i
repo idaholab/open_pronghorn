@@ -550,7 +550,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   pressure_variable_relaxation = 0.3
   turbulence_equation_relaxation = '0.25 0.25'
   turbulence_field_relaxation = '0.25 0.25'
-  num_iterations = 1500
+  num_iterations = 1000 #1500
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12
   turbulence_absolute_tolerance = '1e-12 1e-12'
@@ -583,10 +583,17 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 #   y is the "vertical plane BB" direction used for the paper's Fig. 9 comparison
 [VectorPostprocessors]
   [bev00_sp01]
-    type = LineValueSampler
-    start_point = '-0.9906 -0.0381 -0.0762'
-    end_point   = '-0.9906  0.0381 -0.0762'
-    num_points = 41
+    type = PointValueSampler
+    points = '-0.9906 0.0000000 -0.0762
+              -0.9906 0.0047625 -0.0762
+              -0.9906 0.0095250 -0.0762
+              -0.9906 0.0142875 -0.0762
+              -0.9906 0.0190500 -0.0762
+              -0.9906 0.0238125 -0.0762
+              -0.9906 0.0269748 -0.0762
+              -0.9906 0.0303657 -0.0762
+              -0.9906 0.0333375 -0.0762
+              -0.9906 0.0357378 -0.0762'
     variable = 'vel_x vel_y vel_z pressure TKE TKED'
     sort_by = 'y'
     execute_on = 'FINAL'
