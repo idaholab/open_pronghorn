@@ -422,8 +422,9 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 [UserObjects]
   [read_recycling]
     type = PropertyReadFile
-    prop_file_name = 'FDFlow_sm18.csv'
+    # prop_file_name = 'FDFlow_sm18.csv'
     # prop_file_name = 'FDFlow_test.csv'
+    prop_file_name = 'FDFlow_test_sm02interp.csv'
     read_type = 'voronoi'
     #nprop = 13 # number of columns in CSV
     nprop = 6
