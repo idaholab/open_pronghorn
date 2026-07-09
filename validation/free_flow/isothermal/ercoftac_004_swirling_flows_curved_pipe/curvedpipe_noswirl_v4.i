@@ -149,14 +149,14 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     w = vel_z
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     use_deviatoric_terms = true
   []
   [u_diffusion]
     type = LinearFVDiffusion
     variable = vel_x
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -175,14 +175,14 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     w = vel_z
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     use_deviatoric_terms = true
   []
   [v_diffusion]
     type = LinearFVDiffusion
     variable = vel_y
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -201,14 +201,14 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     w = vel_z
     momentum_component = 'z'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     use_deviatoric_terms = true
   []
   [w_diffusion]
     type = LinearFVDiffusion
     variable = vel_z
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [w_pressure]
     type = LinearFVMomentumPressure
@@ -221,7 +221,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = Ainv
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [p_source]
     type = LinearFVDivergence
@@ -238,14 +238,14 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [TKE_diffusion_turbulent]
     type = LinearFVTurbulentDiffusion
     variable = TKE
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_k}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [TKE_source_sink]
     type = kEpsilonTKESourceSink
@@ -272,7 +272,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = LinearFVTurbulentDiffusion
     variable = TKED
     diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     walls = ${walls}
   []
   [TKED_diffusion_turbulent]
@@ -280,7 +280,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     variable = TKED
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_eps}
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
     walls = ${walls}
    []
   [TKED_source_sink]
@@ -422,8 +422,8 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 [UserObjects]
   [read_recycling]
     type = PropertyReadFile
-    #prop_file_name = 'FDflow.csv'
-    prop_file_name = 'FDFlow_test.csv'
+    prop_file_name = 'FDFlow_sm18.csv'
+    # prop_file_name = 'FDFlow_test.csv'
     read_type = 'voronoi'
     #nprop = 13 # number of columns in CSV
     nprop = 6
@@ -554,7 +554,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   pressure_variable_relaxation = 0.3
   turbulence_equation_relaxation = '0.25 0.25'
   turbulence_field_relaxation = '0.25 0.25'
-  num_iterations = 1500
+  num_iterations = 1000 #1500
   pressure_absolute_tolerance = 1e-12
   momentum_absolute_tolerance = 1e-12
   turbulence_absolute_tolerance = '1e-12 1e-12'
