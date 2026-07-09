@@ -1,6 +1,6 @@
 """
 Compare OpenPronghorn/MOOSE outputs (v3 and v4 input files) against the
-ERCOFTAC Anwer & So (case004) experimental data, at s/D = 1 downstream of
+ERCOFTAC Anwer & So (case004) experimental data, at s/D = -1 upstream of
 the bend, vertical plane (plane BB). Only the +y half of each simulation is
 plotted (see the geometry note in the .i files: y is the radial coordinate).
 
@@ -38,7 +38,7 @@ a = 0.0381        # pipe radius [m]  (D = 0.0762 m)
 bulk_u = 10.4     # normalizing bulk velocity used in the .i files [m/s]
 
 # ---- 1. load experimental data (required - fail loudly if missing) --------
-exp_path = Path('swb-allfiles/bev00-sp01.dat')
+exp_path = Path('swb-allfiles/bev00-sm01.dat')
 if not exp_path.is_file():
     sys.exit(f"ERROR: experimental data file not found: {exp_path}\n"
              f"Nothing to plot without it - stopping.")
@@ -49,7 +49,7 @@ exp['V'] = exp['V100'] / 100.0   # file stores V, U scaled by 100
 exp['U'] = exp['U100'] / 100.0
 
 # ---- 2. load simulation data (optional - flag and skip if missing) --------
-v4_csv = 'curvedpipe_noswirl_v4_csv_bev00_sp01_0002.csv'
+v4_csv = 'curvedpipe_noswirl_v4_csv_bev00_sm01_0002.csv'
 v3_csv = v4_csv.replace('_v4_', '_v3_')   # assumed to be named the same way as v4
 
 
@@ -80,7 +80,7 @@ def load_sim(csv_path):
     # Flow in this leg travels in -z (per the .i file's geometry comment),
     # so the physically "forward" axial speed is -vel_z, matching the
     # experiment's positive-W convention.
-    sim['W'] = -sim['vel_z'] / bulk_u
+    sim['W'] = sim['vel_z'] / bulk_u
     sim['U'] = sim['vel_y'] / bulk_u   # radial component, along the sampled line
     sim['V'] = sim['vel_x'] / bulk_u   # circumferential component, in-plane
     return sim
@@ -120,7 +120,7 @@ for ax, quantity, ylabel in zip(
         spine.set_linewidth(1.0)
 
 axes[0].legend(frameon=True, fontsize=8, handlelength=2.0)
-fig.suptitle(r's/D = 1, vertical plane (plane BB)')
+fig.suptitle(r's/D = -1, vertical plane (plane BB)')
 fig.tight_layout()
-fig.savefig('comparison_bev00-sp01.png', dpi=300, bbox_inches='tight')
-print('Saved comparison_bev00-sp01.png')
+fig.savefig('comparison_bev00-sm01.png', dpi=300, bbox_inches='tight')
+print('Saved comparison_bev00-sm01.png')
