@@ -586,6 +586,23 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     sort_by = 'y'
     execute_on = 'FINAL'
   []
+  
+  [bev00_sm01]
+    type = PointValueSampler
+    points = '0.0 0.0000000 -0.0762
+              0.0 0.0047625 -0.0762
+              0.0 0.0095250 -0.0762
+              0.0 0.0142875 -0.0762
+              0.0 0.0190500 -0.0762
+              0.0 0.0238125 -0.0762
+              0.0 0.0269748 -0.0762
+              0.0 0.0303657 -0.0762
+              0.0 0.0333375 -0.0762
+              0.0 0.0357378 -0.0762'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'FINAL'
+  []
 []
 
 [Outputs]

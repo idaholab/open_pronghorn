@@ -1,7 +1,7 @@
 rho = 1.0
-bulk_u = 10.
+bulk_u = 10.4 #10.
 D = 0.0762
-mu = 1.524e-5
+mu = 1.58e-5 #1.524e-5
 
 # advected_interp_method = 'upwind'
 momentum_interp_method = 'average'
@@ -12,6 +12,7 @@ sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
+C_pl = 2      # production limiter multiplier - default is 10
 
 ### Initial and Boundary Conditions ###
 intensity = 0.01
@@ -21,7 +22,7 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / D}'
 ### Modeling parameters ###
 bulk_wall_treatment = false
 walls = 'wall'
-wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
     [load_mesh]
@@ -258,6 +259,8 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     mu_t = 'mu_t'
     walls = ${walls}
     wall_treatment = ${wall_treatment}
+    C_pl = ${C_pl}
+
   []
 
   [TKED_advection]
@@ -294,6 +297,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     C2_eps = ${C2_eps}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
+    C_pl = ${C_pl}
   []
 []
 
@@ -598,7 +602,26 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     sort_by = 'y'
     execute_on = 'FINAL'
   []
+  
+  [bev00_sm01]
+    type = PointValueSampler
+    points = '0.0 0.0000000 -0.0762
+              0.0 0.0047625 -0.0762
+              0.0 0.0095250 -0.0762
+              0.0 0.0142875 -0.0762
+              0.0 0.0190500 -0.0762
+              0.0 0.0238125 -0.0762
+              0.0 0.0269748 -0.0762
+              0.0 0.0303657 -0.0762
+              0.0 0.0333375 -0.0762
+              0.0 0.0357378 -0.0762'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED'
+    sort_by = 'y'
+    execute_on = 'FINAL'
+  []
 []
+
+
 
 [Outputs]
   [out]
