@@ -49,4 +49,5 @@ def custom_evaluation(output):
     if not csv_matches_gold(current, gold, rel_err=1e-3, abs_zero=1e-10):
         print("combined_halfwidths.csv does not match gold/combined_halfwidths.csv")
         return False
+
     return True

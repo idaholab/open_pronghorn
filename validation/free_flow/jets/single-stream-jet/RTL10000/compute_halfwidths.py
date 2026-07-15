@@ -146,12 +146,12 @@ def main():
                 min_consec=MIN_CONSECUTIVE,
                 min_span_y=MIN_SPAN_Y,
             )
-            rows.append([fname, float(z), float(yh) if not np.isnan(yh) else np.nan])
+            rows.append([float(z), float(yh) if not np.isnan(yh) else np.nan])
 
     if not rows:
         raise SystemExit("No jet half-width rows were computed")
 
-    out = pd.DataFrame(rows, columns=["file_name", "z", "y_half"])
+    out = pd.DataFrame(rows, columns=["z", "y_half"])
     if out["y_half"].isna().any():
         raise SystemExit("One or more jet half-width rows could not be computed")
 
