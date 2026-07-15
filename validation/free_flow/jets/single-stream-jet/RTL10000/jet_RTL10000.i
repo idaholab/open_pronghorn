@@ -30,8 +30,8 @@ rho = 1.184 # Density (kg/m3)
 # ================================================================================================================
 Re = 10000.0 # Reynolds number
 mu = 1.844e-5 # Pa*s
-Vin =  '${fparse Re * mu / (rho * Dh)}' # Inlet velocity (m/s) # Uniform velocity profile Faghani et al.
-intensity = 0.05 # Turutoglu et al
+Vin =  '${fparse Re * mu / (rho * Dh)}' # Inlet velocity (m/s) # Uniform velocity profile Faghani et al. 2011
+intensity = 0.05 # Turutoglu et al 2024
 k_init = '${fparse 1.5*(intensity * Vin)^2}'
 eps_init = '${fparse C_mu^0.75 * k_init^1.5 / (2*0.07*Dh)}'
 advected_interp_method = 'upwind'
@@ -43,6 +43,8 @@ sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
+# The front boundary is the solid inlet-plane area outside the jet opening;
+# the remaining outer tank boundaries are pressure outlets.
 walls = 'front'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
 eps = 1e-4
@@ -123,7 +125,6 @@ outlet = 'back bottom top left right'
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  advected_interp_method = ${advected_interp_method}
 []
 
 [UserObjects]
@@ -172,11 +173,17 @@ outlet = 'back bottom top left right'
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_eff'
     u = vel_x
     v = vel_y
@@ -196,7 +203,7 @@ outlet = 'back bottom top left right'
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_eff'
     u = vel_x
     v = vel_y
@@ -216,7 +223,7 @@ outlet = 'back bottom top left right'
   [w_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_z
-    advected_interp_method = ${advected_interp_method}
+    advected_interp_method_name = ${advected_interp_method}
     mu = 'mu_eff'
     u = vel_x
     v = vel_y
@@ -234,7 +241,7 @@ outlet = 'back bottom top left right'
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = true
@@ -249,18 +256,12 @@ outlet = 'back bottom top left right'
   [TKE_advection]
     type = LinearFVTurbulentAdvection
     variable = TKE
+    advected_interp_method_name = ${advected_interp_method}
   []
   [TKE_diffusion]
     type = LinearFVTurbulentDiffusion
     variable = TKE
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
-  []
-  [TKE_turb_diffusion]
-    type = LinearFVTurbulentDiffusion
-    variable = TKE
-    diffusion_coeff = 'mu_t'
-    scaling_coeff = ${sigma_k}
+    diffusion_coeff = 'mu_eff_k'
     use_nonorthogonal_correction = true
   []
   [TKE_source_sink]
@@ -294,20 +295,13 @@ outlet = 'back bottom top left right'
   [TKED_advection]
     type = LinearFVTurbulentAdvection
     variable = TKED
+    advected_interp_method_name = ${advected_interp_method}
     walls = ${walls}
   []
   [TKED_diffusion]
     type = LinearFVTurbulentDiffusion
     variable = TKED
-    diffusion_coeff = ${mu}
-    use_nonorthogonal_correction = true
-    walls = ${walls}
-  []
-  [TKED_turb_diffusion]
-    type = LinearFVTurbulentDiffusion
-    variable = TKED
-    diffusion_coeff = 'mu_t'
-    scaling_coeff = ${sigma_eps}
+    diffusion_coeff = 'mu_eff_eps'
     use_nonorthogonal_correction = true
     walls = ${walls}
   []
@@ -458,11 +452,6 @@ outlet = 'back bottom top left right'
   []
   [yplus]
     type = MooseVariableFVReal
-        two_term_boundary_expansion = false
-  []
-  [mu_eff]
-    type = MooseVariableFVReal
-    initial_condition = '${fparse rho * C_mu * ${k_init}^2 / eps_init + mu}'
     two_term_boundary_expansion = false
   []
 []
@@ -518,12 +507,32 @@ outlet = 'back bottom top left right'
     wall_treatment = ${wall_treatment}
     execute_on = 'NONLINEAR'
   []
+[]
+
+[FunctorMaterials]
   [compute_mu_eff]
-    type = ParsedAux
-    variable = 'mu_eff'
-    coupled_variables = 'mu_t'
-    expression = 'mu_t + ${mu}'
-    execute_on = 'NONLINEAR'
+    type = FunctorEffectiveDynamicViscosity
+    property_name = mu_eff
+    mu = ${mu}
+    mu_t = mu_t
+    mu_t_inverse_factor = 1
+    execute_on = 'ALWAYS'
+  []
+  [compute_mu_eff_k]
+    type = FunctorEffectiveDynamicViscosity
+    property_name = mu_eff_k
+    mu = ${mu}
+    mu_t = mu_t
+    mu_t_inverse_factor = ${sigma_k}
+    execute_on = 'ALWAYS'
+  []
+  [compute_mu_eff_eps]
+    type = FunctorEffectiveDynamicViscosity
+    property_name = mu_eff_eps
+    mu = ${mu}
+    mu_t = mu_t
+    mu_t_inverse_factor = ${sigma_eps}
+    execute_on = 'ALWAYS'
   []
 []
 
