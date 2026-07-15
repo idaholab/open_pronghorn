@@ -424,7 +424,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     type = PropertyReadFile
     # prop_file_name = 'FDFlow_sm18.csv'
     # prop_file_name = 'FDFlow_test.csv'
-    prop_file_name = 'FDFlow_test_sm02interp.csv'
+    prop_file_name = 'FDFlow_test_sm02interp_massnorm.csv'
     read_type = 'voronoi'
     #nprop = 13 # number of columns in CSV
     nprop = 6
@@ -599,7 +599,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
               -0.9906 0.0303657 -0.0762
               -0.9906 0.0333375 -0.0762
               -0.9906 0.0357378 -0.0762'
-    variable = 'vel_x vel_y vel_z pressure TKE TKED'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED yplus'
     sort_by = 'y'
     execute_on = 'FINAL'
   []
@@ -616,7 +616,7 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
               0.0 0.0303657 -0.0762
               0.0 0.0333375 -0.0762
               0.0 0.0357378 -0.0762'
-    variable = 'vel_x vel_y vel_z pressure TKE TKED'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED yplus'
     sort_by = 'y'
     execute_on = 'FINAL'
   []
