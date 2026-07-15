@@ -598,8 +598,9 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
               -0.9906 0.0269748 -0.0762
               -0.9906 0.0303657 -0.0762
               -0.9906 0.0333375 -0.0762
-              -0.9906 0.0357378 -0.0762'
-    variable = 'vel_x vel_y vel_z pressure TKE TKED yplus'
+              -0.9906 0.0357378 -0.0762
+              -0.9906 0.0376424 -0.0762'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED yplus mu_t'
     sort_by = 'y'
     execute_on = 'FINAL'
   []
@@ -615,8 +616,9 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
               0.0 0.0269748 -0.0762
               0.0 0.0303657 -0.0762
               0.0 0.0333375 -0.0762
-              0.0 0.0357378 -0.0762'
-    variable = 'vel_x vel_y vel_z pressure TKE TKED yplus'
+              0.0 0.0357378 -0.0762
+              0.0 0.0376424 -0.0762'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED yplus mu_t'
     sort_by = 'y'
     execute_on = 'FINAL'
   []
