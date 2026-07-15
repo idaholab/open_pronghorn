@@ -34,7 +34,6 @@ use_low_re_Gprime   = false
 
 [GlobalParams]
   rhie_chow_user_object = 'rc'
-  advected_interp_method = 'upwind'
 []
 
 [Mesh]
@@ -96,10 +95,17 @@ use_low_re_Gprime   = false
   []
 []
 
+[FVInterpolationMethods]
+  [upwind]
+    type = FVAdvectedUpwind
+  []
+[]
+
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_x
+    advected_interp_method_name = upwind
     mu = 'mu_t'
     u = vel_x
     v = vel_y
@@ -124,6 +130,7 @@ use_low_re_Gprime   = false
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
     variable = vel_y
+    advected_interp_method_name = upwind
     mu = 'mu_t'
     u = vel_x
     v = vel_y
@@ -146,7 +153,7 @@ use_low_re_Gprime   = false
   []
 
   [p_diffusion]
-    type = LinearFVAnisotropicDiffusion
+    type = LinearFVPressureCorrectionDiffusion
     variable = pressure
     diffusion_tensor = Ainv
     use_nonorthogonal_correction = false
@@ -161,6 +168,7 @@ use_low_re_Gprime   = false
   [TKE_advection]
     type = LinearFVTurbulentAdvection
     variable = TKE
+    advected_interp_method_name = upwind
   []
   [TKE_diffusion]
     type = LinearFVTurbulentDiffusion
@@ -201,6 +209,7 @@ use_low_re_Gprime   = false
   [TKED_advection]
     type = LinearFVTurbulentAdvection
     variable = TKED
+    advected_interp_method_name = upwind
     walls = ${walls}
   []
   [TKED_diffusion]
