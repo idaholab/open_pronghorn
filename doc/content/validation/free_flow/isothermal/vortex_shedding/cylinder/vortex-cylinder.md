@@ -75,6 +75,9 @@ St = \frac{f D_h}{U}
 where $f$ denotes the frequency, $D_h$ the hydraulic diameter and $U$ the
 characteristic speed. The benchmark in [!cite](schafer1996benchmark)
 prescribes an acceptable $St$ range of $[0.295, 0.305]$ for this Reynolds number.
+The same benchmark prescribes ranges of $[3.22, 3.24]$ for the maximum drag
+coefficient and $[0.99, 1.01]$ for the maximum absolute lift coefficient. The
+validation test compares all three quantities against these literature ranges.
 
 
 !media media/validation/free_flow/isothermal/vortex_shedding/cylinder/strouhal_plot.py
@@ -95,5 +98,3 @@ simulations so runtimes might vary depending on which physical resource the job 
        id=fig:st_performance
        caption=Runtime over the latest commits.
        style=width:75%;margin-left:auto;margin-right:auto;text-align:center
-
-

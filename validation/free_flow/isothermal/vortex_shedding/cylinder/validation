@@ -8,6 +8,10 @@
     validation_test = strouhal_vnv.py
     validation_lower_bound = 0.295 # Based on literature benchmark values
     validation_upper_bound = 0.305 # Based on literature benchmark values
+    drag_validation_lower_bound = 3.22 # Based on literature benchmark values
+    drag_validation_upper_bound = 3.24 # Based on literature benchmark values
+    lift_validation_lower_bound = 0.99 # Based on literature benchmark values
+    lift_validation_upper_bound = 1.01 # Based on literature benchmark values
     regression_rel_err = 5e-4
   []
 []

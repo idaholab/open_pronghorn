@@ -1,7 +1,6 @@
 from TestHarness.validation import ValidationCase
 import numpy as np
 import pandas as pd
-import os
 
 
 class TestCase(ValidationCase):
@@ -11,19 +10,26 @@ class TestCase(ValidationCase):
 
         self.lower_bound = float(self.getParam("validation_lower_bound"))
         self.upper_bound = float(self.getParam("validation_upper_bound"))
+        self.drag_lower_bound = float(self.getParam("drag_validation_lower_bound"))
+        self.drag_upper_bound = float(self.getParam("drag_validation_upper_bound"))
+        self.lift_lower_bound = float(self.getParam("lift_validation_lower_bound"))
+        self.lift_upper_bound = float(self.getParam("lift_validation_upper_bound"))
 
         self.regression_rel_err = float(self.getParam("regression_rel_err"))
 
         time_series = pd.read_csv("flow_csv.csv")
         signal = time_series["lift_coeff"]
         t = time_series["time"]
+        self.max_drag_coeff = time_series["drag_coeff"].max()
+        self.max_abs_lift_coeff = time_series["lift_coeff"].abs().max()
 
         d_cylinder = 0.1
         u_bulk = 1.0
 
         fft_result = np.fft.fft(signal)
 
-        frequencies = np.fft.fftfreq(len(fft_result), d=0.001)
+        sample_spacing = np.mean(np.diff(t))
+        frequencies = np.fft.fftfreq(len(fft_result), d=sample_spacing)
         magnitude = np.abs(fft_result)
 
         peak_index = np.argmax(magnitude[: len(magnitude) // 2])
@@ -44,6 +50,22 @@ class TestCase(ValidationCase):
             "validation_upper_bound", "The upper bound for the data"
         )
         params.addRequiredParam(
+            "drag_validation_lower_bound",
+            "The literature lower bound for the maximum drag coefficient",
+        )
+        params.addRequiredParam(
+            "drag_validation_upper_bound",
+            "The literature upper bound for the maximum drag coefficient",
+        )
+        params.addRequiredParam(
+            "lift_validation_lower_bound",
+            "The literature lower bound for the maximum absolute lift coefficient",
+        )
+        params.addRequiredParam(
+            "lift_validation_upper_bound",
+            "The literature upper bound for the maximum absolute lift coefficient",
+        )
+        params.addRequiredParam(
             "regression_rel_err", "The lower bound for the regression test"
         )
         return params
@@ -55,6 +77,20 @@ class TestCase(ValidationCase):
             "Strouhal number",
             None,
             bounds=(self.lower_bound, self.upper_bound),
+        )
+        self.addScalarData(
+            "maximum_drag_coefficient",
+            self.max_drag_coeff,
+            "Maximum drag coefficient",
+            None,
+            bounds=(self.drag_lower_bound, self.drag_upper_bound),
+        )
+        self.addScalarData(
+            "maximum_absolute_lift_coefficient",
+            self.max_abs_lift_coeff,
+            "Maximum absolute lift coefficient",
+            None,
+            bounds=(self.lift_lower_bound, self.lift_upper_bound),
         )
 
     def testVerification(self):
