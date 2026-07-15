@@ -110,3 +110,16 @@ The allowable interval is within 2\% of the current solution difference.
 
 The $y^{+}$ of the first cell near the wall at the outlet of the system, in the fully developed flow region is also tracked.
 A 2\% deviation is allowed on that value.
+
+## Performance Chart
+
+!alert note
+The following figure showcases the measured total runtime of the problem over the different
+commit history. We utilized INL's High-Performance Computational resources to run these
+simulations so runtimes might vary depending on which physical resource the job got allocated.
+
+!media media/validation/free_flow/isothermal/2d_turbulent_channel/channel_performance.py
+       image_name=channel_performance.png
+       id=fig:channel_performance
+       caption=Runtime of both turbulent channel validation cases over the latest commits.
+       style=width:75%;margin-left:auto;margin-right:auto;text-align:center
