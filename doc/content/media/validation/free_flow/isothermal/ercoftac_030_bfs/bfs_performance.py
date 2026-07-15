@@ -15,7 +15,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 with ResultsReader("civet_tests_open_pronghorn_validation") as ctx:
     collection = ctx.reader.get_latest_push_results(50)
     tests = collection.get_tests(
-        TestName("free_flow/isothermal/ercoftac_030_bfs", "bfs_030"),
+        TestName("free_flow/isothermal/ercoftac_030_bfs", "bfs_030_standard"),
         (TestDataFilter.STATUS, TestDataFilter.TIMING),
     )
 
@@ -89,4 +89,4 @@ fig.subplots_adjust(top=0.9, bottom=0.25, left=0.10)
 # Export to PNG
 output_file = "bfs_performance.png"
 plt.savefig(output_file, dpi=300)
-plt.show()
+plt.close()
