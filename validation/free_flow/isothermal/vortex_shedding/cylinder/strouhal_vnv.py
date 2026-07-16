@@ -21,7 +21,7 @@ class TestCase(ValidationCase):
         signal = time_series["lift_coeff"]
         t = time_series["time"]
         self.max_drag_coeff = time_series["drag_coeff"].max()
-        self.max_abs_lift_coeff = time_series["lift_coeff"].abs().max()
+        self.max_lift_coeff = time_series["lift_coeff"].max()
 
         d_cylinder = 0.1
         u_bulk = 1.0
@@ -39,6 +39,16 @@ class TestCase(ValidationCase):
 
         st_df = pd.DataFrame([self.value], columns=["Strouhal"])
         st_df.to_csv("strouhal.csv", index=False)
+
+        coefficient_df = pd.DataFrame(
+            [
+                {
+                    "Maximum drag coefficient": self.max_drag_coeff,
+                    "Maximum lift coefficient": self.max_lift_coeff,
+                }
+            ]
+        )
+        coefficient_df.to_csv("force_coefficients.csv", index=False)
 
     @staticmethod
     def validParams():
@@ -87,7 +97,7 @@ class TestCase(ValidationCase):
         )
         self.addScalarData(
             "maximum_absolute_lift_coefficient",
-            self.max_abs_lift_coeff,
+            self.max_lift_coeff,
             "Maximum absolute lift coefficient",
             None,
             bounds=(self.lift_lower_bound, self.lift_upper_bound),

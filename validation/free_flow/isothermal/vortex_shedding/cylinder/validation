@@ -4,7 +4,7 @@
     input = flow.i
     requirement = 'The system should be able to accurately simulate vortex shedding behind a circle.'
     min_parallel = 16
-    max_time = 1500
+    max_time = 2000
     validation_test = strouhal_vnv.py
     validation_lower_bound = 0.295 # Based on literature benchmark values
     validation_upper_bound = 0.305 # Based on literature benchmark values

@@ -50,7 +50,8 @@ which is presented below:
 !listing /validation/free_flow/isothermal/vortex_shedding/cylinder/header.i
 
 The mesh is generated using the native mesh generation capabilities in MOOSE.
-The input file is presented below. The mesh contains 21,092 quadriliteral cells altogether and is depicted in Figure REF.
+The input file is presented below. The mesh contains 30,564 quadrilateral cells,
+with 256 faces around the cylinder, and is depicted in Figure REF.
 
 !listing /validation/free_flow/isothermal/vortex_shedding/cylinder/mesh.i
 
@@ -85,6 +86,12 @@ validation test compares all three quantities against these literature ranges.
        id=fig:st
        caption=The Strouhal number supplied by OpenPronghorn with respect to the acceptable range.
        style=width:50%;margin-left:auto;margin-right:auto;text-align:center
+
+!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/force_coefficients_plot.py
+       image_name=force_coefficients.png
+       id=fig:force_coefficients
+       caption=The maximum drag and absolute lift coefficients supplied by OpenPronghorn with respect to their acceptable ranges.
+       style=width:75%;margin-left:auto;margin-right:auto;text-align:center
 
 ## Performance Chart
 
