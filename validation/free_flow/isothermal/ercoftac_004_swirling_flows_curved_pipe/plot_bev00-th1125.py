@@ -20,17 +20,19 @@ theta=0/180 limits:
     theta=0   -> W = vel_z         (matches plot_bev00-sm01.py exactly)
     theta=180 -> W = -vel_z        (matches plot_bev00-sp01.py exactly)
 
-CAVEAT on the "V" (secondary, in-plane) component: the sm01/sp01 scripts you
-already have both use V = +vel_x with NO rotation and no sign flip between
-legs (this was flagged earlier in our conversation as an unresolved
-simplification, not a verified convention). The geometrically consistent
-extension to a rotated bend station is V = cos(theta)*vel_x + sin(theta)*vel_z
-(the raw in-plane-normal projection), which correctly reduces to +vel_x at
-theta=0 (matching sm01) but reduces to -vel_x at theta=180 -- the OPPOSITE
-sign from what the given sp01 script uses. That's not a bug here; it's the
-existing sp01 script's V that isn't rotated. I've implemented the physically
-consistent rotation below and flagged it -- let me know if you'd rather I
-revisit the leg scripts to match instead.
+UPDATE 2: an earlier version of this comment (and of every V formula in
+this whole file set) had the wrong overall sign. The circumferential
+direction of a proper right-handed (radial, circumferential, axial)
+cylindrical frame is V_hat = W_hat x U_hat (axial cross radial), not
+U_hat x W_hat. Working that out at this station gives V_hat = -N(theta),
+the negative of the raw in-plane-normal projection used before. So the
+formula below is now NEGATED relative to earlier drafts, and reduces to
+V = -vel_x at theta=0 (inlet) and V = +vel_x at theta=180 (outlet) --
+matching the corrected sign now used in sm01/sp01/sp06/sp10/sp18. Positive
+V = toward the INNER bend wall (not outer, as previously stated) -- this
+was confirmed against the actual generated comparison plots, where the old
+sign showed simulated V mirrored in sign from the experimental V near the
+wall (r/a -> 1) at every bend station.
 """
 
 import sys
@@ -105,7 +107,11 @@ def load_sim(csv_path):
     # Rotated in-plane ("circumferential") component -- see the CAVEAT in
     # the module docstring above regarding the sign mismatch with sp01/sm01
     # at the theta=180 limit.
-    sim['V'] = (cos_th * sim['vel_x'] + sin_th * sim['vel_z']) / bulk_u
+    # CORRECTED SIGN: V_hat = W_hat x U_hat (not U_hat x W_hat) gives
+    # V_hat = -N(theta), the negative of what an earlier version used.
+    # Positive V = toward the INNER bend wall (matches the leg scripts'
+    # corrected V at the theta=0/180 limits: -vel_x inlet, +vel_x outlet).
+    sim['V'] = -(cos_th * sim['vel_x'] + sin_th * sim['vel_z']) / bulk_u
     return sim
 
 
