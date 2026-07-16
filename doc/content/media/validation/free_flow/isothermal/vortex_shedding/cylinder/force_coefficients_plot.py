@@ -17,8 +17,8 @@ quantities = (
         "bounds": (3.22, 3.24),
     },
     {
-        "column": "Maximum absolute lift coefficient",
-        "label": r"Maximum absolute lift coefficient, $|C_L|_{\max}$",
+        "column": "Maximum lift coefficient",
+        "label": r"Maximum lift coefficient, $C_{L,\max}$",
         "bounds": (0.99, 1.01),
     },
 )

@@ -98,7 +98,7 @@ class TestCase(ValidationCase):
         self.addScalarData(
             "maximum_absolute_lift_coefficient",
             self.max_lift_coeff,
-            "Maximum absolute lift coefficient",
+            "Maximum lift coefficient",
             None,
             bounds=(self.lift_lower_bound, self.lift_upper_bound),
         )
