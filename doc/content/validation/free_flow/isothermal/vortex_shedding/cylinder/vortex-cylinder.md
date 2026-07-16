@@ -77,7 +77,7 @@ where $f$ denotes the frequency, $D_h$ the hydraulic diameter and $U$ the
 characteristic speed. The benchmark in [!cite](schafer1996benchmark)
 prescribes an acceptable $St$ range of $[0.295, 0.305]$ for this Reynolds number.
 The same benchmark prescribes ranges of $[3.22, 3.24]$ for the maximum drag
-coefficient and $[0.99, 1.01]$ for the maximum absolute lift coefficient. The
+coefficient and $[0.99, 1.01]$ for the maximum lift coefficient. The
 validation test compares all three quantities against these literature ranges.
 
 
@@ -88,10 +88,16 @@ validation test compares all three quantities against these literature ranges.
        style=width:50%;margin-left:auto;margin-right:auto;text-align:center
 
 !media media/validation/free_flow/isothermal/vortex_shedding/cylinder/force_coefficients_plot.py
-       image_name=force_coefficients.png
-       id=fig:force_coefficients
-       caption=The maximum drag and absolute lift coefficients supplied by OpenPronghorn with respect to their acceptable ranges.
-       style=width:75%;margin-left:auto;margin-right:auto;text-align:center
+       image_name=drag_coefficient.png
+       id=fig:drag_coefficient
+       caption=The maximum drag coefficient supplied by OpenPronghorn with respect to the acceptable literature range.
+       style=width:50%;margin-left:auto;margin-right:auto;text-align:center
+
+!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/force_coefficients_plot.py
+       image_name=lift_coefficient.png
+       id=fig:lift_coefficient
+       caption=The maximum lift coefficient supplied by OpenPronghorn with respect to the acceptable literature range.
+       style=width:50%;margin-left:auto;margin-right:auto;text-align:center
 
 ## Performance Chart
 

@@ -69,11 +69,11 @@ class TestCase(ValidationCase):
         )
         params.addRequiredParam(
             "lift_validation_lower_bound",
-            "The literature lower bound for the maximum absolute lift coefficient",
+            "The literature lower bound for the maximum lift coefficient",
         )
         params.addRequiredParam(
             "lift_validation_upper_bound",
-            "The literature upper bound for the maximum absolute lift coefficient",
+            "The literature upper bound for the maximum lift coefficient",
         )
         params.addRequiredParam(
             "regression_rel_err", "The lower bound for the regression test"
@@ -96,7 +96,7 @@ class TestCase(ValidationCase):
             bounds=(self.drag_lower_bound, self.drag_upper_bound),
         )
         self.addScalarData(
-            "maximum_absolute_lift_coefficient",
+            "maximum_lift_coefficient",
             self.max_lift_coeff,
             "Maximum lift coefficient",
             None,
