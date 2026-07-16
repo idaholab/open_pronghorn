@@ -101,7 +101,7 @@ def load_sim(csv_path):
     # Rotated axial (W) and in-plane-radial (U) components -- see the module
     # docstring above for the derivation.
     sim['W'] = (-sin_th * sim['vel_x'] + cos_th * sim['vel_z']) / bulk_u
-    sim['U'] = -(cos_th * sim['vel_x'] + sin_th * sim['vel_z']) / bulk_u
+    sim['U'] = (cos_th * sim['vel_x'] + sin_th * sim['vel_z']) / bulk_u   # positive = toward outer bend wall
     sim['V'] = sim['vel_y'] / bulk_u   # vertical direction, never rotates
     return sim
 

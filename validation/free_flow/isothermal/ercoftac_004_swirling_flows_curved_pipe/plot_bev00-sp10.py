@@ -82,7 +82,7 @@ def load_sim(csv_path):
     # experiment's positive-W convention.
     sim['W'] = -sim['vel_z'] / bulk_u
     sim['U'] = sim['vel_y'] / bulk_u   # radial component, along the sampled line
-    sim['V'] = sim['vel_x'] / bulk_u   # circumferential component, in-plane
+    sim['V'] = -sim['vel_x'] / bulk_u   # in-plane component; positive = toward outer bend wall
     return sim
 
 

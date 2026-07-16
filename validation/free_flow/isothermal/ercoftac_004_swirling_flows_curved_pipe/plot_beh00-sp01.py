@@ -87,7 +87,7 @@ def load_sim(csv_path):
 
     # Flow in this leg travels in -z (per the .i file's geometry comment).
     sim['W'] = -sim['vel_z'] / bulk_u
-    sim['U'] = sim['vel_x'] / bulk_u   # radial (in-bend-plane), sign per r_a convention above
+    sim['U'] = -sim['vel_x'] / bulk_u   # radial (in-bend-plane); positive = toward outer bend wall
     sim['V'] = sim['vel_y'] / bulk_u   # vertical direction, never rotates
     return sim
 

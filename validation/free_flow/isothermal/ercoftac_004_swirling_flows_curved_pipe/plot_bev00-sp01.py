@@ -10,6 +10,13 @@ hand. Either simulation CSV may be absent - this script will flag that in
 the console and just skip it, rather than fail. The experimental .dat file
 is required, though: if it's missing, this script stops with an error,
 since there's nothing meaningful to plot without it.
+
+SIGN FIX (this version): V was previously +vel_x, matching the sm01 script.
+Cross-checked against the actual sp01/sp06/sp10/sp18 data plus the bend
+stations, it turns out V and the horizontal plane's U are the same physical
+quantity (in-bend-plane secondary velocity), signed "positive = toward the
+outer bend wall" - which is +vel_x on the inlet leg (sm01, unchanged) but
+-vel_x on the outlet leg (here). See chat for the full derivation.
 """
 
 import sys
@@ -82,7 +89,7 @@ def load_sim(csv_path):
     # experiment's positive-W convention.
     sim['W'] = -sim['vel_z'] / bulk_u
     sim['U'] = sim['vel_y'] / bulk_u   # radial component, along the sampled line
-    sim['V'] = sim['vel_x'] / bulk_u   # circumferential component, in-plane
+    sim['V'] = -sim['vel_x'] / bulk_u  # in-plane component; positive = toward outer bend wall
     return sim
 
 
