@@ -11,16 +11,33 @@ the console and just skip it, rather than fail. The experimental .dat file
 is required, though: if it's missing, this script stops with an error,
 since there's nothing meaningful to plot without it.
 
-SIGN CONVENTION (verified against the Dean-effect W asymmetry in your own
-beh00-sp01.dat / beh00-th1575.dat -- negative r/a is the OUTER bend wall,
-where axial velocity is elevated; positive r/a is the INNER wall):
+SIGN CONVENTION (verified against the real ERCOFTAC .dat files, not just
+internal consistency): negative r/a is the OUTER bend wall, where axial
+velocity W is elevated (the classic Dean effect); positive r/a is the
+INNER wall.
     inlet leg  (x=0 centerline):       r_a = -x / a
     outlet leg (x=-0.9906 centerline): r_a = (x + 0.9906) / a
-The corresponding "U" (along-the-sweep, i.e. radial-in-bend-plane) velocity
-component is defined with the SAME sign convention as r_a itself (positive U
-= flow toward increasing r_a = toward the inner wall), which is why its sign
-differs between the inlet and outlet legs below -- this isn't an assumption,
-it falls directly out of differentiating the r_a formula above.
+
+U (the along-the-sweep, radial-in-bend-plane component) is signed "positive
+= toward the OUTER bend wall" -- i.e. the same sign as the flow direction
+along the symmetry plane described in the Dean-vortex literature ("fluid is
+transported back along the symmetry plane [outward, toward the outer wall]
+after being carried toward the centre of curvature near the walls"). This
+was checked directly against the real beh00-th0225.dat and beh00-sp01.dat
+files (this station), both of which show U uniformly POSITIVE across the
+entire diameter (no sign change) -- consistent with a uniformly outward
+secondary flow along this line, i.e. positive = outward = toward the outer
+wall. At theta=112.5/157.5, where ERCOFTAC's own page documents "a second
+cell in the secondary flow", U flips sign there -- that's the second cell
+reversing the flow locally, not a different sign convention, and by this
+station (s/D=1) that cell has already "disappeared" per ERCOFTAC's text,
+which is exactly what the uniformly-positive U seen here confirms.
+
+(An earlier draft of this file used U = +vel_x / bulk_u here, i.e. "positive
+= toward the inner wall". That was a mistake -- it would require the
+classical outward Dean flow along the symmetry plane to run backwards at
+this station, which contradicts both the literature and the real data.
+This has been reverted.)
 """
 
 import sys

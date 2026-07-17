@@ -82,11 +82,10 @@ def load_sim(csv_path):
     # experiment's positive-W convention.
     sim['W'] = -sim['vel_z'] / bulk_u
     sim['U'] = sim['vel_y'] / bulk_u   # radial component, along the sampled line
-    # CORRECTED SIGN: proper right-handed (radial, circumferential, axial)
-    # cylindrical convention requires V_hat = W_hat x U_hat, not U_hat x W_hat.
-    # At this leg (W=-z_hat, U=+y_hat): W x U = -z_hat x y_hat = +x_hat.
-    # So positive V = toward the INNER bend wall here (an earlier version of
-    # this line used -vel_x, matching the wrong-handed convention).
+    # V_hat = W_hat x U_hat = -z_hat x y_hat = +x_hat here, so V = +vel_x,
+    # positive = toward the INNER bend wall (right-handed radial/circ/axial
+    # cylindrical frame; see bev00-sp01.py's module docstring for the
+    # full derivation and the plot-based confirmation).
     sim['V'] = sim['vel_x'] / bulk_u   # in-plane component; positive = toward inner wall
     return sim
 

@@ -23,10 +23,15 @@ leg stations: negative r/a = outer wall (high W), positive r/a = inner wall.
 W and U (the along-sweep, in-bend-plane radial component) both need the same
 theta-rotation as the vertical bend scripts:
     W = velocity . T(theta),  T(theta) = (-sin theta, 0, cos theta)
-    U = -(velocity . N(theta)),  N(theta) = (cos theta, 0, sin theta)
-(the minus sign on U matches the same "positive U = toward inner wall,
-increasing r_a" convention used in the leg horizontal scripts -- this is a
-direct, derived consequence of the r_a sign convention, not a new guess).
+    U = velocity . N(theta),  N(theta) = (cos theta, 0, sin theta)
+(no minus sign: positive U = toward the OUTER bend wall, away from the
+bend's center of curvature. Taking the theta->0 and theta->180 limits of
+this formula reproduces the leg scripts' code exactly: U=+vel_x at the
+inlet, U=-vel_x at the outlet. This "toward outer wall" convention was
+checked directly against the real beh00-th0225.dat/th0675.dat/sp01.dat
+files -- U is uniformly positive across the whole diameter at stations
+without the documented "second Dean cell", consistent with the classical
+outward Dean flow along the symmetry plane being positive here.)
 V (vertical, out-of-plane) is simply vel_y, unchanged, same as every other
 beh00 script -- the vertical direction never rotates.
 """

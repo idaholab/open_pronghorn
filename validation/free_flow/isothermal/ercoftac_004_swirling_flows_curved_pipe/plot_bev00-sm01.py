@@ -80,16 +80,16 @@ def load_sim(csv_path):
     # Flow in this leg travels in +z here (this is the INLET leg: flow enters
     # at the inlet boundary z=-0.1524 and moves toward the bend entrance at
     # z=0 -- confirmed directly from the mesh file's inlet/outlet side-set
-    # node coordinates, not just the .i file's comment). An earlier version
-    # of this comment said "-z", which was wrong; the code below was already
-    # correct (unnegated vel_z), so no numerical change here, comment only.
+    # node coordinates, not just the .i file's comment).
     sim['W'] = sim['vel_z'] / bulk_u
     sim['U'] = sim['vel_y'] / bulk_u   # radial component, along the sampled line
-    # CORRECTED SIGN: proper right-handed (radial, circumferential, axial)
-    # cylindrical convention requires V_hat = W_hat x U_hat, not U_hat x W_hat.
-    # At this leg (W=+z_hat, U=+y_hat): W x U = z_hat x y_hat = -x_hat.
-    # So positive V = toward the INNER bend wall here (an earlier version of
-    # this line used +vel_x, which was backwards).
+    # V (circumferential): a proper right-handed (radial, circumferential,
+    # axial) cylindrical frame requires V_hat = W_hat x U_hat. At this leg
+    # (W=+z_hat, U=+y_hat): W x U = z_hat x y_hat = -x_hat. So positive V is
+    # velocity dotted with -x_hat here, i.e. V = -vel_x, and it points toward
+    # the INNER bend wall (verified against the mirrored-sign pattern seen
+    # between simulation and experiment near r/a->1 when the old +vel_x
+    # convention was used -- that mismatch disappears with this sign).
     sim['V'] = -sim['vel_x'] / bulk_u   # circumferential component, in-plane; positive = toward inner wall
     return sim
 

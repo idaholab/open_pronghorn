@@ -11,12 +11,15 @@ the console and just skip it, rather than fail. The experimental .dat file
 is required, though: if it's missing, this script stops with an error,
 since there's nothing meaningful to plot without it.
 
-SIGN FIX (this version): V was previously +vel_x, matching the sm01 script.
-Cross-checked against the actual sp01/sp06/sp10/sp18 data plus the bend
-stations, it turns out V and the horizontal plane's U are the same physical
-quantity (in-bend-plane secondary velocity), signed "positive = toward the
-outer bend wall" - which is +vel_x on the inlet leg (sm01, unchanged) but
--vel_x on the outlet leg (here). See chat for the full derivation.
+SIGN CONVENTION (current, final): V is the circumferential component. For a
+proper right-handed (radial, circumferential, axial) cylindrical frame,
+V_hat = W_hat x U_hat. At this leg (W=-z_hat, U=+y_hat): W x U = +x_hat, so
+V = +vel_x here, positive meaning toward the INNER bend wall. (Two earlier
+drafts of this file used +vel_x then -vel_x for other reasons; both were
+based on the wrong cross-product order, U x W instead of W x U. This final
+version was confirmed by checking the actual generated comparison plots:
+the old sign showed simulated V mirrored from experimental V near r/a->1 at
+every bend station, and that mismatch disappears with this sign.)
 """
 
 import sys
@@ -89,11 +92,8 @@ def load_sim(csv_path):
     # experiment's positive-W convention.
     sim['W'] = -sim['vel_z'] / bulk_u
     sim['U'] = sim['vel_y'] / bulk_u   # radial component, along the sampled line
-    # CORRECTED SIGN: proper right-handed (radial, circumferential, axial)
-    # cylindrical convention requires V_hat = W_hat x U_hat, not U_hat x W_hat.
-    # At this leg (W=-z_hat, U=+y_hat): W x U = -z_hat x y_hat = +x_hat.
-    # So positive V = toward the INNER bend wall here (an earlier version of
-    # this line used -vel_x, matching the wrong-handed convention).
+    # V_hat = W_hat x U_hat = -z_hat x y_hat = +x_hat here, so V = +vel_x,
+    # positive = toward the INNER bend wall. See module docstring.
     sim['V'] = sim['vel_x'] / bulk_u  # in-plane component; positive = toward inner wall
     return sim
 

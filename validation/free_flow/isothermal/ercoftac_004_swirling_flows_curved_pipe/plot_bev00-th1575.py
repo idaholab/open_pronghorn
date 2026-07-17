@@ -11,28 +11,23 @@ the console and just skip it, rather than fail. The experimental .dat file
 is required, though: if it's missing, this script stops with an error,
 since there's nothing meaningful to plot without it.
 
-GEOMETRY NOTE (new relative to the sm01/sp01 scripts): at a bend station the
-local flow-aligned frame is ROTATED relative to global (x,y,z). The axial
-("W") direction is the local tangent T(theta) = (-sin theta, 0, cos theta),
-not simply vel_z. y remains the vertical/out-of-plane direction unchanged
-(no rotation needed there), matching the sm01/sp01 convention exactly at the
-theta=0/180 limits:
+GEOMETRY NOTE: at a bend station the local flow-aligned frame is ROTATED
+relative to global (x,y,z). The axial ("W") direction is the local tangent
+T(theta) = (-sin theta, 0, cos theta), not simply vel_z. y remains the
+vertical/out-of-plane direction unchanged (no rotation needed there),
+matching the sm01/sp01 convention exactly at the theta=0/180 limits:
     theta=0   -> W = vel_z         (matches plot_bev00-sm01.py exactly)
     theta=180 -> W = -vel_z        (matches plot_bev00-sp01.py exactly)
 
-UPDATE 2: an earlier version of this comment (and of every V formula in
-this whole file set) had the wrong overall sign. The circumferential
-direction of a proper right-handed (radial, circumferential, axial)
-cylindrical frame is V_hat = W_hat x U_hat (axial cross radial), not
-U_hat x W_hat. Working that out at this station gives V_hat = -N(theta),
-the negative of the raw in-plane-normal projection used before. So the
-formula below is now NEGATED relative to earlier drafts, and reduces to
-V = -vel_x at theta=0 (inlet) and V = +vel_x at theta=180 (outlet) --
-matching the corrected sign now used in sm01/sp01/sp06/sp10/sp18. Positive
-V = toward the INNER bend wall (not outer, as previously stated) -- this
-was confirmed against the actual generated comparison plots, where the old
-sign showed simulated V mirrored in sign from the experimental V near the
-wall (r/a -> 1) at every bend station.
+V (circumferential): a proper right-handed (radial, circumferential, axial)
+cylindrical frame requires V_hat = W_hat x U_hat (not U_hat x W_hat). Working
+that out at this station gives V_hat = -N(theta), N(theta) = (cos theta, 0,
+sin theta). This reduces to V = -vel_x at theta=0 (inlet) and V = +vel_x at
+theta=180 (outlet), matching bev00-sm01.py and bev00-sp01.py exactly.
+Positive V = toward the INNER bend wall. Confirmed against the actual
+generated comparison plots: the old (un-negated) formula showed simulated V
+mirrored in sign from experimental V near the wall (r/a -> 1) at every bend
+station; that mismatch disappears with this sign.
 """
 
 import sys
@@ -104,13 +99,8 @@ def load_sim(csv_path):
     # theta=0 and to sp01's -vel_z at theta=180.
     sim['W'] = (-sin_th * sim['vel_x'] + cos_th * sim['vel_z']) / bulk_u
     sim['U'] = sim['vel_y'] / bulk_u   # vertical direction never rotates
-    # Rotated in-plane ("circumferential") component -- see the CAVEAT in
-    # the module docstring above regarding the sign mismatch with sp01/sm01
-    # at the theta=180 limit.
-    # CORRECTED SIGN: V_hat = W_hat x U_hat (not U_hat x W_hat) gives
-    # V_hat = -N(theta), the negative of what an earlier version used.
-    # Positive V = toward the INNER bend wall (matches the leg scripts'
-    # corrected V at the theta=0/180 limits: -vel_x inlet, +vel_x outlet).
+    # V_hat = W_hat x U_hat = -N(theta); positive V = toward the INNER bend
+    # wall. See module docstring for the derivation.
     sim['V'] = -(cos_th * sim['vel_x'] + sin_th * sim['vel_z']) / bulk_u
     return sim
 

@@ -23,10 +23,26 @@ leg stations: negative r/a = outer wall (high W), positive r/a = inner wall.
 W and U (the along-sweep, in-bend-plane radial component) both need the same
 theta-rotation as the vertical bend scripts:
     W = velocity . T(theta),  T(theta) = (-sin theta, 0, cos theta)
-    U = -(velocity . N(theta)),  N(theta) = (cos theta, 0, sin theta)
-(the minus sign on U matches the same "positive U = toward inner wall,
-increasing r_a" convention used in the leg horizontal scripts -- this is a
-direct, derived consequence of the r_a sign convention, not a new guess).
+    U = velocity . N(theta),  N(theta) = (cos theta, 0, sin theta)
+(no minus sign: positive U = toward the OUTER bend wall, away from the
+bend's center of curvature. Taking the theta->0 and theta->180 limits of
+this formula reproduces the leg scripts' code exactly: U=+vel_x at the
+inlet, U=-vel_x at the outlet.
+
+This station is exactly where ERCOFTAC's own page documents "a second cell
+in the secondary flow": the real beh00-th1575.dat file shows U NEGATIVE
+on the outer half (r/a<0) and POSITIVE on the inner half (r/a>0) -- i.e. the
+secondary flow reverses locally near the outer wall here. That is the
+documented second-cell phenomenon showing up under the "toward outer wall"
+convention, not evidence that the convention itself should flip: at
+theta=22.5/67.5 and at s/D=1 (before/after the second cell), the real data
+is uniformly positive across the whole diameter, which only makes sense
+under "positive = toward outer" (see beh00-th0225.py's docstring for the
+full argument). An earlier version of this file negated U here, i.e. used
+"positive = toward the inner wall" -- that was a mistake, applying a local,
+second-cell-only sign flip as if it were the general convention. It has
+been reverted; the second cell is now correctly represented purely by the
+data itself crossing zero, not by an extra sign flip in the formula.
 V (vertical, out-of-plane) is simply vel_y, unchanged, same as every other
 beh00 script -- the vertical direction never rotates.
 """
