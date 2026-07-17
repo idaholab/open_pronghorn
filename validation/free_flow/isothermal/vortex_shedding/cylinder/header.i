@@ -3,6 +3,8 @@
 # -----------------------------------------------------------------------------
 circle_radius = 0.05
 pitch = 0.2
+cylinder_num_sectors = 64
+cylinder_outer_square_rings = 10
 x_min = -0.2
 x_max = 2.0
 y_min = -0.2

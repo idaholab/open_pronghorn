@@ -233,13 +233,14 @@
   pressure_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  dt = 0.001
-  num_steps = 7000
+  dt = 0.002
+  num_steps = 3000
+  scheme = bdf2
 []
 
 [Outputs]
   [csv]
     type = CSV
-    start_step = 5000
+    start_step = 2000
   []
 []

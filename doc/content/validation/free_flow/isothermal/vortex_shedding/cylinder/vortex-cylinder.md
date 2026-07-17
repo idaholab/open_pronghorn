@@ -50,7 +50,8 @@ which is presented below:
 !listing /validation/free_flow/isothermal/vortex_shedding/cylinder/header.i
 
 The mesh is generated using the native mesh generation capabilities in MOOSE.
-The input file is presented below. The mesh contains 21,092 quadriliteral cells altogether and is depicted in Figure REF.
+The input file is presented below. The mesh contains 30,564 quadrilateral cells,
+with 256 faces around the cylinder, and is depicted in Figure REF.
 
 !listing /validation/free_flow/isothermal/vortex_shedding/cylinder/mesh.i
 
@@ -75,12 +76,27 @@ St = \frac{f D_h}{U}
 where $f$ denotes the frequency, $D_h$ the hydraulic diameter and $U$ the
 characteristic speed. The benchmark in [!cite](schafer1996benchmark)
 prescribes an acceptable $St$ range of $[0.295, 0.305]$ for this Reynolds number.
+The same benchmark prescribes ranges of $[3.22, 3.24]$ for the maximum drag
+coefficient and $[0.99, 1.01]$ for the maximum lift coefficient. The
+validation test compares all three quantities against these literature ranges.
 
 
 !media media/validation/free_flow/isothermal/vortex_shedding/cylinder/strouhal_plot.py
        image_name=strouhal.png
        id=fig:st
        caption=The Strouhal number supplied by OpenPronghorn with respect to the acceptable range.
+       style=width:50%;margin-left:auto;margin-right:auto;text-align:center
+
+!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/force_coefficients_plot.py
+       image_name=drag_coefficient.png
+       id=fig:drag_coefficient
+       caption=The maximum drag coefficient supplied by OpenPronghorn with respect to the acceptable literature range.
+       style=width:50%;margin-left:auto;margin-right:auto;text-align:center
+
+!media media/validation/free_flow/isothermal/vortex_shedding/cylinder/force_coefficients_plot.py
+       image_name=lift_coefficient.png
+       id=fig:lift_coefficient
+       caption=The maximum lift coefficient supplied by OpenPronghorn with respect to the acceptable literature range.
        style=width:50%;margin-left:auto;margin-right:auto;text-align:center
 
 ## Performance Chart
@@ -95,5 +111,3 @@ simulations so runtimes might vary depending on which physical resource the job 
        id=fig:st_performance
        caption=Runtime over the latest commits.
        style=width:75%;margin-left:auto;margin-right:auto;text-align:center
-
-

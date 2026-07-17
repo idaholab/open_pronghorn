@@ -4,9 +4,9 @@
   # ------------------------------------------
   [ccmg]
     type = ConcentricCircleMeshGenerator
-    num_sectors = '32'
+    num_sectors = '${cylinder_num_sectors}'
     radii = '${circle_radius} ${fparse 1.2*circle_radius} ${fparse 1.4*circle_radius}'
-    rings = '4 10 5 10'
+    rings = '4 10 5 ${cylinder_outer_square_rings}'
     has_outer_square = on
     pitch = ${pitch}
     preserve_volumes = off
@@ -38,7 +38,7 @@
     ymin = '${fparse -pitch/2}'
     ymax = '${fparse pitch/2}'
     nx = '24'
-    ny = '54'
+    ny = '${fparse cylinder_num_sectors + 2*cylinder_outer_square_rings + 2}'
   []
   [right]
     type = GeneratedMeshGenerator
@@ -48,7 +48,7 @@
     ymin = '${fparse -pitch/2}'
     ymax = '${fparse pitch/2}'
     nx = '120'
-    ny = '54'
+    ny = '${fparse cylinder_num_sectors + 2*cylinder_outer_square_rings + 2}'
     bias_x = 1.015
   []
   [combined_middle]
@@ -94,7 +94,7 @@
     xmax = '${fparse pitch/2}'
     ymin = '${fparse pitch/2}'
     ymax = '${y_max}'
-    nx = '54'
+    nx = '${fparse cylinder_num_sectors + 2*cylinder_outer_square_rings + 2}'
     ny = '24'
   []
   [top_right_block]
@@ -157,7 +157,7 @@
     xmax = '${fparse pitch/2}'
     ymin = '${y_min}'
     ymax = '${fparse -pitch/2}'
-    nx = '54'
+    nx = '${fparse cylinder_num_sectors + 2*cylinder_outer_square_rings + 2}'
     ny = '24'
   []
   [bottom_right_block]
