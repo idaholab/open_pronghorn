@@ -31,7 +31,27 @@ kEpsilonViscosity::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
 
   params.addParam<Real>("C_mu", 0.09, "Base turbulent kinetic energy closure constant C_mu.");
-  params.addParam<Real>("mu_t_ratio_max", 1e5, "Maximum allowable mu_t_ratio : mu/mu_t.");
+
+  params.addParam<Real>(
+      "mu_t_ratio_max",
+      5000.0,
+      "Maximum allowable mu_t / mu ratio. Applied as a hard ceiling at the output of "
+      "this AuxKernel and also consumed by the TKE/TKED production kernels. "
+      "Reduce during start-up if blow-up still occurs; increase for fully-developed flows.");
+
+  params.addParam<Real>("mu_t_ratio_initial",
+                        100.0,
+                        "Starting mu_t / mu cap applied on the first outer iteration. "
+                        "The cap is linearly ramped from this value up to mu_t_ratio_max over "
+                        "mu_t_ramp_steps outer iterations, providing a soft start-up that prevents "
+                        "the turbulence equations from blowing up in early SIMPLE iterations.");
+
+  params.addParam<unsigned int>(
+      "mu_t_ramp_steps",
+      100,
+      "Number of outer SIMPLE iterations over which the mu_t cap is ramped from "
+      "mu_t_ratio_initial to mu_t_ratio_max.  Set to 0 to disable ramping (hard cap "
+      "at mu_t_ratio_max from the first iteration).");
 
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
@@ -97,6 +117,22 @@ kEpsilonViscosity::validParams()
       "wall_distance",
       "Distance to the closest wall; required for two-layer and Low-Re k-epsilon variants.");
 
+  params.addParam<Real>("k_min",
+                        1e-8,
+                        "Minimum k used to guard the turbulent time scale k/eps in the viscosity "
+                        "computation. Prevents mu_t from becoming undefined when k → 0.");
+
+  params.addParam<Real>(
+      "k_max",
+      1e10,
+      "Maximum k used in the mu_t computation. TKE is clamped to [k_min, k_max] before "
+      "computing the turbulent time scale k/eps. This closes the one-step lag where TKE "
+      "can overshoot its physical ceiling within the current linear solve before the "
+      "bounds-penalty in kEpsilonTKESourceSink has a chance to react (the penalty checks "
+      "the previous iterate, not the current one). Set this to match tke_max_phys in the "
+      "TKE source/sink kernel. Default 1e10 is intentionally loose; tighten it for "
+      "stability if TKE is known to be bounded by a lower value for your flow.");
+
   return params;
 }
 
@@ -128,7 +164,11 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
     _Ct(getParam<Real>("Ct")),
     _wall_distance_functor(
         params.isParamValid("wall_distance") ? &(getFunctor<Real>("wall_distance")) : nullptr),
-    _has_wall_distance(params.isParamValid("wall_distance"))
+    _has_wall_distance(params.isParamValid("wall_distance")),
+    _k_min(getParam<Real>("k_min")),
+    _k_max(getParam<Real>("k_max")),
+    _mu_t_ratio_initial(getParam<Real>("mu_t_ratio_initial")),
+    _mu_t_ramp_steps(getParam<unsigned int>("mu_t_ramp_steps"))
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
@@ -332,8 +372,14 @@ kEpsilonViscosity::computeValue()
     const Real k = _k(elem_arg, state);
     const Real eps = _epsilon(elem_arg, state);
 
-    // Large-eddy time scale T_e = k / epsilon
-    const Real Te = k / std::max(eps, 1e-20);
+    // Clamp k to [k_min, k_max] before computing the time scale.
+    // The upper clamp closes the one-step lag: the bounds-penalty in the TKE
+    // source/sink kernel checks the *previous* iterate, so TKE can overshoot
+    // tke_max_phys within the current linear solve. Without this clamp that
+    // overshoot would propagate directly into mu_t = C_mu*rho*k^2/eps and
+    // blow up the momentum equations one iteration later.
+    const Real k_safe = std::clamp(k, _k_min, _k_max);
+    const Real Te = k_safe / std::max(eps, 1e-20);
 
     // Time scale with optional limiter:
     //   T = max(Te, Ct * sqrt(nu/eps))  (STAR-CCM+ Eq. 1046)
@@ -350,7 +396,7 @@ kEpsilonViscosity::computeValue()
     if (_variant == NS::KEpsilonVariant::StandardLowRe)
     {
       const Real d = (*_wall_distance_functor)(elem_arg, state);
-      const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
+      const Real Red = std::sqrt(k_safe) * d / std::max(nu, 1e-12);
       const Real fmu = NS::fmu_SKE_LRe(_Cd0, _Cd1, _Cd2, Red);
       Cmu_eff = _C_mu * fmu;
     }
@@ -358,11 +404,12 @@ kEpsilonViscosity::computeValue()
              _variant == NS::KEpsilonVariant::RealizableTwoLayer)
     {
       auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
-      Cmu_eff = NS::Cmu_realizable(_Ca0, _Ca1, _Ca2, _Ca3, inv.S2, inv.W2, k, std::max(eps, 1e-20));
+      Cmu_eff =
+          NS::Cmu_realizable(_Ca0, _Ca1, _Ca2, _Ca3, inv.S2, inv.W2, k_safe, std::max(eps, 1e-20));
     }
 
     // Base k-epsilon turbulent viscosity
-    const Real mu_t_ke = rho * Cmu_eff * k * time_scale;
+    const Real mu_t_ke = rho * Cmu_eff * k_safe * time_scale;
 
     // Two-layer blending if requested
     if (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
@@ -370,7 +417,7 @@ kEpsilonViscosity::computeValue()
     {
       mooseAssert(_has_wall_distance, "Two-layer variants require wall_distance functor.");
       const Real d = (*_wall_distance_functor)(elem_arg, state);
-      const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
+      const Real Red = std::sqrt(k_safe) * d / std::max(nu, 1e-12);
 
       // Two-layer mu ratio and epsilon length scale
       NS::TwoLayerLengths tl;
@@ -380,7 +427,7 @@ kEpsilonViscosity::computeValue()
         tl = NS::twoLayerNorrisReynolds(_C_mu, d, Red);
       else // Xu (natural convection)
       {
-        const Real yv_star = Red * nu / std::max(k, 1e-20);
+        const Real yv_star = Red * nu / k_safe; // k_safe = clamp(k, k_min, k_max) > 0
         tl = NS::twoLayerXu(_C_mu, d, Red, yv_star);
       }
 
@@ -400,6 +447,20 @@ kEpsilonViscosity::computeValue()
     mu_t = std::max(mu_t, NS::mu_t_low_limit);
   }
 
-  // Turbulent viscosity limiter
-  return std::min(mu_t, _mu_t_ratio_max * mu);
+  // Adaptive turbulent viscosity cap:
+  //   - Ramps linearly from mu_t_ratio_initial → mu_t_ratio_max over mu_t_ramp_steps
+  //     outer SIMPLE iterations (using _t_step as the outer iteration counter).
+  //   - After ramp_steps iterations the hard cap mu_t_ratio_max applies permanently.
+  //   - Setting mu_t_ramp_steps = 0 disables ramping (hard cap from iteration 1).
+  Real mu_t_cap_ratio;
+  if (_mu_t_ramp_steps == 0)
+    mu_t_cap_ratio = _mu_t_ratio_max;
+  else
+  {
+    const Real ramp_frac =
+        std::min(1.0, static_cast<Real>(_t_step) / static_cast<Real>(_mu_t_ramp_steps));
+    mu_t_cap_ratio = _mu_t_ratio_initial + ramp_frac * (_mu_t_ratio_max - _mu_t_ratio_initial);
+  }
+
+  return std::min(mu_t, mu_t_cap_ratio * mu);
 }

@@ -9,6 +9,8 @@
 
 #include "WallDistanceAux.h"
 
+#include "libmesh/parallel_algebra.h"
+
 registerMooseObject("OpenPronghornApp", WallDistanceAux);
 
 InputParameters
@@ -16,17 +18,14 @@ WallDistanceAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Computes the distance from the nearest wall.");
-  params.addParam<std::vector<BoundaryName>>(
-      "walls", {}, "Boundaries that correspond to solid walls.");
+  params.addRequiredParam<std::vector<BoundaryName>>("walls",
+                                                     "Boundaries that correspond to solid walls.");
   return params;
 }
 
 WallDistanceAux::WallDistanceAux(const InputParameters & parameters)
   : AuxKernel(parameters), _wall_boundary_names(getParam<std::vector<BoundaryName>>("walls"))
 {
-  const MeshBase & mesh = _subproblem.mesh().getMesh();
-  if (!mesh.is_replicated())
-    mooseError("WallDistanceAux only supports replicated meshes");
   if (!dynamic_cast<MooseVariableFV<Real> *>(&_var))
     paramError("variable",
                "'",
@@ -36,50 +35,99 @@ WallDistanceAux::WallDistanceAux(const InputParameters & parameters)
                "' is a finite volume variable.");
 }
 
-Real
-WallDistanceAux::computeValue()
+void
+WallDistanceAux::initialSetup()
 {
-  // Get reference to the libMesh mesh object
-  const MeshBase & l_mesh = _mesh.getMesh();
+  meshChanged();
+}
 
+void
+WallDistanceAux::meshChanged()
+{
   // Get the ids of the wall boundaries
   std::vector<BoundaryID> vec_ids = _mesh.getBoundaryIDs(_wall_boundary_names, true);
+  std::vector<BoundaryName> invalid_boundaries;
+  for (const auto i : index_range(vec_ids))
+    if (vec_ids[i] == BoundaryInfo::invalid_id)
+      invalid_boundaries.push_back(_wall_boundary_names[i]);
+  if (!invalid_boundaries.empty())
+    paramError("walls",
+               "The following boundaries do not exist in the mesh: ",
+               Moose::stringify(invalid_boundaries));
 
-  // Loop over all boundaries
-  Real min_dist2 = 1e9;
+  // Map of boundary IDs to element ids
   const auto & bnd_to_elem_map = _mesh.getBoundariesToActiveSemiLocalElemIds();
-  for (BoundaryID bid : vec_ids)
-  {
-    // Get the set of elements on this boundary
-    auto search = bnd_to_elem_map.find(bid);
-    if (search == bnd_to_elem_map.end())
-      mooseError("Error computing wall distance; the boundary id ", bid, " is invalid");
-    const auto & bnd_elems = search->second;
 
-    // Loop over all boundary elements and find the distance to the closest one
-    for (dof_id_type elem_id : bnd_elems)
+  // Use a local set during collection to deduplicate faces visited from both elem and neighbor
+  // sides
+  std::unordered_set<Point> local_set;
+
+  // Loop through wall boundaries
+  for (const auto & bid : vec_ids)
+  {
+    // Get element IDs associated with boundary
+    auto search = bnd_to_elem_map.find(bid);
+    // If boundary doesn't exist locally, just continue
+    if (search == bnd_to_elem_map.end())
+      continue;
+    const auto & bnd_elem_ids = search->second;
+
+    // Loop through boundary elements to gather face centroids
+    for (const auto bnd_elem_id : bnd_elem_ids)
     {
-      const Elem & elem{l_mesh.elem_ref(elem_id)};
-      const auto side = _mesh.sideWithBoundaryID(&elem, bid);
-      const FaceInfo * fi = _mesh.faceInfo(&elem, side);
-      // It's possible that we are on an internal boundary
-      if (!fi)
+      // Get a pointer to the element
+      const auto elem = _mesh.elemPtr(bnd_elem_id);
+      // This shouldn't happen
+      mooseAssert(elem,
+                  "Boundary element " + std::to_string(bnd_elem_id) + " does not exist on mesh.");
+
+      // Get side(s) where boundary is
+      const auto sides = _mesh.getMesh().get_boundary_info().sides_with_boundary_id(elem, bid);
+      // This shouldn't happen
+      mooseAssert(sides.size() > 0,
+                  "Element " + std::to_string(bnd_elem_id) + " does not contain boundary " +
+                      std::to_string(bid));
+
+      // Loop through sides and collect face centroid
+      for (const auto side : sides)
       {
-        const Elem * const neigh = elem.neighbor_ptr(side);
-        mooseAssert(neigh,
-                    "In WallDistanceAux, we could not find a face information object with elem "
-                    "and side, and we are on an external boundary. This shouldn't happen.");
-        const auto neigh_side = neigh->which_neighbor_am_i(&elem);
-        fi = _mesh.faceInfo(neigh, neigh_side);
-        mooseAssert(fi, "We should have a face info for either the elem or neigh side");
+        auto fi = _mesh.faceInfo(elem, side);
+        // It's possible that we are on an internal boundary
+        if (!fi)
+        {
+          const Elem * const neigh = elem->neighbor_ptr(side);
+          mooseAssert(neigh,
+                      "In WallDistanceAux, we could not find a face information object with elem "
+                      "and side, and we are on an external boundary. This shouldn't happen.");
+          const auto neigh_side = neigh->which_neighbor_am_i(elem);
+          fi = _mesh.faceInfo(neigh, neigh_side);
+          mooseAssert(fi, "We should have a face info for either the elem or neigh side");
+        }
+
+        // Collect centroid
+        local_set.insert(fi->faceCentroid());
       }
-      Point bnd_pos = fi->faceCentroid();
-      const auto distance = bnd_pos - _q_point[_qp];
-      const auto dist2 = distance * distance;
-      mooseAssert(dist2 != 0, "This distance should never be 0");
-      min_dist2 = std::min(min_dist2, dist2);
     }
   }
 
-  return std::sqrt(min_dist2);
+  // If the mesh is distributed, we have to allgather
+  if (_mesh.isDistributedMesh())
+    _communicator.set_union(local_set);
+
+  if (local_set.empty())
+    paramError("walls", "Could not find boundaries");
+
+  _boundary_points.assign(local_set.begin(), local_set.end());
+  _kd_tree = std::make_unique<KDTree>(_boundary_points, /*max_leaf_size=*/10);
+}
+
+Real
+WallDistanceAux::computeValue()
+{
+  mooseAssert(_kd_tree, "WallDistanceAux has not been initialized yet.");
+
+  std::vector<std::size_t> idx(1);
+  std::vector<Real> d2(1);
+  _kd_tree->neighborSearch(_q_point[_qp], 1, idx, d2);
+  return std::sqrt(d2[0]);
 }

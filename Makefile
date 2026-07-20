@@ -47,7 +47,7 @@ REACTOR                     := no
 RDG                         := no
 RICHARDS                    := no
 SOLID_MECHANICS             := no
-STOCHASTIC_TOOLS            := no
+STOCHASTIC_TOOLS            := yes
 THERMAL_HYDRAULICS          := no
 XFEM                        := no
 

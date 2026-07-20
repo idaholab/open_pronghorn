@@ -112,4 +112,19 @@ protected:
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}
+
+  /// Minimum k used to guard the turbulent time scale k/eps in the viscosity computation.
+  const Real _k_min;
+
+  /// Maximum k used in the mu_t computation. TKE is clamped to [k_min, k_max] before
+  /// computing k/eps. This closes the one-step lag where TKE can overshoot its physical
+  /// bound within the current linear solve before the bounds-penalty in kEpsilonTKESourceSink
+  /// has a chance to react (the penalty checks the *previous* iterate, not the current one).
+  const Real _k_max;
+
+  /// Starting mu_t/mu cap for the adaptive ramp.
+  const Real _mu_t_ratio_initial;
+
+  /// Number of outer iterations over which the cap is ramped to mu_t_ratio_max.
+  const unsigned int _mu_t_ramp_steps;
 };
