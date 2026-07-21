@@ -7,6 +7,7 @@
       type = Exodiff
       input = wall_distance.i
       exodiff = wall_distance_out.e
+      recover = false
       detail = 'replicated and'
     []
     [distributed]
