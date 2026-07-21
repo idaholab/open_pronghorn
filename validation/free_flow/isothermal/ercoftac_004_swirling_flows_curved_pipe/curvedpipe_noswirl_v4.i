@@ -12,7 +12,7 @@ sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
-C_pl = 2      # production limiter multiplier - default is 10
+C_pl = 2
 
 ### Initial and Boundary Conditions ###
 intensity = 0.01
@@ -22,13 +22,14 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / D}'
 ### Modeling parameters ###
 bulk_wall_treatment = false
 walls = 'wall'
-wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
+wall_treatment = 'neq' # Options: eq_newton, eq_incremental (best), eq_linearized, neq
 
 [Mesh]
     [load_mesh]
       type = FileMeshGenerator
       #file = 'swirled_pipe_mesh_fine_cubit.e'
-      file = 'curvedpipe_noswirl_lam_out.e'
+      # file = 'curvedpipe_noswirl_lam_out.e'
+      file = 'curvedpipe_noswirl_lam_wall_coarsened.e'
       #use_for_exodus_restart = true
     []
     # [rename_blocks]
@@ -423,8 +424,11 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
   [read_recycling]
     type = PropertyReadFile
     # prop_file_name = 'FDFlow_sm18.csv'
+    # prop_file_name = 'FDFlow_sm18_reconstructed.csv'
+    prop_file_name = 'FDFlow_sm02_reconstructed.csv'
     # prop_file_name = 'FDFlow_test.csv'
-    prop_file_name = 'FDFlow_test_sm02interp_massnorm.csv'
+    # prop_file_name = 'FDFlow_test_sm02interp.csv'
+    # prop_file_name = 'FDFlow_test_sm02interp_massnorm.csv'
     read_type = 'voronoi'
     #nprop = 13 # number of columns in CSV
     nprop = 6
@@ -989,6 +993,25 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     execute_on = 'FINAL'
   []
 
+
+  [beh00_th0675_wall]
+    type = PointValueSampler
+    points = '-0.3201549 0.0000000 0.4228377
+              -0.2913589 0.0000000 0.4923573'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED yplus'
+    sort_by = 'id'
+    execute_on = 'FINAL'
+  []
+
+  [beh00_th1125_wall]
+    type = PointValueSampler
+    points = '-0.6704451 0.0000000 0.4228377
+              -0.6992411 0.0000000 0.4923573'
+    variable = 'vel_x vel_y vel_z pressure TKE TKED yplus'
+    sort_by = 'id'
+    execute_on = 'FINAL'
+  []
+  
 []
 
 
