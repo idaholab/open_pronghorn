@@ -1,13 +1,13 @@
 """
 Compute the combined L2 (and RMS) error in W/W0 (axial velocity) between
-OpenPronghorn/MOOSE outputs (v3 and v4) and the ERCOFTAC Anwer & So (case004)
+OpenPronghorn/MOOSE outputs (v3, v4, and v5) and the ERCOFTAC Anwer & So (case004)
 experimental data, at all 9 measurement stations, combining both the
 horizontal (beh00, plane AA) and vertical (bev00, plane BB) measurement
 planes into one number per station per model version.
 
-Run this AFTER you've executed curvedpipe_noswirl_v3.i and/or
-curvedpipe_noswirl_v4.i and have all 18 VectorPostprocessor CSVs (9 stations
-x 2 planes) for whichever version(s) you want to check. Missing files are
+Run this AFTER you've executed curvedpipe_noswirl_v3.i, curvedpipe_noswirl_v4.i,
+and/or curvedpipe_noswirl_v5.i and have all 18 VectorPostprocessor CSVs
+(9 stations x 2 planes) for whichever version(s) you want to check. Missing files are
 skipped with a console note rather than causing a crash -- exactly like the
 individual per-station plotting scripts.
 
@@ -93,7 +93,8 @@ STATIONS = [
     dict(code="sp18",   label=r"$s/D=18$",          kind="leg",  centerline_x=-0.9906,  flow_sign=-1),
 ]
 
-VERSIONS = ["v3", "v4"]
+VERSIONS = ["v3", "v4", "v5"]
+VERSION_COLORS = {"v3": "#1f77b4", "v4": "#d62728", "v5": "#B8860B"}
 EXP_COLS = ["r_a", "W", "V100", "U100", "wp", "vp", "up", "wu", "uv", "vw"]
 
 # ERCOFTAC's own quoted measurement uncertainty on W (case004 page 4 table),
@@ -229,7 +230,11 @@ for station in STATIONS:
         r = results[station["code"]][version]
         row[f"{version} L2"] = r["l2"] if r is not None else np.nan
         row[f"{version} RMS %"] = 100.0 * r["rms"] if r is not None else np.nan
-    r_any = results[station["code"]]["v3"] or results[station["code"]]["v4"]
+    r_any = next(
+        (results[station["code"]][version] for version in VERSIONS
+         if results[station["code"]][version] is not None),
+        None,
+    )
     row["N"] = r_any["n_eff"] if r_any is not None else np.nan
     rows.append(row)
 
@@ -244,21 +249,32 @@ print("=" * 78)
 # ---- 3. bar chart -----------------------------------------------------------
 codes = [s["code"] for s in STATIONS]
 labels = [s["label"] for s in STATIONS]
-rms_v3 = [100.0 * results[c]["v3"]["rms"] if results[c]["v3"] is not None else np.nan for c in codes]
-rms_v4 = [100.0 * results[c]["v4"]["rms"] if results[c]["v4"] is not None else np.nan for c in codes]
+rms_by_version = {
+    version: [
+        100.0 * results[code][version]["rms"]
+        if results[code][version] is not None else np.nan
+        for code in codes
+    ]
+    for version in VERSIONS
+}
 
 x = np.arange(len(codes))
-width = 0.35
+width = 0.25
 
 fig, ax = plt.subplots(figsize=(12, 5.5))
 
-bars_v3 = ax.bar(x - width / 2, rms_v3, width, color="#1f77b4", label="MOOSE v3")
-bars_v4 = ax.bar(x + width / 2, rms_v4, width, color="#d62728", label="MOOSE v4")
+offsets = (np.arange(len(VERSIONS)) - (len(VERSIONS) - 1) / 2.0) * width
+bars_by_version = []
+for offset, version in zip(offsets, VERSIONS):
+    bars_by_version.append(
+        ax.bar(x + offset, rms_by_version[version], width,
+               color=VERSION_COLORS[version], label=f"MOOSE {version}")
+    )
 
 ax.axhline(W_UNCERTAINTY_PCT, color="black", linestyle="--", linewidth=0.9,
            label=f"ERCOFTAC measurement uncertainty ({W_UNCERTAINTY_PCT}%)")
 
-for bars in (bars_v3, bars_v4):
+for bars in bars_by_version:
     for b in bars:
         h = b.get_height()
         if np.isfinite(h):
@@ -277,10 +293,14 @@ for spine in ax.spines.values():
     spine.set_linewidth(1.0)
 # headroom above the tallest bar so the value labels never get clipped, and
 # the legend sits outside the axes so it never overlaps a bar or its label.
-ax.set_ylim(0, max(np.nanmax(rms_v3 + rms_v4), 1.0) * 1.18)
+finite_rms = [
+    value for rms_values in rms_by_version.values() for value in rms_values
+    if np.isfinite(value)
+]
+ax.set_ylim(0, max(max(finite_rms) if finite_rms else 1.0, 1.0) * 1.18)
 # data series first, reference line last, regardless of draw order above.
 handles, leg_labels = ax.get_legend_handles_labels()
-order = [1, 2, 0]
+order = list(range(1, len(handles))) + [0]
 ax.legend([handles[i] for i in order], [leg_labels[i] for i in order],
           frameon=True, fontsize=9, handlelength=2.0,
           loc="upper left", bbox_to_anchor=(1.01, 1.0), borderaxespad=0.0)

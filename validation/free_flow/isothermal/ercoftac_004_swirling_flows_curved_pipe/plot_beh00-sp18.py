@@ -73,6 +73,7 @@ exp['U'] = exp['U100'] / 100.0
 # ---- 2. load simulation data (optional - flag and skip if missing) --------
 v4_csv = 'curvedpipe_noswirl_v4_csv_beh00_sp18_0002.csv'
 v3_csv = v4_csv.replace('_v4_', '_v3_')   # assumed to be named the same way as v4
+v5_csv = v4_csv.replace('_v4_', '_v5_')   # assumed to be named the same way as v4
 
 
 def load_sim(csv_path):
@@ -105,6 +106,7 @@ def load_sim(csv_path):
 
 v3 = load_sim(v3_csv)
 v4 = load_sim(v4_csv)
+v5 = load_sim(v5_csv)
 
 # ---- published measurement uncertainty (ERCOFTAC case004, page 4 table) ---
 uncertainty = {'W': 0.003, 'U': 0.03, 'V': 0.07}
@@ -124,6 +126,8 @@ for ax, quantity, ylabel in zip(
         ax.plot(v3['r_a'], v3[quantity], 's', color='#1f77b4', markersize=3.2, label='MOOSE v3')
     if v4 is not None:
         ax.plot(v4['r_a'], v4[quantity], '^', color='#d62728', markersize=3.2, label='MOOSE v4')
+    if v5 is not None:
+        ax.plot(v5['r_a'], v5[quantity], 'D', color='#B8860B', markersize=3.2, label='MOOSE v5')
     ax.set_xlabel(r'$r / a$')
     ax.set_ylabel(ylabel)
     ax.grid(alpha=0.3)
