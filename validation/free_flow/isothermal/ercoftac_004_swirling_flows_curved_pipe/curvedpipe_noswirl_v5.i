@@ -4,7 +4,7 @@ D = 0.0762
 mu = 1.58e-5 #1.524e-5
 
 # advected_interp_method = 'upwind'
-momentum_interp_method = 'average'
+momentum_interp_method = 'average'     
 
 ### k-epslilon Closure Parameters ###
 sigma_k = 1.0
@@ -24,13 +24,14 @@ bulk_wall_treatment = false
 walls = 'wall'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental (best), eq_linearized, neq
 k_epsilon_variant   = 'Realizable'  # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-# two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
-curvature_model     = 'none'
-use_yap             = false
+curvature_model     = 'standard'
+use_yap             = false  #to try later on
 use_low_re_Gprime   = false
+use_curvature_correction = true
 
 [Mesh]
     [load_mesh]
@@ -274,6 +275,8 @@ use_low_re_Gprime   = false
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
     curvature_model          = ${curvature_model}
+    use_curvature_correction = ${use_curvature_correction}
+
   []
 
   [TKED_advection]
@@ -319,6 +322,7 @@ use_low_re_Gprime   = false
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
     wall_distance       = distance
+    use_curvature_correction = ${use_curvature_correction}
   []
 []
 
@@ -603,8 +607,8 @@ use_low_re_Gprime   = false
   pressure_system = 'pressure_system'
   turbulence_systems = 'TKE_system TKED_system'
 
-  momentum_equation_relaxation = 0.7
-  pressure_variable_relaxation = 0.3
+  momentum_equation_relaxation = 0.4
+  pressure_variable_relaxation = 0.1
   turbulence_equation_relaxation = '0.25 0.25'
   turbulence_field_relaxation = '0.25 0.25'
   num_iterations = 2500 # 1000
