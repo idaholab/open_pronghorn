@@ -10,6 +10,7 @@
 #pragma once
 
 #include "AuxKernel.h"
+#include "KDTree.h"
 
 /*
  *Computes the distance from cell centers to the walls
@@ -22,9 +23,15 @@ public:
 
   WallDistanceAux(const InputParameters & parameters);
 
+  virtual void initialSetup() override;
+  virtual void meshChanged() override;
+
 protected:
-  virtual Real computeValue();
+  virtual Real computeValue() override;
 
   /// Name of the boundaries to which the wall distance will be computed
   const std::vector<BoundaryName> & _wall_boundary_names;
+  /// Face centroids of wall boundaries; kept alive as KDTree holds iterators into this vector
+  std::vector<Point> _boundary_points;
+  std::unique_ptr<KDTree> _kd_tree;
 };
