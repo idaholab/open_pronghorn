@@ -2,7 +2,7 @@
 
 # Submit this script with: sbatch thefilename
 
-#SBATCH --time=1:00:00   # walltime
+#SBATCH --time=2:00:00   # walltime
 
 #SBATCH --ntasks-per-node=112   # number of processor cores (i.e. tasks)
 

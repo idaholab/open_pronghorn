@@ -4,7 +4,7 @@ D = 0.0762
 mu = 1.58e-5 #1.524e-5
 
 # advected_interp_method = 'upwind'
-momentum_interp_method = 'average'     
+momentum_interp_method = 'upwind'     
 
 ### k-epslilon Closure Parameters ###
 sigma_k = 1.0
@@ -12,7 +12,7 @@ sigma_eps = 1.3
 C1_eps = 1.44
 C2_eps = 1.92
 C_mu = 0.09
-C_pl = 2
+C_pl = 10
 
 ### Initial and Boundary Conditions ###
 intensity = 0.01
@@ -24,7 +24,7 @@ bulk_wall_treatment = false
 walls = 'wall'
 wall_treatment = 'neq' # Options: eq_newton, eq_incremental (best), eq_linearized, neq
 k_epsilon_variant   = 'Realizable'  # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+# two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
@@ -611,10 +611,10 @@ use_curvature_correction = true
   pressure_variable_relaxation = 0.1
   turbulence_equation_relaxation = '0.25 0.25'
   turbulence_field_relaxation = '0.25 0.25'
-  num_iterations = 2500 # 1000
-  pressure_absolute_tolerance = 1e-12
-  momentum_absolute_tolerance = 1e-12
-  turbulence_absolute_tolerance = '1e-12 1e-12'
+  num_iterations = 5000 # 1000
+  pressure_absolute_tolerance = 1e-15
+  momentum_absolute_tolerance = 1e-15
+  turbulence_absolute_tolerance = '1e-15 1e-15'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
