@@ -1,0 +1,21 @@
+[Tests]
+  design = "WallDistanceAux.md"
+  issues = "#66"
+  [wall_distance]
+    requirement = 'The system shall be able to compute the distance from prescribed boundaries in meshes that are '
+    [replicated]
+      type = Exodiff
+      input = wall_distance.i
+      exodiff = wall_distance_out.e
+      recover = false
+      detail = 'replicated and'
+    []
+    [distributed]
+      type = Exodiff
+      input = wall_distance.i
+      cli_args = 'Mesh/Partitioner/type=RandomPartitioner Mesh/parallel_type=distributed'
+      exodiff = wall_distance_out.e
+      detail = 'distributed.'
+    []
+  []
+[]
