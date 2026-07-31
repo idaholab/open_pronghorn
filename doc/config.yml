@@ -26,6 +26,8 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/rdg/doc/content
     reactor:
         root_dir: ${MOOSE_DIR}/modules/reactor/doc/content
+    solid_properties:
+        root_dir: ${MOOSE_DIR}/modules/solid_properties/doc/content
     subchannel:
         root_dir: ${MOOSE_DIR}/modules/subchannel/doc/content
     thermal_hydraulics:
@@ -57,10 +59,20 @@ Extensions:
         includes:
             - include
     MooseDocs.extensions.common:
-        shortcuts: !include ${MOOSE_DIR}/framework/doc/globals.yml
+        shortcuts:
+            framework: !include ${MOOSE_DIR}/framework/doc/globals.yml
+            thermal_hydraulics:
+                Components: systems/Components/index.md
     MooseDocs.extensions.acronym:
         acronyms:
             framework: !include ${MOOSE_DIR}/framework/doc/acronyms.yml
+    MooseDocs.extensions.katex:
+        macros: !include ${MOOSE_DIR}/modules/doc/katex_macros.yml
+    MooseDocs.extensions.template:
+        active: true
+        args:
+            thm-bin-opt: thermal_hydraulics-opt
+            thm-bin-dbg: thermal_hydraulics-dbg
     MooseDocs.extensions.sqa:
         active: true
         categories:
@@ -73,6 +85,7 @@ Extensions:
             rdg: !include ${MOOSE_DIR}/modules/rdg/doc/sqa_rdg.yml
             ray_tracing: !include ${MOOSE_DIR}/modules/ray_tracing/doc/sqa_ray_tracing.yml
             reactor: !include ${MOOSE_DIR}/modules/reactor/doc/sqa_reactor.yml
+            solid_properties: !include ${MOOSE_DIR}/modules/solid_properties/doc/sqa_solid_properties.yml
             subchannel: !include ${MOOSE_DIR}/modules/subchannel/doc/sqa_subchannel.yml
             thermal_hydraulics: !include ${MOOSE_DIR}/modules/thermal_hydraulics/doc/sqa_thermal_hydraulics.yml
         reports: !include ${ROOT_DIR}/doc/sqa_reports.yml
