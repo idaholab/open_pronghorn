@@ -5,7 +5,7 @@ small example. You do not need to install MOOSE separately or know how MOOSE is
 developed. The commands below take care of the required version for you.
 
 The instructions work on Linux, macOS, and Windows Subsystem for Linux. You
-will need an internet connection, several gigabytes of free disk space, and a
+will need an internet connection, several (>15) gigabytes of free disk space, and a
 terminal. Make sure [Git](https://git-scm.com/downloads) is installed before
 starting.
 
@@ -43,17 +43,17 @@ Create an environment named `moose`. This downloads the compiler and libraries
 needed by OpenPronghorn and may take a few minutes:
 
 !versioner! code
-conda create --name moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
+conda create -y --name moose moose-dev=__VERSIONER_CONDA_VERSION_MOOSE_DEV__
 !versioner-end!
 
-When Conda asks whether to proceed, enter `y`. Then activate the environment:
+Then activate the environment:
 
 ```bash
 conda activate moose
 ```
 
 Your terminal prompt will usually begin with `(moose)` after activation. Run
-`conda activate moose` again whenever you open a new terminal to use
+`conda activate moose` again whenever you open a new terminal or a new tab to use
 OpenPronghorn.
 
 ## 3. Download OpenPronghorn
@@ -82,7 +82,7 @@ make -j 6
 ```
 
 The build can take a while. The `6` tells the computer to perform up to six
-compile tasks at once. On a computer with limited memory, use `make -j 2`
+compile tasks at once. On a computer with limited memory, use `make -j 1` or `2`
 instead. When the build finishes, the program `open_pronghorn-opt` will be in
 the `open_pronghorn` directory.
 
