@@ -36,20 +36,21 @@ FUNCTIONAL_EXPANSION_TOOLS  := no
 GEOCHEMISTRY                := no
 HEAT_TRANSFER               := yes
 LEVEL_SET                   := no
-MISC                        := no
+MISC                        := yes
 NAVIER_STOKES               := yes
 OPTIMIZATION                := no
 PERIDYNAMICS                := no
 PHASE_FIELD                 := no
 POROUS_FLOW                 := no
 RAY_TRACING                 := no
-REACTOR                     := no
+REACTOR                     := yes
 RDG                         := no
 RICHARDS                    := no
 SOLID_MECHANICS             := no
 STOCHASTIC_TOOLS            := no
-THERMAL_HYDRAULICS          := no
+THERMAL_HYDRAULICS          := yes
 XFEM                        := no
+SUBCHANNEL                  := yes
 
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
