@@ -44,6 +44,8 @@ Extensions:
         name: OpenPronghorn
         repo: https://github.com/idaholab/open_pronghorn
         menu:
+            Getting Started:
+                Installation: getting_started/installation.md
             Validation: resources/filter/index.html
             Documentation:
                 OpenPronghorn-only Syntax: syntax/open_pronghorn_only.md
