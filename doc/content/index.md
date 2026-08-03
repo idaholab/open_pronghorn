@@ -11,6 +11,9 @@
 !style halign=center fontsize=120% color=0.35 0.35 0.35
 Engineering-scale thermal hydraulics built on the MOOSE framework.
 
+!style halign=center fontsize=115%
+[Install OpenPronghorn](getting_started/installation.md) and run your first example.
+
 !style! class=logo-belt style=--logo-speed:50s;
 !style! class=logo-belt__track
 
