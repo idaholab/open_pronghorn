@@ -11,7 +11,7 @@
 #include "NS.h" // Variable Term Names
 #include "NavierStokesMethods.h"
 
-registerMooseObject("OpenPronghornApp", LinearFVSRFFunctorMaterial);
+registerMooseObject("NavierStokesApp", LinearFVSRFFunctorMaterial);
 
 InputParameters
 LinearFVSRFFunctorMaterial::validParams()
@@ -201,12 +201,15 @@ LinearFVSRFFunctorMaterial::LinearFVSRFFunctorMaterial(const InputParameters & p
       using std::sin;
 
       const Real T = per(r, t);
-      if (T <= 0.0)
+      if (T < 0.0)
         mooseError(label, "_per must be positive.");
 
       const Real A_rad = amp_deg(r, t) * deg_to_rad;
       const Real phase_rad = pha_deg(r, t) * deg_to_rad;
       const Real w = 2.0 * libMesh::pi / T;
+
+      if (A_rad == 0.0)
+        return 0.0;
 
       return A_rad * sin(w * _t + phase_rad);
     };
@@ -222,12 +225,15 @@ LinearFVSRFFunctorMaterial::LinearFVSRFFunctorMaterial(const InputParameters & p
       using std::cos;
 
       const Real T = per(r, t);
-      if (T <= 0.0)
+      if (T < 0.0)
         mooseError(label, "_per must be positive.");
 
       const Real A_rad = amp_deg(r, t) * deg_to_rad;
       const Real phase_rad = pha_deg(r, t) * deg_to_rad;
       const Real w = 2.0 * libMesh::pi / T;
+
+      if (A_rad == 0.0)
+        return 0.0;
 
       return A_rad * w * cos(w * _t + phase_rad);
     };
@@ -243,12 +249,15 @@ LinearFVSRFFunctorMaterial::LinearFVSRFFunctorMaterial(const InputParameters & p
       using std::sin;
 
       const Real T = per(r, t);
-      if (T <= 0.0)
+      if (T < 0.0)
         mooseError(label, "_per must be positive.");
 
       const Real A_rad = amp_deg(r, t) * deg_to_rad;
       const Real phase_rad = pha_deg(r, t) * deg_to_rad;
       const Real w = 2.0 * libMesh::pi / T;
+
+      if (A_rad == 0.0)
+        return 0.0;
 
       return -A_rad * w * w * sin(w * _t + phase_rad);
     };
