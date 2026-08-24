@@ -11,7 +11,7 @@
 #include "NS.h" // Variable Term Names
 #include "NavierStokesMethods.h"
 
-registerMooseObject("NavierStokesApp", LinearFVSRFFunctorMaterial);
+registerMooseObject("OpenPronghornApp", LinearFVSRFFunctorMaterial);
 
 InputParameters
 LinearFVSRFFunctorMaterial::validParams()

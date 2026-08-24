@@ -12,7 +12,7 @@
 
 #include <cmath>
 
-registerMooseObject("NavierStokesApp", LinearFVSRFMomentumHeave);
+registerMooseObject("OpenPronghornApp", LinearFVSRFMomentumHeave);
 
 InputParameters
 LinearFVSRFMomentumHeave::validParams()

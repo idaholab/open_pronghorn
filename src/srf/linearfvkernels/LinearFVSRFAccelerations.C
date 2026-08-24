@@ -13,7 +13,7 @@
 #include "SRFUtils.h"
 #include "FEProblemBase.h"
 
-registerMooseObject("NavierStokesApp", LinearFVSRFAccelerations);
+registerMooseObject("OpenPronghornApp", LinearFVSRFAccelerations);
 
 InputParameters
 LinearFVSRFAccelerations::validParams()
