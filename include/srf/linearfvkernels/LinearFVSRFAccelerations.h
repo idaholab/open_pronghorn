@@ -43,11 +43,11 @@ protected:
   // Metacenter origin vector
   const Moose::Functor<RealVectorValue> & _r_mc;
   /// x-velocity
-  const Moose::Functor<Real> & _u_var;
+  const MooseLinearVariableFVReal * _u_var;
   /// y-velocity
-  const Moose::Functor<Real> & _v_var;
+  const MooseLinearVariableFVReal * _v_var;
   /// z-velocity
-  const Moose::Functor<Real> & _w_var;
+  const MooseLinearVariableFVReal * _w_var;
   // Flag to add Coriolis or not.
   const bool _coriolis;
 

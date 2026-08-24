@@ -11,8 +11,9 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "SRFUtils.h"
+#include "FEProblemBase.h"
 
-registerMooseObject("OpenPronghornApp", LinearFVSRFAccelerations);
+registerMooseObject("NavierStokesApp", LinearFVSRFAccelerations);
 
 InputParameters
 LinearFVSRFAccelerations::validParams()
@@ -44,9 +45,13 @@ LinearFVSRFAccelerations::LinearFVSRFAccelerations(const InputParameters & param
     _omega_dot_brf(getFunctor<RealVectorValue>("omega_dot_brf")),
     _index(getParam<MooseEnum>("momentum_component")),
     _r_mc(getFunctor<RealVectorValue>("r_mc")),
-    _u_var(getFunctor<Real>("u")),
-    _v_var(getFunctor<Real>("v")),
-    _w_var(params.isParamValid("w") ? &(getFunctor<Real>("w")) : nullptr),
+    _u_var(dynamic_cast<const MooseLinearVariableFVReal *>(
+        &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("u")))),
+    _v_var(dynamic_cast<const MooseLinearVariableFVReal *>(
+        &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("v")))),
+    _w_var(params.isParamValid("w")
+               ? dynamic_cast<const MooseLinearVariableFVReal *>(
+                     &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("w"))): nullptr),
     _coriolis(getParam<bool>("add_coriolis"))
 {
 }
@@ -73,9 +78,10 @@ LinearFVSRFAccelerations::computeRightHandSideContribution()
   const RealVectorValue omega_dot = _omega_dot_brf(elem_arg, state_arg);
   const RealVectorValue omega_dot_x_r = omega_dot.cross(rmc);
   // Coriolis effect
-  const RealVectorValue vel(_u_var(elem_arg, state_arg),
-                            _v_var(elem_arg, state_arg),
-                            _w_var ? (*_w_var)(elem_arg, state_arg) : 0.0);
+  const RealVectorValue vel((*_u_var).getElemValue(*_current_elem_info, state_arg),
+                            (*_v_var).getElemValue(*_current_elem_info, state_arg),
+                            _w_var ? (*_w_var).getElemValue(*_current_elem_info, state_arg) : 0.0);
+
   const RealVectorValue coriolis = 2.0 * omega.cross(vel);
 
   return -rho * (omega_x_omega_x_r(_index) + omega_dot_x_r(_index) + coriolis(_index)) * _current_elem_volume;
