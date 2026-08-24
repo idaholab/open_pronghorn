@@ -44,7 +44,7 @@ w = 1.0
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    body_force_kernel_names = "u_omega; v_omega"
+    # body_force_kernel_names = "u_omega; v_omega"
   []
 []
 
@@ -152,6 +152,9 @@ w = 1.0
     variable = pressure
     HbyA_flux = HbyA
     Ainv = Ainv
+    u = vel_x
+    v = vel_y
+    rho = ${rho}
   []
 []
 
