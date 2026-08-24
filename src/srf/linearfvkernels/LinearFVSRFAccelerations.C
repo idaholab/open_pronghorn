@@ -33,8 +33,6 @@ LinearFVSRFAccelerations::validParams()
   params.addRequiredParam<SolverVariableName>("u", "The velocity in the x direction.");
   params.addRequiredParam<SolverVariableName>("v", "The velocity in the y direction.");
   params.addParam<SolverVariableName>("w", "The velocity in the z direction.");
-
-  params.addParam<bool>("add_coriolis", true, "Add Coriolis terms or not.");
   return params;
 }
 
@@ -51,8 +49,7 @@ LinearFVSRFAccelerations::LinearFVSRFAccelerations(const InputParameters & param
         &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("v")))),
     _w_var(params.isParamValid("w")
                ? dynamic_cast<const MooseLinearVariableFVReal *>(
-                     &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("w"))): nullptr),
-    _coriolis(getParam<bool>("add_coriolis"))
+                     &_fe_problem.getVariable(_tid, getParam<SolverVariableName>("w"))): nullptr)
 {
 }
 

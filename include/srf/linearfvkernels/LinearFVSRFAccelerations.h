@@ -48,7 +48,5 @@ protected:
   const MooseLinearVariableFVReal * _v_var;
   /// z-velocity
   const MooseLinearVariableFVReal * _w_var;
-  // Flag to add Coriolis or not.
-  const bool _coriolis;
 
 };
