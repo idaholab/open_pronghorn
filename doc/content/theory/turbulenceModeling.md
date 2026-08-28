@@ -366,8 +366,8 @@ This section explains the available corrections, their motivation, and how they 
   [!cite](spalart1997rotation).
 - *Implementation*:
   (a) `computeCurvatureFactor` uses $S^2$ and $W^2$ to build $f_c$,
-  (b) $P_k$ is replaced by $f_c P_k$ in both the $k$ and $\epsilon$ equations when
-    curvature corrections are enabled.
+  (b) $f_c$ scales shear production in both the $k$ and $\epsilon$ equations, with the
+    corrected shear contribution limited by $C_\text{pl}\rho\epsilon$ before assembly.
 - *Activation*:
   (a) `use_curvature_correction = true`,
   (b) `curvature_model = 'standard'` (or similar option as implemented).

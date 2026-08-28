@@ -297,7 +297,7 @@ Real computeGnl(const NonlinearConstitutiveRelation model,
  * This is used to scale the production in the Realizable k-epsilon
  * variants:
  *   P_k = f_c G_k
- *   P_eps = f_c S_k
+ *   P_eps = min(f_c S_k, C_pl rho epsilon)
  */
 Real computeCurvatureFactor(const CurvatureCorrectionModel model,
                             const StrainRotationInvariants & inv);
