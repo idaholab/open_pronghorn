@@ -191,7 +191,7 @@ outlet = 'back bottom top left right'
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = true
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -211,7 +211,7 @@ outlet = 'back bottom top left right'
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = true
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -231,7 +231,7 @@ outlet = 'back bottom top left right'
     momentum_component = 'z'
     rhie_chow_user_object = 'rc'
     use_nonorthogonal_correction = true
-    use_deviatoric_terms = no
+    use_deviatoric_terms = yes
   []
   [w_pressure]
     type = LinearFVMomentumPressure
