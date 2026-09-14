@@ -278,18 +278,12 @@ outlet = 'back bottom top left right'
     wall_treatment = ${wall_treatment}
     C_pl = 1e10
 
-    # NEW (optional)
+    # optional
     k_epsilon_variant        = ${k_epsilon_variant}    # 'Standard', 'Realizable', etc.
     use_buoyancy             = ${use_buoyancy}
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
     curvature_model          = ${curvature_model}
-    # if/when you have these fields:
-    # temperature       = T
-    # beta              = beta
-    # speed_of_sound    = c
-    # nonlinear_production = Gnl
-    # curvature_factor  = fc
   []
 
   [TKED_advection]
@@ -320,9 +314,8 @@ outlet = 'back bottom top left right'
     C2_eps = ${C2_eps}
     walls = ${walls}
     wall_treatment = ${wall_treatment}
-    # C_pl = 1e10
 
-    # NEW (optional)
+    # optional
     k_epsilon_variant   = ${k_epsilon_variant}
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
@@ -330,13 +323,6 @@ outlet = 'back bottom top left right'
     curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
-
-    # same functors as for TKE if you use them:
-    # temperature       = T
-    # beta              = beta
-    # speed_of_sound    = c
-    # nonlinear_production = Gnl
-    # curvature_factor  = fc
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
   []
 []

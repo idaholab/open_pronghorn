@@ -14,6 +14,11 @@ import pandas as pd
 OUTFILE = "combined_halfwidths.csv"
 
 SMOOTH_WINDOW = 7  # smoothing kernel size in samples (odd int >=3)
+# Smoothing is applied only to suppress local, mesh-level noise in the radial
+# profile before locating the 0.5*Vc crossing; it can still shift the
+# interpolated crossing location slightly. window=7 was chosen empirically as
+# the smallest kernel that removes that noise without visibly biasing the
+# crossing relative to the unsmoothed profile.
 SMOOTH_PAD_MODE = "edge"  # mode for np.pad
 MIN_CONSECUTIVE = (
     5  # require at least this many consecutive samples below threshold after crossing
