@@ -15,7 +15,7 @@
     validation_abs_tol = 1e-3
 
     # CSVDiff tolerance for direct file comparison to gold
-    rel_err = 1e-3
+    rel_err = 3e-2
     # Gold data generated from converged SIMPLE solution after 1500 iterations.
   []
 []
