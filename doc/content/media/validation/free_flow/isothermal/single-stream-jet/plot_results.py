@@ -12,7 +12,7 @@ D = 0.01
 DATA = os.path.abspath(
     os.path.join(
         SCRIPT_DIR,
-        "../../../../../../../validation/free_flow/jets/single-stream-jet/RTL10000",
+        "../../../../../../../validation/free_flow/isothermal/single-stream-jet/RTL10000",
     )
 )
 REF = os.path.join(DATA, "reference")

@@ -1,11 +1,11 @@
 # Single-stream-jet flow in still tank
 
 !tag name=Single-stream-jet flow in still tank
-     image=../../media/validation/free_flow/jets/single-stream-jet/jet.png
+     image=../../media/validation/free_flow/isothermal/single-stream-jet/jet.png
      description=Single-stream turbulent free jet discharging into a still-air tank
      pairs=flow_configuration:free-flow
            compressibility:incompressible
-           heattransfer:none
+           heattransfer:isothermal
            convection_type:forced
            transient:steady
            flow_regime:turbulent
@@ -18,18 +18,13 @@ Free jet flows have been extensively examined through both experimental and nume
 
 In this experiment, a free jet flows into a large tank filled with still air. The experimental setup consists of a jet flow unit that generates a round free jet discharging from a nozzle and an air supply system. Compressed air used to generate the jet flow is stored in a tank. Flow is obtained by passing the pressurized air through a pressure regulator and then directing it into a stagnation chamber. After the stagnation chamber, flow is discharged into the atmosphere through a nozzle. The exit diameter of the nozzle is 12 mm. The contraction ratio of the jet nozzle is 4. Jet velocity is controlled by adjusting the pressure inside the stagnation chamber with a closed-loop algorithm in the jet flow unit system. Velocity and turbulence profiles are measured by moving the probe in the radial direction. In addition, jet centerline velocities and turbulence intensities are measured along the jet centerline to examine the change in speed and turbulence intensity on the jet axis with increasing distance from the jet exit plane.
 
-!media media/validation/free_flow/jets/single-stream-jet/jet.png
-       style=width:100%;margin-left:auto;margin-right:auto;text-align:center
-       id=fig:geom
-       caption=Jet in still tank.
-
 The boundary conditions for the momentum and pressure equations are the following:
 
 !table id=tab:momentum-pressure-bc caption=Momentum and pressure boundary conditions.
 | Boundary | Boundary condition |
 | --- | --- |
 | +Fluid inlet+ | Fixed velocity based on $Re_{in}=10000$ |
-| +Fluid front+ | No-slip (wall) |
+| +Fluid front+ | No-slip (wall), with a near-equilibrium wall function for the turbulence variables |
 | +Fluid outlet (the rest of the surfaces)+ | Outlet pressure, $p_{out}=0.0$ |
 
 The air properties used are given in [tab:matprops].
@@ -41,9 +36,14 @@ The air properties used are given in [tab:matprops].
 
 ## `OpenPronghorn` Model
 
-In the geometry created for the CFD analyses, the jet outlet diameter D was set to 10 mm to match the value in the source document. Additionally, Faghani et al. [!cite](faghani2011effect) noted that a uniform inlet velocity profile shows better agreement with experimental data from similar studies on jet flow. The turbulence intensity at the inlet surface was set to 5% to align with the experimental data. This validation case demonstrates the simulation of a round free jet in a still tank using the `OpenPronghorn` K-Epsilon model with the realizable two-layer variation and Wolfstein two-layer model. The mesh is generated using the MOOSE mesh generator system.
+In the geometry created for the CFD analyses, the jet outlet diameter D was set to 10 mm to match the value in the source document. The tank is 0.2 m wide/tall and 0.3 m long, i.e. 20D by 20D by 30D, large enough that the outer boundaries do not constrain the jet development. Additionally, Faghani et al. [!cite](faghani2011effect) noted that a uniform inlet velocity profile shows better agreement with experimental data from similar studies on jet flow. The turbulence intensity at the inlet surface was set to 5% to align with the experimental data. This validation case demonstrates the simulation of a round free jet in a still tank using the `OpenPronghorn` K-Epsilon model with the realizable two-layer variation and Wolfstein two-layer model. The two-layer treatment governs the near-wall resolution of $\mu_t$ and $\varepsilon$ at whichever solid walls are present in the domain; here that is the single `front` wall, so the two-layer formulation is applied there and has no effect elsewhere in the still-air region. The mesh is generated using the MOOSE mesh generator system.
 
-!media media/validation/free_flow/jets/single-stream-jet/mesh.png
+!media media/validation/free_flow/isothermal/single-stream-jet/jet.png
+       style=width:100%;margin-left:auto;margin-right:auto;text-align:center
+       id=fig:geom
+       caption=Computed axial velocity field for the jet discharging into the tank.
+
+!media media/validation/free_flow/isothermal/single-stream-jet/mesh.png
        style=width:70%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:mesh
        caption=Mesh showing the fluid and increased discretization around the jet centerline.
@@ -52,19 +52,19 @@ Altogether, the mesh has 150 cells axially and about 40 cells laterally on avera
 The simulation employs a +SIMPLE solver+ to obtain the steady state solution.
 The input file for this case is embedded below.
 
-!listing /validation/free_flow/jets/single-stream-jet/RTL10000/jet_RTL10000.i
+!listing /validation/free_flow/isothermal/single-stream-jet/RTL10000/jet_RTL10000.i
 
 ## Results
 
 The velocity and jet half-width profiles obtained across the jet centerline for Re=10,000 using experimental methods are compared with `OpenPronghorn` CFD results and other simulations from the open literature. The jet half-width is defined as the distance on the y-axis from the centerline at any point x along the jet axis where the velocity is equal to half of the centerline velocity at that point.
 
-!media media/validation/free_flow/jets/single-stream-jet/plot_results.py
+!media media/validation/free_flow/isothermal/single-stream-jet/plot_results.py
        image_name=jet_CL_normal_velocity.png
        style=width:70%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:velprofile
        caption=Jet centerline velocity distribution.
 
-!media media/validation/free_flow/jets/single-stream-jet/plot_results.py
+!media media/validation/free_flow/isothermal/single-stream-jet/plot_results.py
        image_name=jet_halfwidth.png
        style=width:70%;margin-left:auto;margin-right:auto;text-align:center
        id=fig:halfprofile
