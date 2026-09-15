@@ -52,6 +52,7 @@ Extensions:
                 Complete Code Syntax: syntax/index.md
             Theory:
                 Turbulence Modeling: theory/turbulenceModeling.md
+                Single Frame of Reference Modeling: theory/srfModeling.md
             Software Quality:
                 Software Quality Assurance (SQA) Information: /sqa/index.md
                 Code Standards: sqa/open_pronghorn_scs.md
