@@ -130,9 +130,7 @@ class TestCase(ValidationCase):
         # cf and x/H values
         ercoftac_cf = cf_exp["cf"]
         moose_cf = ((mu_t + mu) * vel_x / distance) / cf_factor
-        sim_moose_cf = (
-            (sim_mu_t + mu) * sim_vel_x / sim_distance
-        ) / cf_factor
+        sim_moose_cf = ((sim_mu_t + mu) * sim_vel_x / sim_distance) / cf_factor
 
         moose_x = x / H
         sim_moose_x = sim_x / H
