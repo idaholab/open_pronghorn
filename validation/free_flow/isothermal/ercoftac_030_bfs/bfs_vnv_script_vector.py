@@ -1,12 +1,19 @@
 from TestHarness.validation import ValidationCase
 
-import glob
-import os
 import numpy as np
 import pandas as pd
 
 
 class TestCase(ValidationCase):
+    @staticmethod
+    def validParams():
+        params = ValidationCase.validParams()
+        params.addRequiredParam(
+            "bfs_file_base",
+            "Output file base for this BFS variant, for example k_epsilon_standard",
+        )
+        return params
+
     def initialize(self):
 
         # Authorized relative increase in the error
@@ -17,18 +24,9 @@ class TestCase(ValidationCase):
         ### REFERENCE FILES: Please do not modify, unless updating reference data
         ### Load .csv files for MOOSE and ERCOFTAC, respectively
 
-        # The base name of the current simulation outputs (e.g. k_epsilon_standard)
-        # is inferred from the generated sampler CSV file. The validation harness
-        # runs each turbulence variant separately so there should only be a single
-        # match.
-        try:
-            sim_base = os.path.basename(
-                glob.glob("*_inlet_channel_wall_sampler_0002.csv")[0]
-            ).split("_inlet_channel_wall_sampler_0002.csv")[0]
-        except IndexError as exc:
-            raise RuntimeError(
-                "Unable to locate inlet sampler output to determine file base"
-            ) from exc
+        # The test specification supplies this explicitly.  Inferring it from a
+        # glob is incorrect because outputs from several BFS cases coexist here.
+        sim_base = str(self.getParam("bfs_file_base"))
 
         moose_inlet_csv = pd.read_csv(
             f"gold/{sim_base}_inlet_channel_wall_sampler_0002.csv"
@@ -46,6 +44,9 @@ class TestCase(ValidationCase):
         pressure = np.concatenate(
             [moose_inlet_csv["pressure"], moose_outlet_csv["pressure"]]
         )
+        order = np.argsort(x)
+        x = x[order]
+        pressure = pressure[order]
 
         # note: U_ref should be updated if the inlet condition is changed
         U_ref = 4.402663e01
@@ -76,10 +77,13 @@ class TestCase(ValidationCase):
         sim_outlet_csv = pd.read_csv(f"{sim_base}_outlet_channel_wall_sampler_0002.csv")
 
         sim_x = np.concatenate([sim_inlet_csv["x"], sim_outlet_csv["x"]])
-        sim_x_norm = sim_x / H
         sim_pressure = np.concatenate(
             [sim_inlet_csv["pressure"], sim_outlet_csv["pressure"]]
         )
+        sim_order = np.argsort(sim_x)
+        sim_x = sim_x[sim_order]
+        sim_x_norm = sim_x / H
+        sim_pressure = sim_pressure[sim_order]
         sim_pressure_cp = (sim_pressure / cp_factor) + 0.125
 
         # Interpolate pressure coefficient onto the ercoftac grid
@@ -92,11 +96,9 @@ class TestCase(ValidationCase):
 
         # Concatenate inlet and outlet data for MOOSE .csv
         x = np.concatenate([moose_inlet_csv["x"], moose_outlet_csv["x"]])
-        mu_t = (
-            np.concatenate(
-                [moose_inlet_csv["mu_t_wall"], moose_outlet_csv["mu_t_wall"]]
-            )
-            / 6.0
+
+        mu_t = np.concatenate(
+            [moose_inlet_csv["mu_t_wall"], moose_outlet_csv["mu_t_wall"]]
         )
         distance = np.concatenate(
             [moose_inlet_csv["distance"], moose_outlet_csv["distance"]]
@@ -104,22 +106,34 @@ class TestCase(ValidationCase):
         vel_x = np.concatenate([moose_inlet_csv["vel_x"], moose_outlet_csv["vel_x"]])
 
         sim_x = np.concatenate([sim_inlet_csv["x"], sim_outlet_csv["x"]])
-        sim_mu_t = (
-            np.concatenate([sim_inlet_csv["mu_t_wall"], sim_outlet_csv["mu_t_wall"]])
-            / 6.0
+        sim_mu_t = np.concatenate(
+            [sim_inlet_csv["mu_t_wall"], sim_outlet_csv["mu_t_wall"]]
         )
         sim_distance = np.concatenate(
             [sim_inlet_csv["distance"], sim_outlet_csv["distance"]]
         )
         sim_vel_x = np.concatenate([sim_inlet_csv["vel_x"], sim_outlet_csv["vel_x"]])
 
+        # Sort each source independently before using np.interp.
+        gold_order = np.argsort(x)
+        x = x[gold_order]
+        mu_t = mu_t[gold_order]
+        distance = distance[gold_order]
+        vel_x = vel_x[gold_order]
+
+        current_order = np.argsort(sim_x)
+        sim_x = sim_x[current_order]
+        sim_mu_t = sim_mu_t[current_order]
+        sim_distance = sim_distance[current_order]
+        sim_vel_x = sim_vel_x[current_order]
+
         # cf and x/H values
         ercoftac_cf = cf_exp["cf"]
         moose_cf = ((mu_t + mu) * vel_x / distance) / cf_factor
-        sim_moose_cf = ((mu_t + mu) * vel_x / distance) / cf_factor
+        sim_moose_cf = ((sim_mu_t + mu) * sim_vel_x / sim_distance) / cf_factor
 
         moose_x = x / H
-        sim_moose_x = x / H
+        sim_moose_x = sim_x / H
         self.ercoftac_x_cf = cf_exp["x/h"]
 
         ### Interpolate MOOSE onto ERCOFTAC
@@ -137,9 +151,10 @@ class TestCase(ValidationCase):
         y_grid = pd.read_csv("reference_csv/u+1.csv")["y/h"].to_numpy()
         self.y_grid = pd.read_csv("reference_csv/u+1.csv")["y/h"].to_numpy()
 
-        # MOOSE Reference: Function to interpolate vel_x to y_grid
+        # Function to sort the sampler coordinate before interpolation.
         def interpolate_vel_x(y_values, vel_x_values, y_grid):
-            return np.interp(y_grid, y_values, vel_x_values)
+            order = np.argsort(y_values)
+            return np.interp(y_grid, y_values[order], vel_x_values[order])
 
         # MOOSE Reference: Read and process each linear CSV
         linear_files = [
@@ -159,10 +174,6 @@ class TestCase(ValidationCase):
                 y_linear, vel_x_linear, y_grid
             )  # Interpolate MOOSE data to y/H
             interpolated_results[file] = interpolated_vel_x
-
-        # MOOSE Current: Function to interpolate vel_x to y_grid
-        def sim_interpolate_vel_x(sim_y_values, sim_vel_x_values, sim_y_grid):
-            return np.interp(y_grid, sim_y_values, sim_vel_x_values)
 
         # Read and process each linear CSV
         sim_linear_files = [
