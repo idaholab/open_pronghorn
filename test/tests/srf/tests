@@ -1,0 +1,22 @@
+[Tests]
+  design = 'LinearFVSRFAccelerations.md LinearFVSRFFunctorMaterial.md srfModeling.md'
+
+  [fixed_omega_equilibrium]
+    type = MMSTest
+    input = mms_spatial.py
+    test_case = TestRotatingLid
+    #csvdiff = rotating_lid_convergence.csv
+    requirement = 'The system shall recover the stationary rotating-frame equilibrium under a fixed angular velocity, exhibit at least first-order spatial convergence in the pressure L2 error, and maintain negligible body-frame velocity.'
+
+    # mms_spatial.py fails before writing the CSV if the fitted pressure order
+    # is below 0.9. Velocity errors smaller than 1e-8 are numerical zero.
+    #rel_err = 1e-10
+    #abs_zero = 1e-8
+
+    #recover = false
+    #valgrind = none
+    #max_parallel = 1
+    #max_threads = 1
+    #required_python_packages = 'numpy pandas sympy'
+  []
+[]

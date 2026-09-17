@@ -1,0 +1,27 @@
+[Tests]
+  [taylor_couette_relative]
+    type = RunApp
+    input = taylor_couette_2d_rel.i
+    validation_test = taylor_couette_vnv.py
+
+    # Pointwise error in reconstructed absolute-frame tangential velocity,
+    # normalized by the physical inner-wall speed |Omega_i R_i|.
+    #
+    # The mu = 5e-4 Pa s case produced:
+    #   RMS error     ~= 0.29%
+    #   maximum error ~= 0.47%
+    #
+    # A 1% upper bound therefore provides margin while remaining restrictive.
+    validation_lower_bound = 0.0
+    validation_upper_bound = 0.01
+
+    # Pointwise pressure-profile error normalized by the total analytical
+    # pressure variation over the sampled radial profile.
+    pressure_validation_upper_bound = 0.01
+
+    requirement = 'The single-rotating-frame formulation shall reproduce the analytical steady laminar Taylor-Couette tangential-velocity profile after reconstruction to the inertial frame.'
+    min_parallel = 24
+    max_parallel = 24
+    max_time = 900
+  []
+[]
