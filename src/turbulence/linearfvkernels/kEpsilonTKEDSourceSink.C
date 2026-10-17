@@ -527,6 +527,8 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
   if (_curvature_model != NS::CurvatureCorrectionModel::None)
     fc = NS::computeCurvatureFactor(_curvature_model, inv);
 
+  const Real corrected_shear_production = std::min(fc * Sk, _C_pl * rho * eps);
+
   // Optional low-Re extra production G'
   Real Gprime = 0.0;
   if (_switches.use_low_re_Gprime && _has_wall_distance)
@@ -592,13 +594,13 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
       break;
 
     case NS::KEpsilonVariant::Realizable:
-      // Realizable: Pe = f_c S_k + C3_eps Gb  (Eq. 1058)
-      Pe = fc * Sk + C3_eps_local * Gb;
+      // Realizable: Pe = min(f_c S_k, C_pl rho epsilon) + C3_eps Gb
+      Pe = corrected_shear_production + C3_eps_local * Gb;
       break;
 
     case NS::KEpsilonVariant::RealizableTwoLayer:
       // Realizable two-layer: same, with optional Yap term
-      Pe = fc * Sk + C3_eps_local * Gb + yap_source;
+      Pe = corrected_shear_production + C3_eps_local * Gb + yap_source;
       break;
 
     default:
