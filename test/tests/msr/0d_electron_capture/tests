@@ -1,0 +1,25 @@
+[Tests]
+  design = 'MoltenSaltRadiolysisAction.md MSRReaction.md'
+  issues = '#000'
+
+  [electron_capture]
+    type = 'CSVDiff'
+    input = 'electron_capture.i'
+    csvdiff = 'electron_capture_out.csv'
+    abs_zero = 1e-10
+    rel_err = 1e-5
+    requirement = 'The system shall integrate the metal electron-capture reaction e_sol + Zn_II -> '
+                  'Zn_I and reproduce the pseudo-first-order decay of the validated 0D radiolysis model.'
+  []
+
+  [electron_capture_epi3v]
+    type = 'CSVDiff'
+    input = 'electron_capture_epi3v.i'
+    csvdiff = 'electron_capture_epi3v_out.csv'
+    abs_zero = 1e-10
+    rel_err = 2e-5
+    requirement = 'The system shall advance the homogeneous 0D electron-capture chemistry with the '
+                  'MSREPI3VTimeIntegrator and reproduce the validated coupled EPI3V trajectory.'
+  []
+
+[]
