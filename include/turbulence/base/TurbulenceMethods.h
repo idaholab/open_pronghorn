@@ -10,6 +10,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_set>
 #include "Moose.h"
 #include "MooseUtils.h"
 #include "ADReal.h"
@@ -141,6 +142,46 @@ TwoLayerLengths twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real 
  * The expressions follow the STAR-CCM+ documentation closely.
  */
 TwoLayerLengths twoLayerXu(const Real Cmu, const Real d, const Real Re_d, const Real yv_star);
+
+/**
+ * Dispatcher for the two-layer length scales according to the selected flavour.
+ *
+ * @param flavor Wolfstein, NorrisReynolds or Xu
+ * @param Cmu closure constant C_mu
+ * @param d wall distance
+ * @param Re_d wall-distance Reynolds number sqrt(k) d / nu
+ * @param nu kinematic viscosity (only used by the Xu flavour to build yv_star)
+ * @param k turbulent kinetic energy (only used by the Xu flavour to build yv_star)
+ */
+TwoLayerLengths twoLayerLengths(const TwoLayerFlavor flavor,
+                                const Real Cmu,
+                                const Real d,
+                                const Real Re_d,
+                                const Real nu,
+                                const Real k);
+
+/**
+ * Wall-proximity blending factor shared by the two-layer mu_t and epsilon blending:
+ *
+ *   lambda = 0.5 (1 + tanh((Re_d - Re_star) / A)),  A = DeltaRe / atanh(0.98)
+ *
+ * lambda -> 0 in the viscosity-affected region (Re_d << Re_star), lambda -> 1 in the fully
+ * turbulent region.
+ */
+Real twoLayerBlendingFactor(const Real Re_d, const Real Rey_star, const Real DeltaRey);
+
+/**
+ * Weight applied to the transport terms (time derivative, advection, diffusion) of a turbulence
+ * equation in a given element:
+ *   - 0 if the element is wall bounded (these rows are replaced by wall treatment)
+ *   - lambda(elem) if a blending functor is provided
+ *   - 1 otherwise
+ * With no blending functor this reproduces the binary wall-bounded skip.
+ */
+Real turbulentBlendWeight(const Moose::ElemArg & elem_arg,
+                          const std::unordered_set<const Elem *> & wall_bounded,
+                          const Moose::Functor<Real> * lambda,
+                          const Moose::StateArg & state);
 
 /**
  * Low-Re standard k-epsilon damping function f2.
