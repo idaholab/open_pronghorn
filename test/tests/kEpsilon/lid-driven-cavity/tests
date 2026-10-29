@@ -58,7 +58,7 @@
     recover = false
     max_threads = 1
     heavy = false
-    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer'
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t Outputs/file_base=lid-driven_k_epsilon_standardtwolayer'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using StandardTwoLayer variant.'
   []
   [lid-driven_k_epsilon_standardtwolayer_lowreGprime]
@@ -70,7 +70,7 @@
     recover = false
     max_threads = 1
     heavy = false
-    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer_lowreGprime'
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t Outputs/file_base=lid-driven_k_epsilon_standardtwolayer_lowreGprime'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using StandardTwoLayer variant and Low-Re Gprime correction.'
   []
   [lid-driven_k_epsilon_realizable]
@@ -106,7 +106,7 @@
     recover = false
     max_threads = 1
     heavy = false
-    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer'
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using RealizableTwoLayer variant.'
   []
   [lid-driven_k_epsilon_realizabletwolayer_lowreGprime]
@@ -118,7 +118,7 @@
     recover = false
     max_threads = 1
     heavy = false
-    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer_lowreGprime'
+    cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer_lowreGprime'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using RealizableTwoLayer variant and Low-Re Gprime correction.'
   []
 []
