@@ -110,6 +110,18 @@ StrainRotationInvariants computeStrainRotationInvariants(const Moose::Functor<Re
                                                          const Moose::ElemArg & elem_arg,
                                                          const Moose::StateArg & state);
 
+/// Transport kernels (flux kernels and time derivatives) acting on a variable
+std::vector<const MooseObject *> getTransportKernels(const FEProblemBase & problem,
+                                                     unsigned int sys_num,
+                                                     unsigned int var_num,
+                                                     THREAD_ID tid);
+
+/// Whether functor \p name is the \p output functor of a kEpsilonTwoLayerFunctorMaterial
+bool isTwoLayerOutput(const FEProblemBase & problem,
+                      const std::string & output,
+                      const std::string & name,
+                      THREAD_ID tid);
+
 /**
  * Small helper to compute the two-layer constant c_l from C_mu.
  * c_l = 0.42 * C_mu^{-3/4}

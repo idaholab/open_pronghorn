@@ -9,6 +9,10 @@
 
 #include "TurbulenceMethods.h"
 #include "SystemBase.h"
+#include "kEpsilonTwoLayerFunctorMaterial.h"
+#include "LinearFVFluxKernel.h"
+#include "LinearFVTimeDerivative.h"
+#include "TheWarehouse.h"
 
 namespace NS
 {
@@ -416,6 +420,42 @@ computeCurvatureFactor(const CurvatureCorrectionModel model, const StrainRotatio
   const Real f_c = std::min(Cmax, 1.0 + f_rot);
 
   return f_c;
+}
+
+std::vector<const MooseObject *>
+getTransportKernels(const FEProblemBase & problem,
+                    unsigned int sys_num,
+                    unsigned int var_num,
+                    THREAD_ID tid)
+{
+  std::vector<LinearFVFluxKernel *> flux;
+  std::vector<LinearFVElementalKernel *> elemental;
+  auto query = problem.theWarehouse()
+                   .query()
+                   .condition<AttribSysNum>(sys_num)
+                   .condition<AttribVar>(static_cast<int>(var_num))
+                   .condition<AttribThread>(tid);
+  query.clone().condition<AttribSystem>("LinearFVFluxKernel").queryInto(flux);
+  query.clone().condition<AttribSystem>("LinearFVElementalKernel").queryInto(elemental);
+
+  std::vector<const MooseObject *> kernels(flux.begin(), flux.end());
+  for (const auto kernel : elemental)
+    if (dynamic_cast<const LinearFVTimeDerivative *>(kernel))
+      kernels.push_back(kernel);
+  return kernels;
+}
+
+bool
+isTwoLayerOutput(const FEProblemBase & problem,
+                 const std::string & output,
+                 const std::string & name,
+                 THREAD_ID tid)
+{
+  for (const auto & mat : problem.getMaterialWarehouse().getObjects(tid))
+    if (dynamic_cast<const kEpsilonTwoLayerFunctorMaterial *>(mat.get()) &&
+        mat->getParam<MooseFunctorName>(output) == name)
+      return true;
+  return false;
 }
 
 } // namespace NS
