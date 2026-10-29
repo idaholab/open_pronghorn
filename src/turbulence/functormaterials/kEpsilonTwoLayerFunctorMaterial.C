@@ -28,10 +28,9 @@ kEpsilonTwoLayerFunctorMaterial::validParams()
   params.addParam<Real>("C_mu", 0.09, "Turbulent kinetic energy closure constant C_mu.");
 
   MooseEnum two_layer_flavor("Wolfstein NorrisReynolds Xu", "Wolfstein");
-  params.addParam<MooseEnum>(
-      "two_layer_flavor",
-      two_layer_flavor,
-      "Two-layer formulation to use (Wolfstein, NorrisReynolds, Xu).");
+  params.addParam<MooseEnum>("two_layer_flavor",
+                             two_layer_flavor,
+                             "Two-layer formulation to use (Wolfstein, NorrisReynolds, Xu).");
 
   params.addParam<Real>("Rey_star",
                         60.0,
@@ -41,9 +40,8 @@ kEpsilonTwoLayerFunctorMaterial::validParams()
 
   params.addParam<MooseFunctorName>(
       "two_layer_lambda", "two_layer_lambda", "Name of the blending factor functor (0..1).");
-  params.addParam<MooseFunctorName>("two_layer_epsilon",
-                                    "two_layer_epsilon",
-                                    "Name of the algebraic near-wall epsilon functor.");
+  params.addParam<MooseFunctorName>(
+      "two_layer_epsilon", "two_layer_epsilon", "Name of the algebraic near-wall epsilon functor.");
   params.addParam<MooseFunctorName>("two_layer_mu_t",
                                     "two_layer_mu_t",
                                     "Name of the algebraic near-wall turbulent viscosity functor.");
@@ -71,12 +69,10 @@ kEpsilonTwoLayerFunctorMaterial::kEpsilonTwoLayerFunctorMaterial(const InputPara
     return std::make_pair(Red, NS::twoLayerLengths(_flavor, _C_mu, d, Red, nu, k));
   };
 
-  addFunctorProperty<Real>("two_layer_lambda",
-                           [this, lengths](const auto & r, const auto & t)
-                           {
-                             return NS::twoLayerBlendingFactor(
-                                 lengths(r, t).first, _Rey_star, _DeltaRey);
-                           });
+  addFunctorProperty<Real>(
+      "two_layer_lambda",
+      [this, lengths](const auto & r, const auto & t)
+      { return NS::twoLayerBlendingFactor(lengths(r, t).first, _Rey_star, _DeltaRey); });
 
   addFunctorProperty<Real>("two_layer_epsilon",
                            [this, lengths](const auto & r, const auto & t)
