@@ -53,7 +53,7 @@ twoLayerWolfstein(const Real Cmu, const Real d, const Real Re_d)
   const Real cl = cl_from_Cmu(Cmu);
   TwoLayerLengths out;
   out.l_eps = cl * d * (1.0 - std::exp(-Re_d / (2.0 * cl)));
-  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) * (1.0 - std::exp(-Re_d / 70.0));
+  out.mu_ratio = 0.42 * Re_d * std::pow(Cmu, 0.25) * (1.0 - std::exp(-Re_d / 70.0));
   return out;
 }
 
@@ -63,7 +63,7 @@ twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d)
   const Real cl = cl_from_Cmu(Cmu);
   TwoLayerLengths out;
   out.l_eps = cl * d * Re_d / (Re_d + 5.3);
-  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) * (1.0 - std::exp(-Re_d / 50.5));
+  out.mu_ratio = 0.42 * Re_d * std::pow(Cmu, 0.25) * (1.0 - std::exp(-Re_d / 50.5));
   return out;
 }
 
@@ -74,6 +74,46 @@ twoLayerXu(const Real /*Cmu*/, const Real d, const Real /*Re_d*/, const Real yv_
   out.l_eps = 8.8 * d / (1.0 + 10.0 / yv_star + 5.15e-2 * yv_star);
   out.mu_ratio = 0.544 * yv_star / (1.0 + 5.025e-4 * std::pow(yv_star, 1.65));
   return out;
+}
+
+TwoLayerLengths
+twoLayerLengths(const TwoLayerFlavor flavor,
+                const Real Cmu,
+                const Real d,
+                const Real Re_d,
+                const Real nu,
+                const Real k)
+{
+  switch (flavor)
+  {
+    case TwoLayerFlavor::Wolfstein:
+      return twoLayerWolfstein(Cmu, d, Re_d);
+    case TwoLayerFlavor::NorrisReynolds:
+      return twoLayerNorrisReynolds(Cmu, d, Re_d);
+    case TwoLayerFlavor::Xu:
+      return twoLayerXu(Cmu, d, Re_d, Re_d * nu / std::max(k, 1e-20));
+  }
+  mooseError("Unknown two-layer flavor.");
+}
+
+Real
+twoLayerBlendingFactor(const Real Re_d, const Real Rey_star, const Real DeltaRey)
+{
+  const Real A = std::abs(DeltaRey / std::atanh(0.98));
+  return 0.5 * (1.0 + std::tanh((Re_d - Rey_star) / A));
+}
+
+// Used later in the Blended Kernels for the two layer treatment. Recovers
+// the standard wall function behavior when lambda is null.
+Real
+turbulentBlendWeight(const Moose::ElemArg & elem_arg,
+                     const std::unordered_set<const Elem *> & wall_bounded,
+                     const Moose::Functor<Real> * lambda,
+                     const Moose::StateArg & state)
+{
+  if (wall_bounded.count(elem_arg.elem))
+    return 0.0;
+  return lambda ? (*lambda)(elem_arg, state) : 1.0;
 }
 
 Real
