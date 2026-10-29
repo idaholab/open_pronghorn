@@ -48,6 +48,23 @@ K_EPSILON_VARIANTS = [
 # Low-Re Gprime toggle
 USE_LOW_RE_GPRIME_OPTIONS = [False, True]
 
+
+# Two-layer variants take lambda, the algebraic epsilon and the algebraic mu_t from the
+# kEpsilonTwoLayerFunctorMaterial [FunctorMaterials/two_layer] block of the input, and
+# require every epsilon transport kernel to be blended by the same lambda.
+TWO_LAYER_ARGS = [
+    "LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection",
+    "LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion",
+    "LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion",
+    "LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda",
+    "LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda",
+    "LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda",
+    "LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda",
+    "LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon",
+    "AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda",
+    "AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t",
+]
+
 # Base info
 BASE_INPUT_FILE = "lid-driven.i"
 BASE_REQUIREMENT = (
@@ -154,6 +171,9 @@ def make_cli_args(p, file_base: str) -> str:
     args.append(
         f"LinearFVKernels/TKED_source_sink/use_low_re_Gprime={bool_to_moose(enable_gprime)}"
     )
+
+    if "TwoLayer" in p["variant"]:
+        args.extend(TWO_LAYER_ARGS)
 
     # Set output base
     args.append(f"Outputs/file_base={file_base}")
