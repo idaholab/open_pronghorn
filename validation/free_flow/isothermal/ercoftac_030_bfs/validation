@@ -57,7 +57,7 @@
     rel_err = 1e-4
     abs_zero = 1e-6
     # Correct base file
-    cli_args = 'Outputs/file_base=k_epsilon_realizable_two_layer k_epsilon_variant=RealizableTwoLayer'
+    cli_args = 'Outputs/file_base=k_epsilon_realizable_two_layer k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t'
   []
   [bfs_030_realizable_quadratic]
     type = CSVDiff
