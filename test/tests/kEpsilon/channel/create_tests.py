@@ -46,6 +46,23 @@ NONLINEAR_MODELS = [
 
 USE_YAP_OPTIONS = [False, True]
 
+
+# Two-layer variants take lambda, the algebraic epsilon and the algebraic mu_t from the
+# kEpsilonTwoLayerFunctorMaterial [FunctorMaterials/two_layer] block of the input, and
+# require every epsilon transport kernel to be blended by the same lambda.
+TWO_LAYER_ARGS = [
+    "LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection",
+    "LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion",
+    "LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion",
+    "LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda",
+    "LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda",
+    "LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda",
+    "LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda",
+    "LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon",
+    "AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda",
+    "AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t",
+]
+
 BASE_TEST_NAME_PREFIX = "channel_ERCOFTAC"
 BASE_INPUT_FILE = "channel_ERCOFTAC.i"
 BASE_REQUIREMENT = (
@@ -221,9 +238,11 @@ def make_cli_args(p, file_base: str) -> str:
             f"LinearFVKernels/TKED_source_sink/nonlinear_model={nonlinear_model}"
         )
 
-    # Two-layer flavor only applies to *TwoLayer variants (viscosity blending)
-    if two_layer_flavor is not None and "TwoLayer" in variant:
-        args.append(f"AuxKernels/compute_mu_t/two_layer_flavor={two_layer_flavor}")
+    # Two-layer flavor only applies to *TwoLayer variants, through the two-layer functor material
+    if "TwoLayer" in variant:
+        if two_layer_flavor is not None:
+            args.append(f"FunctorMaterials/two_layer/two_layer_flavor={two_layer_flavor}")
+        args.extend(TWO_LAYER_ARGS)
 
     # Yap correction is only supported for StandardTwoLayer, StandardLowRe, RealizableTwoLayer
     yap_supported = variant in (

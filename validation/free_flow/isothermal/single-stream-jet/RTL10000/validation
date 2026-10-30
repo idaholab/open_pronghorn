@@ -16,6 +16,7 @@
 
     # CSVDiff tolerance for direct file comparison to gold
     rel_err = 3e-2
-    # Gold data generated from converged SIMPLE solution after 1500 iterations.
+    # Gold data generated from converged SIMPLE solution after 3000 iterations
+    # (far field still drifts up to ~9% between 1500 and 3000; <0.6% between 3000 and 6000).
   []
 []

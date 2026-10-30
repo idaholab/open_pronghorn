@@ -403,6 +403,18 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
 []
 
+[FunctorMaterials]
+  # Only evaluated by the two-layer variants (see tests)
+  [two_layer]
+    type = kEpsilonTwoLayerFunctorMaterial
+    tke = TKE
+    rho = ${rho}
+    mu = ${mu}
+    C_mu = ${C_mu}
+    wall_distance = wall_distance
+  []
+[]
+
 [Executioner]
   type = SIMPLE
 

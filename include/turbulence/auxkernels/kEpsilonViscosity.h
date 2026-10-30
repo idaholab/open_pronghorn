@@ -83,9 +83,6 @@ protected:
   /// Selected k-epsilon model variant
   const NS::KEpsilonVariant _variant;
 
-  /// Selected two-layer flavour (Wolfstein / Norris-Reynolds / Xu)
-  const NS::TwoLayerFlavor _two_layer_flavor;
-
   /// Low-Re f_mu coefficients (SKE LRe)
   const Real _Cd0;
   const Real _Cd1;
@@ -105,6 +102,12 @@ protected:
 
   /// Whether wall distance is available
   const bool _has_wall_distance;
+
+  /// Two-layer wall-proximity blending factor lambda (two-layer variants only)
+  const Moose::Functor<Real> * _two_layer_lambda;
+
+  /// Two-layer algebraic near-wall turbulent viscosity (two-layer variants only)
+  const Moose::Functor<Real> * _two_layer_mu_t;
 
   ///@{
   /// Maps for wall bounded elements (used only for bulk_wall_treatment)

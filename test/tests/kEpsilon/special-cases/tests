@@ -32,7 +32,7 @@
     recover = false
     max_threads = 1
     heavy = false
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel using low-Reynolds number production corrections.'
+    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel using the StandardLowRe variant with the low-Reynolds number production correction (G prime).'
   []
   [lid-driven-curvature-corrected]
     type = 'CSVDiff'

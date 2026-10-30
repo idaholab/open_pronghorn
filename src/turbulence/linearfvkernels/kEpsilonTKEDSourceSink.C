@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "NavierStokesMethods.h"
+#include "LinearFVTurbulentBlended.h"
 
 registerMooseObject("OpenPronghornApp", kEpsilonTKEDSourceSink);
 
@@ -91,6 +92,15 @@ kEpsilonTKEDSourceSink::validParams()
   params.addParam<MooseFunctorName>(
       "wall_distance", "Distance to the closest wall; used for Yap and low-Re corrections.");
 
+  // Two-layer quantities, provided by a kEpsilonTwoLayerFunctorMaterial
+  params.addParam<MooseFunctorName>(
+      "two_layer_lambda",
+      "Wall-proximity blending factor lambda (0 = viscosity affected, 1 = fully turbulent); "
+      "required for two-layer variants.");
+  params.addParam<MooseFunctorName>(
+      "two_layer_epsilon",
+      "Algebraic (damped) near-wall epsilon; required for two-layer variants.");
+
   MooseEnum nonlinear_model("none quadratic cubic", "none");
   params.addParam<MooseEnum>("nonlinear_model",
                              nonlinear_model,
@@ -128,6 +138,8 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _Cw(getParam<Real>("Cw")),
     _C_pl(getParam<Real>("C_pl")),
     _variant(getParam<MooseEnum>("k_epsilon_variant").getEnum<NS::KEpsilonVariant>()),
+    _two_layer(_variant == NS::KEpsilonVariant::StandardTwoLayer ||
+               _variant == NS::KEpsilonVariant::RealizableTwoLayer),
     _switches{/*use_buoyancy*/ getParam<bool>("use_buoyancy"),
               /*use_compressibility*/ getParam<bool>("use_compressibility"),
               /*use_yap*/ getParam<bool>("use_yap"),
@@ -143,6 +155,12 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
                                                      : nullptr),
     _wall_distance_functor(
         params.isParamValid("wall_distance") ? &(getFunctor<Real>("wall_distance")) : nullptr),
+    _two_layer_lambda(params.isParamValid("two_layer_lambda")
+                          ? &(getFunctor<Real>("two_layer_lambda"))
+                          : nullptr),
+    _two_layer_epsilon(params.isParamValid("two_layer_epsilon")
+                           ? &(getFunctor<Real>("two_layer_epsilon"))
+                           : nullptr),
     _has_T(params.isParamValid("temperature")),
     _has_beta(params.isParamValid("beta")),
     _has_c(params.isParamValid("speed_of_sound")),
@@ -158,8 +176,7 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
 
   // Additional constructor error checks (variant/option consistency)
 
-  const bool is_two_layer = (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
-                             _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+  const bool is_two_layer = _two_layer;
 
   const bool is_low_re = (_variant == NS::KEpsilonVariant::StandardLowRe);
 
@@ -174,6 +191,27 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
   if ((is_two_layer || is_low_re) && !_has_wall_distance)
     paramError("wall_distance",
                "The selected k_epsilon_variant requires 'wall_distance' (two-layer or low-Re).");
+
+  if (is_two_layer)
+  {
+    if (!_two_layer_lambda)
+      paramError("two_layer_lambda",
+                 "Two-layer variants require the 'two_layer_lambda' functor "
+                 "(see kEpsilonTwoLayerFunctorMaterial).");
+    if (!_two_layer_epsilon)
+      paramError("two_layer_epsilon",
+                 "Two-layer variants require the 'two_layer_epsilon' functor "
+                 "(see kEpsilonTwoLayerFunctorMaterial).");
+  }
+  else
+  {
+    if (user_set("two_layer_lambda"))
+      paramError("two_layer_lambda",
+                 "Parameter 'two_layer_lambda' is only applicable to two-layer variants.");
+    if (user_set("two_layer_epsilon"))
+      paramError("two_layer_epsilon",
+                 "Parameter 'two_layer_epsilon' is only applicable to two-layer variants.");
+  }
 
   if (_switches.use_yap && !_has_wall_distance)
     paramError("wall_distance", "'use_yap=true' requires the 'wall_distance' functor.");
@@ -260,6 +298,69 @@ kEpsilonTKEDSourceSink::initialSetup()
       _wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _wall_bounded);
   NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _dist);
   NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _face_infos);
+
+  if (_two_layer)
+  {
+    for (const auto & output : {"two_layer_lambda", "two_layer_epsilon"})
+      if (!NS::isTwoLayerOutput(_fe_problem, output, getParam<MooseFunctorName>(output), _tid))
+        paramError(output, "Must be the '", output, "' of a kEpsilonTwoLayerFunctorMaterial.");
+    checkTwoLayerTransportKernels();
+  }
+  else
+    for (const auto kernel : NS::getTransportKernels(_fe_problem, _sys_num, _var_num, _tid))
+      if (const auto b = dynamic_cast<const LinearFVTurbulentBlendedInterface *>(kernel);
+          b && b->blendingFactorName())
+        kernel->paramError(
+            "blending_factor", "Only applicable to two-layer variants of '", name(), "'.");
+}
+
+void
+kEpsilonTKEDSourceSink::checkTwoLayerTransportKernels() const
+{
+  // In two-layer variants the epsilon row is lambda-blended with the algebraic epsilon, so every
+  // transport kernel of epsilon must scale its rows by the same lambda. A plain kernel, or a
+  // blended one without a blending factor, keeps the full transport in the viscosity-affected
+  // region and silently breaks the blending.
+  const auto & lambda_name = getParam<MooseFunctorName>("two_layer_lambda");
+
+  const auto check_kernel = [&](const MooseObject & kernel)
+  {
+    const auto blended = dynamic_cast<const LinearFVTurbulentBlendedInterface *>(&kernel);
+    if (!blended)
+      mooseError("Kernel '",
+                 kernel.name(),
+                 "' (",
+                 kernel.type(),
+                 ") acts on '",
+                 _var.name(),
+                 "' but is not a blended turbulence kernel. Two-layer variants require "
+                 "'LinearFVTurbulentBlendedAdvection', 'LinearFVTurbulentBlendedDiffusion' and "
+                 "'LinearFVTurbulentBlendedTimeDerivative' for epsilon, with "
+                 "'blending_factor = ",
+                 lambda_name,
+                 "'.");
+    if (!blended->blendingFactorName())
+      kernel.paramError("blending_factor",
+                        "Two-layer variants require 'blending_factor' on every epsilon transport "
+                        "kernel. Set it to the 'two_layer_lambda' functor of '",
+                        name(),
+                        "' ('",
+                        lambda_name,
+                        "').");
+    if (*blended->blendingFactorName() != lambda_name)
+      kernel.paramError("blending_factor",
+                        "The blending factor '",
+                        *blended->blendingFactorName(),
+                        "' differs from the 'two_layer_lambda' functor '",
+                        lambda_name,
+                        "' of '",
+                        name(),
+                        "'. The epsilon transport and source rows will be blended "
+                        "inconsistently.");
+  };
+
+  for (const auto kernel : NS::getTransportKernels(_fe_problem, _sys_num, _var_num, _tid))
+    check_kernel(*kernel);
 }
 
 Real
@@ -270,41 +371,83 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
   const Elem * elem = _current_elem_info->elem();
 
   // ---------------------------------------------------------------------------
-  // Two-layer epsilon: algebraic epsilon in the internal near-wall region
+  // Two-layer: lambda-blend the epsilon equation with the algebraic epsilon in all cells.
+  //   row = lambda * (bulk equation) + (1 - lambda) * a_alg * (eps - eps_alg)
+  // The transport kernels apply the same lambda to their rows. In wall-bounded cells their
+  // weight is 0, so there epsilon is imposed as lambda * eps_wall + (1 - lambda) * eps_alg
+  // (unit coefficient, see the classic branch below). lambda -> 1 recovers the wall function
+  // of the high-Re variants, lambda -> 0 the algebraic two-layer epsilon.
   // ---------------------------------------------------------------------------
-  if ((_variant == NS::KEpsilonVariant::StandardTwoLayer ||
-       _variant == NS::KEpsilonVariant::RealizableTwoLayer) &&
-      _has_wall_distance)
+  if (_two_layer)
   {
-    const Real rho = _rho(elem_arg, state);
-    const Real mu = _mu(elem_arg, state);
-    const Real nu = mu / rho;
-    const Real k = _k(elem_arg, state);
-    const Real d = (*_wall_distance_functor)(elem_arg, state);
+    if (_wall_bounded.find(elem) != _wall_bounded.end())
+      return 1.0;
 
-    const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
-
-    // Same wall-distance Reynolds threshold used in the two-layer μ_t blending
-    const Real Rey_star = 60.0; // if you change this in kEpsilonViscosity, change it here too
-
-    // Viscosity-dominated two-layer region: impose epsilon algebraically
-    if (Red <= Rey_star)
-      // Matrix coefficient = 1, but in FV we multiply by the cell volume
-      return _current_elem_volume;
+    const Real lambda = (*_two_layer_lambda)(elem_arg, state);
+    return (lambda * computeBulkDestructionCoeff(elem_arg, state) +
+            (1.0 - lambda) * computeAlgebraicCoeff(elem_arg, state)) *
+           _current_elem_volume;
   }
 
   // ---------------------------------------------------------------------------
   // Classic near-wall: algebraic epsilon only in wall-bounded cells
-  // (used for non two-layer variants)
   // ---------------------------------------------------------------------------
-  if (_wall_bounded.find(elem) != _wall_bounded.end() &&
-      !(_variant == NS::KEpsilonVariant::StandardTwoLayer ||
-        _variant == NS::KEpsilonVariant::RealizableTwoLayer))
-    return _current_elem_volume;
+  // The coefficient is deliberately 1 rather than the cell volume, matching
+  // LinearFVTKEDSourceSink. Advection and diffusion skip wall-bounded rows, but the time
+  // derivative still adds rho V / dt; a unit coefficient keeps that negligible for small
+  // near-wall cells so the wall-function epsilon is effectively imposed. Scaling by V would
+  // make both terms O(V) and pin epsilon to its old value instead.
+  if (_wall_bounded.find(elem) != _wall_bounded.end())
+    return 1.0;
 
-  // ---------------------------------------------------------------------------
-  // Bulk: implicit destruction term C2_eps f2 rho / T_e
-  // ---------------------------------------------------------------------------
+  return computeBulkDestructionCoeff(elem_arg, state) * _current_elem_volume;
+}
+
+Real
+kEpsilonTKEDSourceSink::computeRightHandSideContribution()
+{
+  const auto state = determineState();
+  const auto elem_arg = makeElemArg(_current_elem_info->elem());
+  const Elem * elem = _current_elem_info->elem();
+
+  // Two-layer: see computeMatrixContribution()
+  if (_two_layer)
+  {
+    const Real lambda = (*_two_layer_lambda)(elem_arg, state);
+    const Real eps_alg = (*_two_layer_epsilon)(elem_arg, state);
+
+    // Wall-bounded: blended wall-function / algebraic epsilon, not volume-scaled
+    if (_wall_bounded.find(elem) != _wall_bounded.end())
+      return lambda * computeWallEpsilon(elem_arg, state) + (1.0 - lambda) * eps_alg;
+
+    return (lambda * computeBulkProductionRHS(elem_arg, state) +
+            (1.0 - lambda) * computeAlgebraicCoeff(elem_arg, state) * eps_alg) *
+           _current_elem_volume;
+  }
+
+  // Classic near-wall: not volume-scaled, consistent with the unit matrix coefficient
+  if (_wall_bounded.find(elem) != _wall_bounded.end())
+    return computeWallEpsilon(elem_arg, state);
+
+  return computeBulkProductionRHS(elem_arg, state) * _current_elem_volume;
+}
+
+Real
+kEpsilonTKEDSourceSink::computeAlgebraicCoeff(const Moose::ElemArg & elem_arg,
+                                              const Moose::StateArg & state) const
+{
+  // a_alg = rho eps_alg / k = rho sqrt(k) / l_eps, i.e. the inverse of the time scale of the
+  // algebraic relaxation, which keeps the algebraic row of the same magnitude as the equation
+  const Real k = _k(elem_arg, state);
+  const Real eps_alg = (*_two_layer_epsilon)(elem_arg, state);
+  return _rho(elem_arg, state) * eps_alg / std::max(k, 1e-20);
+}
+
+Real
+kEpsilonTKEDSourceSink::computeBulkDestructionCoeff(const Moose::ElemArg & elem_arg,
+                                                    const Moose::StateArg & state)
+{
+  // Implicit destruction term C2_eps f2 rho / T_e (per unit volume)
   const Real rho = _rho(elem_arg, state);
   const Real Te = computeTimeScale(elem_arg, state);
 
@@ -322,66 +465,17 @@ kEpsilonTKEDSourceSink::computeMatrixContribution()
            _variant == NS::KEpsilonVariant::RealizableTwoLayer)
     f2 = NS::f2_RKE(k, nu, eps);
 
-  const Real destruction_coeff = _C2_eps * f2 * rho / std::max(Te, 1e-20);
-  return destruction_coeff * _current_elem_volume;
+  return _C2_eps * f2 * rho / std::max(Te, 1e-20);
 }
 
 Real
-kEpsilonTKEDSourceSink::computeRightHandSideContribution()
+kEpsilonTKEDSourceSink::computeBulkProductionRHS(const Moose::ElemArg & elem_arg,
+                                                 const Moose::StateArg & state)
 {
-  const auto state = determineState();
-  const auto elem_arg = makeElemArg(_current_elem_info->elem());
-  const Elem * elem = _current_elem_info->elem();
-
-  // ---------------------------------------------------------------------------
-  // Two-layer epsilon: algebraic epsilon in the internal near-wall region
-  // ---------------------------------------------------------------------------
-  if ((_variant == NS::KEpsilonVariant::StandardTwoLayer ||
-       _variant == NS::KEpsilonVariant::RealizableTwoLayer) &&
-      _has_wall_distance)
-  {
-    const Real rho = _rho(elem_arg, state);
-    const Real mu = _mu(elem_arg, state);
-    const Real nu = mu / rho;
-    const Real k = _k(elem_arg, state);
-    const Real d = (*_wall_distance_functor)(elem_arg, state);
-
-    const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
-
-    const Real Rey_star = 60.0; // must match the value used in computeMatrixContribution
-
-    if (Red <= Rey_star)
-    {
-      // Algebraic two-layer epsilon:
-      //   epsilon_2L ≈ C_mu^(3/4) k^(3/2) / (kappa * d)
-      // This follows the structure of Eq. (1073): epsilon ∝ k^(3/2)/l_eps.
-      const Real eps_2layer =
-          std::pow(_C_mu, 0.75) * std::pow(k, 1.5) / (NS::von_karman_constant * std::max(d, 1e-12));
-
-      return eps_2layer * _current_elem_volume;
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Classic near-wall: algebraic epsilon only in wall-bounded cells
-  // (used for non two-layer variants)
-  // ---------------------------------------------------------------------------
-  if (_wall_bounded.find(elem) != _wall_bounded.end() &&
-      !(_variant == NS::KEpsilonVariant::StandardTwoLayer ||
-        _variant == NS::KEpsilonVariant::RealizableTwoLayer))
-  {
-    const Real eps_wall = computeWallEpsilon(elem_arg, state);
-    return eps_wall * _current_elem_volume;
-  }
-
-  // ---------------------------------------------------------------------------
-  // Bulk: production term C1_eps * Pe / T_e
-  // ---------------------------------------------------------------------------
+  // Production term C1_eps * Pe / T_e (per unit volume)
   const Real Pe = computeBulkPe(elem_arg, state);
   const Real Te = computeTimeScale(elem_arg, state);
-
-  const Real production_eps = _C1_eps * Pe / std::max(Te, 1e-20);
-  return production_eps * _current_elem_volume;
+  return _C1_eps * Pe / std::max(Te, 1e-20);
 }
 
 Real
@@ -571,13 +665,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     case NS::KEpsilonVariant::Standard:
     {
       // Match old LinearFVTKEDSourceSink for Standard:
-      // - Gk = mu_t S2
-      // - apply C_pl limiter on Gk (production)
-      const Real production_limit = _C_pl * rho * eps;
-      const Real Gk_limited = std::min(Gk, production_limit);
-
-      // Legacy Standard model had no Gb/Gnl/etc., but we allow them if enabled.
-      Pe = Gk_limited + Gnl + C3_eps_local * Gb;
+      Pe = Gk + Gnl + C3_eps_local * Gb;
       break;
     }
 
@@ -592,7 +680,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
       break;
 
     case NS::KEpsilonVariant::Realizable:
-      // Realizable: Pe = f_c S_k + C3_eps Gb  (Eq. 1058)
+      // Realizable: Pe = f_c S_k + C3_eps Gb
       Pe = fc * Sk + C3_eps_local * Gb;
       break;
 
