@@ -241,7 +241,9 @@ def make_cli_args(p, file_base: str) -> str:
     # Two-layer flavor only applies to *TwoLayer variants, through the two-layer functor material
     if "TwoLayer" in variant:
         if two_layer_flavor is not None:
-            args.append(f"FunctorMaterials/two_layer/two_layer_flavor={two_layer_flavor}")
+            args.append(
+                f"FunctorMaterials/two_layer/two_layer_flavor={two_layer_flavor}"
+            )
         args.extend(TWO_LAYER_ARGS)
 
     # Yap correction is only supported for StandardTwoLayer, StandardLowRe, RealizableTwoLayer
