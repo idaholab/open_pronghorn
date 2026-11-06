@@ -87,7 +87,7 @@ advected_interp_method = 'average'
     boundary_name_prefix = 'ent'
   []
   [smg]
-    type = StitchedMeshGenerator
+    type = StitchMeshGenerator
     inputs = 'entrance fluid_channel solid_base'
     stitch_boundaries_pairs = 'ent_right fluid_left;
                               fluid_bottom solid_top'
