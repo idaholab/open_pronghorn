@@ -60,6 +60,7 @@
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using StandardTwoLayer variant.'
+    min_slots = 2 # 384 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
   []
   [lid-driven_k_epsilon_standardtwolayer_lowreGprime]
     type = 'CSVDiff'
@@ -72,6 +73,7 @@
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=StandardTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_standardtwolayer_lowreGprime'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using StandardTwoLayer variant and Low-Re Gprime correction.'
+    min_slots = 2 # 383 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
   []
   [lid-driven_k_epsilon_realizable]
     type = 'CSVDiff'
@@ -84,6 +86,7 @@
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizable'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using Realizable variant.'
+    min_slots = 2 # 384 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
   []
   [lid-driven_k_epsilon_realizable_lowreGprime]
     type = 'CSVDiff'
@@ -108,6 +111,7 @@
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using RealizableTwoLayer variant.'
+    min_slots = 2 # 383 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
   []
   [lid-driven_k_epsilon_realizabletwolayer_lowreGprime]
     type = 'CSVDiff'
@@ -120,5 +124,6 @@
     heavy = false
     cli_args = 'AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/use_low_re_Gprime=false Outputs/file_base=lid-driven_k_epsilon_realizabletwolayer_lowreGprime'
     requirement = 'The system shall be able to solve turbulent lid-driven cavity flow using the k-epsilon turbulence model and reach converged results with segregated solvers using RealizableTwoLayer variant and Low-Re Gprime correction.'
+    min_slots = 2 # 384 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
   []
 []
