@@ -61,7 +61,7 @@ use_low_re_Gprime   = false
     ymin = 0
     ymax = ${H}
     nx = 10
-    ny = 5
+    ny = 8
     bias_y = 0.7
   []
   [block_2]
@@ -72,7 +72,7 @@ use_low_re_Gprime   = false
     ymin = ${fparse -H}
     ymax = 0
     nx = 10
-    ny = 5
+    ny = 8
     bias_y = ${fparse 1/0.7}
   []
   [smg]
@@ -275,25 +275,28 @@ use_low_re_Gprime   = false
   []
 
   [TKED_advection]
-    type = LinearFVTurbulentAdvection
+    type = LinearFVTurbulentBlendedAdvection
     variable = TKED
     advected_interp_method_name = ${advected_interp_method}
     walls = ${walls}
+    blending_factor = two_layer_lambda
   []
   [TKED_diffusion]
-    type = LinearFVTurbulentDiffusion
+    type = LinearFVTurbulentBlendedDiffusion
     variable = TKED
     diffusion_coeff = ${mu}
     use_nonorthogonal_correction = false
     walls = ${walls}
+    blending_factor = two_layer_lambda
   []
   [TKED_turb_diffusion]
-    type = LinearFVTurbulentDiffusion
+    type = LinearFVTurbulentBlendedDiffusion
     variable = TKED
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_eps}
     use_nonorthogonal_correction = false
     walls = ${walls}
+    blending_factor = two_layer_lambda
   []
   [TKED_source_sink]
     type = kEpsilonTKEDSourceSink
@@ -331,6 +334,8 @@ use_low_re_Gprime   = false
     # nonlinear_production = Gnl
     # curvature_factor  = fc
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
+    two_layer_lambda  = two_layer_lambda
+    two_layer_epsilon = two_layer_epsilon
   []
 
   [heat_advection]
@@ -375,6 +380,16 @@ use_low_re_Gprime   = false
     boundary = 'top bottom'
     variable = vel_y
     functor = 0.0
+  []
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
+    boundary = 'top bottom'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    rho = ${rho_0}
+    u = vel_x
+    v = vel_y
   []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -487,7 +502,8 @@ use_low_re_Gprime   = false
 
     # NEW (optional) – choose model and options
     k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
-    two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
+    two_layer_lambda  = two_layer_lambda
+    two_layer_mu_t    = two_layer_mu_t
     wall_distance = wall_distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_y_plus]
@@ -505,6 +521,17 @@ use_low_re_Gprime   = false
 []
 
 [FunctorMaterials]
+  [two_layer]
+    type = kEpsilonTwoLayerFunctorMaterial
+    tke = TKE
+    rho = 'rho_functor'
+    mu = ${mu}
+    C_mu = ${C_mu}
+    wall_distance = wall_distance
+    two_layer_flavor = ${two_layer_flavor}
+    Rey_star = 60
+    DeltaRey = 10
+  []
   [rho_function]
     type = ParsedFunctorMaterial
     property_name = 'rho_functor'

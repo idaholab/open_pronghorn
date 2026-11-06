@@ -38,8 +38,8 @@ walls = 'bottom top'
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 # Turbulence-model knobs (optional)
-k_epsilon_variant   = 'RealizableTwoLayer'    # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-two_layer_flavor    = 'Wolfstein'             # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+k_epsilon_variant   = 'StandardLowRe'         # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
+use_low_re_Gprime   = true                    # low-Re production G' (StandardLowRe only)
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
@@ -281,6 +281,7 @@ use_yap             = false
     nonlinear_model     = ${nonlinear_model}
     curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
+    use_low_re_Gprime   = ${use_low_re_Gprime}
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
   []
 []
@@ -408,7 +409,6 @@ use_yap             = false
 
     # NEW (optional) – choose model and options
     k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
-    two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
     wall_distance = wall_distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_y_plus]

@@ -56,11 +56,14 @@ kEpsilonViscosity::validParams()
   params.addParam<MooseEnum>(
       "k_epsilon_variant", k_eps_variant, "k-epsilon model variant used for viscosity.");
 
-  MooseEnum two_layer_flavor("Wolfstein NorrisReynolds Xu", "Wolfstein");
-  params.addParam<MooseEnum>(
-      "two_layer_flavor",
-      two_layer_flavor,
-      "Two-layer formulation to use for 2L variants (Wolfstein, NorrisReynolds, Xu).");
+  // Two-layer quantities, provided by a kEpsilonTwoLayerFunctorMaterial
+  params.addParam<MooseFunctorName>(
+      "two_layer_lambda",
+      "Wall-proximity blending factor lambda (0 = viscosity affected, 1 = fully turbulent); "
+      "required for two-layer variants.");
+  params.addParam<MooseFunctorName>(
+      "two_layer_mu_t",
+      "Algebraic near-wall turbulent viscosity; required for two-layer variants.");
 
   // Low-Re damping coefficients for f_mu (SKE LRe)
   params.addParam<Real>("Cd0",
@@ -117,7 +120,6 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _scale_limiter(getParam<MooseEnum>("scale_limiter")),
     _variant(getParam<MooseEnum>("k_epsilon_variant").getEnum<NS::KEpsilonVariant>()),
-    _two_layer_flavor(getParam<MooseEnum>("two_layer_flavor").getEnum<NS::TwoLayerFlavor>()),
     _Cd0(getParam<Real>("Cd0")),
     _Cd1(getParam<Real>("Cd1")),
     _Cd2(getParam<Real>("Cd2")),
@@ -128,24 +130,39 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
     _Ct(getParam<Real>("Ct")),
     _wall_distance_functor(
         params.isParamValid("wall_distance") ? &(getFunctor<Real>("wall_distance")) : nullptr),
-    _has_wall_distance(params.isParamValid("wall_distance"))
+    _has_wall_distance(params.isParamValid("wall_distance")),
+    _two_layer_lambda(params.isParamValid("two_layer_lambda")
+                          ? &(getFunctor<Real>("two_layer_lambda"))
+                          : nullptr),
+    _two_layer_mu_t(params.isParamValid("two_layer_mu_t") ? &(getFunctor<Real>("two_layer_mu_t"))
+                                                          : nullptr)
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
   if (_dim >= 3 && !_w_var)
     paramError("w", "In three dimensions, the w velocity must be supplied.");
 
-  // Ensure wall distance is available for variants that need it
-  if ((_variant == NS::KEpsilonVariant::StandardTwoLayer ||
-       _variant == NS::KEpsilonVariant::RealizableTwoLayer ||
-       _variant == NS::KEpsilonVariant::StandardLowRe) &&
-      !_has_wall_distance)
-    paramError("wall_distance", "The selected k-epsilon variant requires a wall_distance functor.");
-
   // Variant-specific parameter consistency checks
 
   const bool is_two_layer_variant = (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
                                      _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+
+  // Ensure wall distance is available for variants that need it
+  if (_variant == NS::KEpsilonVariant::StandardLowRe && !_has_wall_distance)
+    paramError("wall_distance", "The selected k-epsilon variant requires a wall_distance functor.");
+
+  // Two-layer variants take lambda and the algebraic mu_t from a kEpsilonTwoLayerFunctorMaterial
+  if (is_two_layer_variant)
+  {
+    if (!_two_layer_lambda)
+      paramError("two_layer_lambda",
+                 "Two-layer variants require the 'two_layer_lambda' functor "
+                 "(see kEpsilonTwoLayerFunctorMaterial).");
+    if (!_two_layer_mu_t)
+      paramError("two_layer_mu_t",
+                 "Two-layer variants require the 'two_layer_mu_t' functor "
+                 "(see kEpsilonTwoLayerFunctorMaterial).");
+  }
 
   const bool is_realizable_variant = (_variant == NS::KEpsilonVariant::Realizable ||
                                       _variant == NS::KEpsilonVariant::RealizableTwoLayer);
@@ -160,11 +177,16 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
       paramError(pname, msg);
   };
 
-  // ---- Two-layer flavor only makes sense for two-layer variants ----
+  // ---- Two-layer functors only make sense for two-layer variants ----
   check_param_applicability(
-      "two_layer_flavor",
+      "two_layer_lambda",
       is_two_layer_variant,
-      "Parameter 'two_layer_flavor' is only applicable when 'k_epsilon_variant' is "
+      "Parameter 'two_layer_lambda' is only applicable when 'k_epsilon_variant' is "
+      "'StandardTwoLayer' or 'RealizableTwoLayer'.");
+  check_param_applicability(
+      "two_layer_mu_t",
+      is_two_layer_variant,
+      "Parameter 'two_layer_mu_t' is only applicable when 'k_epsilon_variant' is "
       "'StandardTwoLayer' or 'RealizableTwoLayer'.");
 
   // ---- Low-Re damping coefficients only apply to StandardLowRe ----
@@ -230,6 +252,11 @@ kEpsilonViscosity::initialSetup()
     NS::getElementFaceArgs(
         _wall_boundary_names, _c_fe_problem, _subproblem, blockIDs(), _face_infos);
   }
+
+  if (_two_layer_lambda)
+    for (const auto & output : {"two_layer_lambda", "two_layer_mu_t"})
+      if (!NS::isTwoLayerOutput(_c_fe_problem, output, getParam<MooseFunctorName>(output), _tid))
+        paramError(output, "Must be the '", output, "' of a kEpsilonTwoLayerFunctorMaterial.");
 }
 
 Real
@@ -368,29 +395,9 @@ kEpsilonViscosity::computeValue()
     if (_variant == NS::KEpsilonVariant::StandardTwoLayer ||
         _variant == NS::KEpsilonVariant::RealizableTwoLayer)
     {
-      mooseAssert(_has_wall_distance, "Two-layer variants require wall_distance functor.");
-      const Real d = (*_wall_distance_functor)(elem_arg, state);
-      const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
-
-      // Two-layer mu ratio and epsilon length scale
-      NS::TwoLayerLengths tl;
-      if (_two_layer_flavor == NS::TwoLayerFlavor::Wolfstein)
-        tl = NS::twoLayerWolfstein(_C_mu, d, Red);
-      else if (_two_layer_flavor == NS::TwoLayerFlavor::NorrisReynolds)
-        tl = NS::twoLayerNorrisReynolds(_C_mu, d, Red);
-      else // Xu (natural convection)
-      {
-        const Real yv_star = Red * nu / std::max(k, 1e-20);
-        tl = NS::twoLayerXu(_C_mu, d, Red, yv_star);
-      }
-
-      const Real mu_2layer = tl.mu_ratio * mu;
-
-      // Wall-proximity indicator lambda (0..1)
-      const Real Rey_star = 60.0;
-      const Real DeltaRey = 10.0;
-      const Real A = std::abs(DeltaRey / std::atanh(0.98));
-      const Real lambda = 0.5 * (1.0 + std::tanh((Red - Rey_star) / A));
+      // Wall-proximity indicator lambda (0..1), shared with the epsilon equation
+      const Real lambda = (*_two_layer_lambda)(elem_arg, state);
+      const Real mu_2layer = (*_two_layer_mu_t)(elem_arg, state);
 
       mu_t = lambda * mu_t_ke + (1.0 - lambda) * mu_2layer;
     }
