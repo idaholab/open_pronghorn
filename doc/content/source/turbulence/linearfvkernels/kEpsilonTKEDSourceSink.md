@@ -70,7 +70,7 @@ These invariants are used to construct:
   \begin{equation}
   G_k = \mu_t S^2 \;\; (\text{plus compressible terms if enabled}),
   \end{equation}
-- the shear-based $\epsilon$-production term $S_k = \mu_t S^2$ for realizable variants (note that $G_k$ may be limited so a disctinction is made with the non-limited $S_k$),
+- the shear-based $\epsilon$-production term $S_k = \mu_t S^2$ for realizable variants,
 - the curvature correction factor $f_c$ (for realizable models when enabled),
 - the normalized strain/rotation quantities used by the nonlinear constitutive relations.
 
@@ -145,13 +145,15 @@ For the *Realizable* high-Re model, the $\epsilon$-production is written in term
 
 production $S_k$:
 \begin{equation}
-f_c S_k + C_{\epsilon3} G_b,
+\min\left(f_c S_k, C_\text{pl}\rho\epsilon\right) + C_{\epsilon3} G_b,
 \end{equation}
 
 where
 
 - $S_k = \mu_t S^2$ is the shear contribution,
 - $f_c$ is the curvature correction factor (if `curvature_model != none`),
+- $C_\text{pl}\rho\epsilon$ limits the corrected shear contribution consistently with the
+  k-equation production limiter,
 - $C_{\epsilon3} G_b$ is the buoyancy contribution.
 
 In realizable models the nonlinear constitutive relation affects the viscosity (via realizable
@@ -164,7 +166,8 @@ The *RealizableTwoLayer* model combines the realizable bulk behavior with a two-
 enhancement via Yap:
 
 \begin{equation}
-f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+\min\left(f_c S_k, C_\text{pl}\rho\epsilon\right)
++ C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
 \end{equation}
 
 with the same definitions of $S_k$, $f_c$, and $G_b$ as in the realizable model and the Yap
@@ -203,12 +206,15 @@ is applied multiplicatively to $S_k$ in the $\epsilon$-production:
 
 - `Realizable`:
   \begin{equation}
-  \text{Production} = f_c S_k + C_{\epsilon3} G_b,
+  \text{Production} =
+  \min\left(f_c S_k, C_\text{pl}\rho\epsilon\right) + C_{\epsilon3} G_b,
   \end{equation}
 
 - `RealizableTwoLayer`:
   \begin{equation}
-  \text{Production} = f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+  \text{Production} =
+  \min\left(f_c S_k, C_\text{pl}\rho\epsilon\right)
+  + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
   \end{equation}
 
 The same curvature model (e.g. `curvature_model = standard`) is used in both the k-equation and
