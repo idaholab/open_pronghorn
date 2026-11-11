@@ -15,7 +15,7 @@ This object implements:
 
 - Standard, Low-Re, Two-Layer, and Realizable viscosity formulations,
 - Several wall treatments (Newton, incremental, linearized, non-equilibrium),
-- Two-layer near-wall blending methods ([!cite](wolfstein1969velocity), [!cite](norris1975oneequation), [!cite](xu1998new)),
+- Two-layer near-wall blending methods ([!cite](wolfstein1969velocity), [!cite](norris1975oneequation)),
 - Low-Re damping functions for the StandardLowRe model,
 - Realizable variable $C_\mu$,
 - Optional scale limiting for the time scale,
@@ -119,7 +119,7 @@ Let:
 
 - $\mu_{t,k\epsilon} = \rho C_\mu^{\mathrm{eff}} k T$,
 - $\mu_{2L}$ = near-wall turbulent viscosity from the chosen flavor
-  (Wolfstein, Norris–Reynolds, or Xu), see the [theory](theory/turbulenceModeling.md) section for more details.
+  (Wolfstein or Norris–Reynolds), see the [theory](theory/turbulenceModeling.md) section for more details.
 
 Using the wall-distance Reynolds number $Re_d = \sqrt{k} d / \nu$,
 the two-layer blending function is:

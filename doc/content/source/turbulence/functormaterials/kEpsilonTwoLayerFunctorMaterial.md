@@ -68,13 +68,8 @@ $c_\ell = 0.42\, C_\mu^{-3/4}$:
   \ell_\epsilon = c_\ell\, d \frac{Re_d}{Re_d + 5.3}, \qquad
   \left(\frac{\mu_t}{\mu}\right)_{2L} = 0.42\, C_\mu^{1/4} Re_d \left(1 - e^{-Re_d/50.5}\right).
   \end{equation}
-- `Xu` [!cite](xu1998new), intended for natural convection. With $y_v^* = Re_d\, \nu / k$:
-  \begin{equation}
-  \ell_\epsilon = \frac{8.8\, d}{1 + 10/y_v^* + 5.15\times10^{-2}\, y_v^*}, \qquad
-  \left(\frac{\mu_t}{\mu}\right)_{2L} = \frac{0.544\, y_v^*}{1 + 5.025\times10^{-4}\, (y_v^*)^{1.65}}.
-  \end{equation}
 
-For the `Wolfstein` and `NorrisReynolds` flavors,
+For both flavors,
 $(\mu_t/\mu)_{2L} = \rho C_\mu \ell_\mu \sqrt{k}/\mu$ with $\ell_\mu = c_\ell\, d\, (1 - e^{-Re_d/A_\mu})$.
 This is the one-equation viscosity of the Chen–Patel two-layer model.
 

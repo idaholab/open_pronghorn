@@ -52,7 +52,7 @@ eps = 1e-4
 # Modeling parameters: Turbulence-model knobs (optional)
 # ================================================================================================================
 k_epsilon_variant   = 'RealizableTwoLayer'  # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds (only used for *TwoLayer variants)
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'

@@ -27,10 +27,10 @@ kEpsilonTwoLayerFunctorMaterial::validParams()
 
   params.addParam<Real>("C_mu", 0.09, "Turbulent kinetic energy closure constant C_mu.");
 
-  MooseEnum two_layer_flavor("Wolfstein NorrisReynolds Xu", "Wolfstein");
+  MooseEnum two_layer_flavor("Wolfstein NorrisReynolds", "Wolfstein");
   params.addParam<MooseEnum>("two_layer_flavor",
                              two_layer_flavor,
-                             "Two-layer formulation to use (Wolfstein, NorrisReynolds, Xu).");
+                             "Two-layer formulation to use (Wolfstein, NorrisReynolds).");
 
   params.addParam<Real>("Rey_star",
                         60.0,
@@ -66,7 +66,7 @@ kEpsilonTwoLayerFunctorMaterial::kEpsilonTwoLayerFunctorMaterial(const InputPara
     const Real nu = _mu(r, t) / _rho(r, t);
     const Real d = _wall_distance(r, t);
     const Real Red = std::sqrt(k) * d / std::max(nu, 1e-12);
-    return std::make_pair(Red, NS::twoLayerLengths(_flavor, _C_mu, d, Red, nu, k));
+    return std::make_pair(Red, NS::twoLayerLengths(_flavor, _C_mu, d, Red));
   };
 
   addFunctorProperty<Real>(

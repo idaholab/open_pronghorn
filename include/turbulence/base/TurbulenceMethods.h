@@ -43,8 +43,7 @@ enum class KEpsilonVariant
 enum class TwoLayerFlavor
 {
   Wolfstein,
-  NorrisReynolds,
-  Xu
+  NorrisReynolds
 };
 
 /**
@@ -148,29 +147,15 @@ TwoLayerLengths twoLayerWolfstein(const Real Cmu, const Real d, const Real Re_d)
 TwoLayerLengths twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d);
 
 /**
- * Xu natural-convection two-layer model variant.
- *
- * yv_star is the dimensionless wall distance used in the Xu model.
- * The expressions follow the STAR-CCM+ documentation closely.
- */
-TwoLayerLengths twoLayerXu(const Real Cmu, const Real d, const Real Re_d, const Real yv_star);
-
-/**
  * Dispatcher for the two-layer length scales according to the selected flavour.
  *
- * @param flavor Wolfstein, NorrisReynolds or Xu
+ * @param flavor Wolfstein or NorrisReynolds
  * @param Cmu closure constant C_mu
  * @param d wall distance
  * @param Re_d wall-distance Reynolds number sqrt(k) d / nu
- * @param nu kinematic viscosity (only used by the Xu flavour to build yv_star)
- * @param k turbulent kinetic energy (only used by the Xu flavour to build yv_star)
  */
-TwoLayerLengths twoLayerLengths(const TwoLayerFlavor flavor,
-                                const Real Cmu,
-                                const Real d,
-                                const Real Re_d,
-                                const Real nu,
-                                const Real k);
+TwoLayerLengths
+twoLayerLengths(const TwoLayerFlavor flavor, const Real Cmu, const Real d, const Real Re_d);
 
 /**
  * Wall-proximity blending factor shared by the two-layer mu_t and epsilon blending:

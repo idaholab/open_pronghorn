@@ -149,32 +149,13 @@ with $c_\ell = c_\ell(C_\mu)$ as before. As for `twoLayerWolfstein`, this is
 $\rho C_\mu \ell_\mu \sqrt{k} / \mu$ with $\ell_\mu = c_\ell\, d\, (1 - e^{-\mathrm{Re}_d / 50.5})$.
 
 
-## 5. `twoLayerXu`
-
-This function implements an *Xu-type two-layer correlation* [!cite](xu1998new) using a
-modified wall coordinate $y_\nu^\ast$ (denoted `yv_star` in the code). It returns
-
-\begin{equation}
-\ell_\epsilon = \frac{8.8 \, d}
-                      {1 + \frac{10}{y_\nu^\ast} + 5.15 \times 10^{-2} y_\nu^\ast},
-\end{equation}
-\begin{equation}
-\frac{\mu_t}{\mu} = \frac{0.544 \, y_\nu^\ast}
-                         {1 + 5.025 \times 10^{-4} \, y_\nu^{\ast\,1.65}}.
-\end{equation}
-
-Note that `Cmu` and `Re_d` are not used in this formulation.
+## 5. Two-layer helpers
 
 
 ### 5.1 `twoLayerLengths`
 
-Dispatches to `twoLayerWolfstein`, `twoLayerNorrisReynolds` or `twoLayerXu` according to the
-selected `two_layer_flavor`. For the Xu flavor, it builds the wall coordinate from the other
-inputs:
-\begin{equation}
-y_\nu^\ast = \frac{\mathrm{Re}_d \, \nu}{k} = \frac{d}{\sqrt{k}},
-\end{equation}
-with $k$ bounded below by $10^{-20}$.
+Dispatches to `twoLayerWolfstein` or `twoLayerNorrisReynolds` according to the
+selected `two_layer_flavor`.
 
 
 ### 5.2 `twoLayerBlendingFactor`

@@ -6,7 +6,7 @@ for the channel_ERCOFTAC case.
     * k_epsilon_variant
     * nonlinear_model (none, quadratic, cubic)
     * use_yap (true/false)
-    * two_layer_flavor (Wolfstein, NorrisReynolds, Xu) for *TwoLayer variants
+    * two_layer_flavor (Wolfstein, NorrisReynolds) for *TwoLayer variants
 - Each test:
     * Uses channel_ERCOFTAC.i as input
     * Uses a unique Outputs/file_base
@@ -35,7 +35,6 @@ K_EPSILON_VARIANTS = [
 TWO_LAYER_FLAVORS = [
     "Wolfstein",
     "NorrisReynolds",
-    "Xu",
 ]
 
 NONLINEAR_MODELS = [
@@ -103,10 +102,6 @@ def is_skipped_permutation(p) -> bool:
     nonlinear = p["nonlinear_model"]
     use_yap = p["use_yap"]
 
-    # Skip StandardTwoLayer + Xu flavor (all nonlinear/YAP combos)
-    if variant == "StandardTwoLayer" and flavor == "Xu":
-        return True
-
     # Skip StandardTwoLayer + NorrisReynolds flavor for quadratic/cubic (with or without YAP)
     if (
         variant == "StandardTwoLayer"
@@ -122,10 +117,6 @@ def is_skipped_permutation(p) -> bool:
             and use_yap
             and nonlinear in ("quadratic", "cubic")
         ):
-            return True
-
-        # Xu, cubic (with or without YAP)
-        if flavor == "Xu" and nonlinear == "cubic":
             return True
 
         # Wolfstein, cubic with YAP

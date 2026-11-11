@@ -30,7 +30,7 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
 
 # Turbulence-model knobs (optional)
 k_epsilon_variant   = 'Standard'  # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used by the two-layer material)
+two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds (only used by the two-layer material)
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'

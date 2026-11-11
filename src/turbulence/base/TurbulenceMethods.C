@@ -72,21 +72,7 @@ twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d)
 }
 
 TwoLayerLengths
-twoLayerXu(const Real /*Cmu*/, const Real d, const Real /*Re_d*/, const Real yv_star)
-{
-  TwoLayerLengths out;
-  out.l_eps = 8.8 * d / (1.0 + 10.0 / yv_star + 5.15e-2 * yv_star);
-  out.mu_ratio = 0.544 * yv_star / (1.0 + 5.025e-4 * std::pow(yv_star, 1.65));
-  return out;
-}
-
-TwoLayerLengths
-twoLayerLengths(const TwoLayerFlavor flavor,
-                const Real Cmu,
-                const Real d,
-                const Real Re_d,
-                const Real nu,
-                const Real k)
+twoLayerLengths(const TwoLayerFlavor flavor, const Real Cmu, const Real d, const Real Re_d)
 {
   switch (flavor)
   {
@@ -94,8 +80,6 @@ twoLayerLengths(const TwoLayerFlavor flavor,
       return twoLayerWolfstein(Cmu, d, Re_d);
     case TwoLayerFlavor::NorrisReynolds:
       return twoLayerNorrisReynolds(Cmu, d, Re_d);
-    case TwoLayerFlavor::Xu:
-      return twoLayerXu(Cmu, d, Re_d, Re_d * nu / std::max(k, 1e-20));
   }
   mooseError("Unknown two-layer flavor.");
 }

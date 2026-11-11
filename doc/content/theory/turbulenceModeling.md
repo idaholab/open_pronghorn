@@ -226,8 +226,7 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 - Near the wall, $\mu_t$ and the dissipation length scale $\ell_\epsilon$ are given by
   one of the two-layer prescriptions:
 - `twoLayerWolfstein` [!cite](wolfstein1969velocity),
-- `twoLayerNorrisReynolds` [!cite](norris1975oneequation),
-- `twoLayerXu` [!cite](xu1998new).
+- `twoLayerNorrisReynolds` [!cite](norris1975oneequation).
 - Away from the wall, the model reverts to the standard high-Re form.
 - A blending function $\lambda(Re_d)$ [!cite](jongen1998simulation) gives a smooth transition
   for both $\mu_t$ and the $\epsilon$ equation (see [#two-layer]).
@@ -308,12 +307,10 @@ The available flavors are:
 - Norris–Reynolds [!cite](norris1975oneequation):
   \begin{equation}
   \ell_\epsilon = c_\ell\, d \frac{Re_d}{Re_d + 5.3}, \qquad
-  \left(\frac{\mu_t}{\mu}\right)_{2L} = 0.42\, C_\mu^{1/4}\, Re_d \left(1 - e^{-Re_d/50.5}\right),
+  \left(\frac{\mu_t}{\mu}\right)_{2L} = 0.42\, C_\mu^{1/4}\, Re_d \left(1 - e^{-Re_d/50.5}\right).
   \end{equation}
-- Xu [!cite](xu1998new), for near-wall natural convection, written in terms of
-  $y_v^* = Re_d\, \nu / k$ (see [turbulenceModelingReference.md]).
 
-For the Wolfstein and Norris–Reynolds flavors the viscosity ratio is the one-equation
+For both flavors the viscosity ratio is the one-equation
 viscosity $\rho C_\mu \ell_\mu \sqrt{k} / \mu$, with $\ell_\mu = c_\ell\, d\, (1 - e^{-Re_d/A_\mu})$.
 
 #### Blending function
@@ -388,7 +385,7 @@ through the blended $\epsilon$ and $\mu_t$.
   [kEpsilonTKESourceSink.md] and [kEpsilonTKEDSourceSink.md],
 - a `wall_distance` field (e.g. from [WallDistanceAux.md]),
 - one [kEpsilonTwoLayerFunctorMaterial.md], which also selects
-  `two_layer_flavor = 'Wolfstein' | 'NorrisReynolds' | 'Xu'` and sets `Rey_star` and `DeltaRey`,
+  `two_layer_flavor = 'Wolfstein' | 'NorrisReynolds'` and sets `Rey_star` and `DeltaRey`,
 - `two_layer_lambda` and `two_layer_mu_t` set on [kEpsilonViscosity.md], and `two_layer_lambda`
   and `two_layer_epsilon` set on [kEpsilonTKEDSourceSink.md], all pointing to the outputs of that
   material,
@@ -499,7 +496,7 @@ OpenPronghorn.
 |----------------------|------------------------------------------|--------------------------|------------------------------------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------|----------|
 | `Standard`           | High-Re, wall functions                  | $30 \lesssim y^+ \lesssim 300$ | Coarse first cell in log layer; few cells across BL  | Fully turbulent attached flows, mild pressure gradients                      | Straight channels, simple pipe flows, external bluff body with mild separation | Fast and robust; good initial choice for simple internal flows. |
 | `StandardLowRe`      | Low-Re damping ($f_\mu$, $f_2$)         | $y^+ \approx 1$         | Strong wall clustering; many cells in viscous sublayer and buffer region | Heat-transfer-dominated internal flows, strong adverse pressure gradients | High-fidelity channel-flow benchmarks, heated rod bundles (resolved near wall) | More expensive; sensitive to near-wall mesh quality and wall-distance accuracy. |
-| `StandardTwoLayer`   | Two-layer (Wolfstein/NorrisReynolds/Xu)  | $1 \lesssim y^+ \lesssim 100$ | Moderate wall clustering; smooth near-wall blending  | Industrial internal flows, moderate separation, HVAC and ductwork           | Reactor auxiliary systems, plenum mixing with moderate separation             | Good compromise between cost and accuracy; pick `two_layer_flavor` based on target data. |
+| `StandardTwoLayer`   | Two-layer (Wolfstein/NorrisReynolds)     | $1 \lesssim y^+ \lesssim 100$ | Moderate wall clustering; smooth near-wall blending  | Industrial internal flows, moderate separation, HVAC and ductwork           | Reactor auxiliary systems, plenum mixing with moderate separation             | Good compromise between cost and accuracy; pick `two_layer_flavor` based on target data. |
 | `Realizable`         | High-Re, wall functions                  | $30 \lesssim y^+ \lesssim 300$ | Similar to `Standard`                                | Rotating, swirling, and separating flows                                     | Mixing tees, swirling jets, complex manifolds with recirculation              | Often preferred to `Standard` when rotation or separation is important. |
 | `RealizableTwoLayer` | Realizable + two-layer near-wall model   | $1 \lesssim y^+ \lesssim 100$ | Moderate wall clustering plus two-layer blending     | General-purpose model for complex internal flows with heat transfer          | Reactor primary loops with moderate mesh resolution near walls                | Recommended default in many industrial-like configurations when mesh allows $y^+ \lesssim 50$. |
 
