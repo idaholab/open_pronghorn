@@ -160,7 +160,7 @@ selected `two_layer_flavor`.
 
 ### 5.2 `twoLayerBlendingFactor`
 
-The wall-proximity blending factor of Jongen [!cite](jongen1998simulation), shared by the
+The wall-proximity blending factor of Jongen ([!cite](jongen1998simulation)), shared by the
 two-layer turbulent viscosity and the two-layer $\epsilon$ equation:
 \begin{equation}
 \lambda = \tfrac12\left[1 + \tanh\!\left(\frac{\mathrm{Re}_d - \mathrm{Re}^\ast}{A}\right)\right],

@@ -279,7 +279,7 @@ This section explains the available corrections, their motivation, and how they 
   kept but $\epsilon$ and $\mu_t$ are given by algebraic length scales (a one-equation model);
   away from the wall, the standard or realizable $k$–$\epsilon$ equations are used
   [!cite](wolfstein1969velocity,norris1975oneequation). The two regions are blended
-  smoothly following Jongen [!cite](jongen1998simulation).
+  smoothly following Jongen ([!cite](jongen1998simulation)).
 
 #### Near-wall length scales
 
@@ -299,12 +299,12 @@ length $\ell_\epsilon$ and a viscosity ratio $(\mu_t/\mu)_{2L}$, which give
 
 The available flavors are:
 
-- Wolfstein [!cite](wolfstein1969velocity), with $c_\ell = 0.42\, C_\mu^{-3/4}$:
+- Wolfstein ([!cite](wolfstein1969velocity)), with $c_\ell = 0.42\, C_\mu^{-3/4}$:
   \begin{equation}
   \ell_\epsilon = c_\ell\, d \left(1 - e^{-Re_d/(2 c_\ell)}\right), \qquad
   \left(\frac{\mu_t}{\mu}\right)_{2L} = 0.42\, C_\mu^{1/4}\, Re_d \left(1 - e^{-Re_d/70}\right),
   \end{equation}
-- Norris–Reynolds [!cite](norris1975oneequation):
+- Norris–Reynolds ([!cite](norris1975oneequation)):
   \begin{equation}
   \ell_\epsilon = c_\ell\, d \frac{Re_d}{Re_d + 5.3}, \qquad
   \left(\frac{\mu_t}{\mu}\right)_{2L} = 0.42\, C_\mu^{1/4}\, Re_d \left(1 - e^{-Re_d/50.5}\right).
@@ -315,7 +315,7 @@ viscosity $\rho C_\mu \ell_\mu \sqrt{k} / \mu$, with $\ell_\mu = c_\ell\, d\, (1
 
 #### Blending function
 
-The inner and outer layers are blended with the function of Jongen [!cite](jongen1998simulation):
+The inner and outer layers are blended with the function of Jongen ([!cite](jongen1998simulation)):
 
 \begin{equation}
 \lambda = \tfrac12\left[1 + \tanh\!\left(\frac{Re_d - Re^*}{A}\right)\right],
