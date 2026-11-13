@@ -108,7 +108,8 @@ This constant is used by the two-layer models (`twoLayerWolfstein`, `twoLayerNor
 
 ## 3. `twoLayerWolfstein`
 
-This function implements a *Wolfstein-type two-layer near-wall model*. It returns a
+This function implements a *Wolfstein-type two-layer near-wall model*
+[!cite](wolfstein1969velocity). It returns a
 `TwoLayerLengths` struct with
 
 - `l_eps`: dissipation length scale $\ell_\epsilon$,
@@ -119,45 +120,71 @@ Using $c_\ell = c_\ell(C_\mu)$ from `cl_from_Cmu`,
 \ell_\epsilon = c_\ell \, d \left(1 - e^{- \mathrm{Re}_d / (2 c_\ell)}\right),
 \end{equation}
 \begin{equation}
-\frac{\mu_t}{\mu} = 0.42 \, \mathrm{Re}_d^{0.25}
+\frac{\mu_t}{\mu} = 0.42 \, C_\mu^{1/4} \, \mathrm{Re}_d
 \left( 1 - e^{-\mathrm{Re}_d / 70} \right),
 \end{equation}
 where
 
 - $d$ is the wall distance,
-- $\mathrm{Re}_d$ is a Reynolds number based on wall distance.
+- $\mathrm{Re}_d = \sqrt{k}\, d / \nu$ is the wall-distance Reynolds number.
+
+The viscosity ratio is the one-equation viscosity $\rho C_\mu \ell_\mu \sqrt{k} / \mu$ with
+$\ell_\mu = c_\ell\, d\, (1 - e^{-\mathrm{Re}_d / 70})$.
 
 
 ## 4. `twoLayerNorrisReynolds`
 
-This function implements a *Norris–Reynolds-type two-layer model*. It returns
+This function implements a *Norris–Reynolds-type two-layer model*
+[!cite](norris1975oneequation). It returns
 
 \begin{equation}
 \ell_\epsilon = c_\ell \, d \frac{\mathrm{Re}_d}{\mathrm{Re}_d + 5.3},
 \end{equation}
 \begin{equation}
-\frac{\mu_t}{\mu} = 0.42 \, \mathrm{Re}_d^{0.25}
+\frac{\mu_t}{\mu} = 0.42 \, C_\mu^{1/4} \, \mathrm{Re}_d
 \left( 1 - e^{-\mathrm{Re}_d / 50.5} \right),
 \end{equation}
 
-with $c_\ell = c_\ell(C_\mu)$ as before.
+with $c_\ell = c_\ell(C_\mu)$ as before. As for `twoLayerWolfstein`, this is
+$\rho C_\mu \ell_\mu \sqrt{k} / \mu$ with $\ell_\mu = c_\ell\, d\, (1 - e^{-\mathrm{Re}_d / 50.5})$.
 
 
-## 5. `twoLayerXu`
+## 5. Two-layer helpers
 
-This function implements an *Xu-type two-layer correlation* using a modified wall
-coordinate $y_\nu^\ast$ (denoted `yv_star` in the code). It returns
 
+### 5.1 `twoLayerLengths`
+
+Dispatches to `twoLayerWolfstein` or `twoLayerNorrisReynolds` according to the
+selected `two_layer_flavor`.
+
+
+### 5.2 `twoLayerBlendingFactor`
+
+The wall-proximity blending factor of Jongen ([!cite](jongen1998simulation)), shared by the
+two-layer turbulent viscosity and the two-layer $\epsilon$ equation:
 \begin{equation}
-\ell_\epsilon = \frac{8.8 \, d}
-                      {1 + \frac{10}{y_\nu^\ast} + 5.15 \times 10^{-2} y_\nu^\ast},
+\lambda = \tfrac12\left[1 + \tanh\!\left(\frac{\mathrm{Re}_d - \mathrm{Re}^\ast}{A}\right)\right],
+\qquad A = \left|\frac{\Delta \mathrm{Re}}{\operatorname{atanh}(0.98)}\right|,
 \end{equation}
-\begin{equation}
-\frac{\mu_t}{\mu} = \frac{0.544 \, y_\nu^\ast}
-                         {1 + 5.025 \times 10^{-4} \, y_\nu^{\ast\,1.65}}.
-\end{equation}
+where $\mathrm{Re}^\ast$ (`Rey_star`) is the threshold and $\Delta \mathrm{Re}$ (`DeltaRey`) the
+half-width of the blending region. $\lambda$ goes from 0.01 at
+$\mathrm{Re}^\ast - \Delta\mathrm{Re}$ to 0.99 at $\mathrm{Re}^\ast + \Delta\mathrm{Re}$.
 
-Note that `Cmu` and `Re_d` are not used in this formulation.
+
+### 5.3 `turbulentBlendWeight`
+
+The weight applied to the rows of the blended turbulence transport kernels
+(time derivative, advection, diffusion) in an element $e$:
+\begin{equation}
+w_e =
+\begin{cases}
+0 & \text{if } e \text{ is wall bounded}, \\
+\lambda(e) & \text{if a blending functor is given}, \\
+1 & \text{otherwise}.
+\end{cases}
+\end{equation}
+Without a blending functor, this reproduces the binary wall-bounded skip of the regular
+turbulent kernels.
 
 
 ## 6. `f2_SKE_LRe`

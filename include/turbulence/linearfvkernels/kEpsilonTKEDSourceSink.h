@@ -46,6 +46,9 @@ public:
   virtual Real computeRightHandSideContribution() override;
 
 protected:
+  /// Error if the transport kernels of epsilon do not apply the two-layer blending factor
+  void checkTwoLayerTransportKernels() const;
+
   /// Convenience: domain dimension
   const unsigned int _dim;
 
@@ -103,6 +106,9 @@ protected:
   /// Selected k-epsilon variant
   const NS::KEpsilonVariant _variant;
 
+  /// Whether a two-layer variant is selected
+  const bool _two_layer;
+
   /// Switches for optional corrections
   NS::KEpsilonSwitches _switches;
 
@@ -124,6 +130,11 @@ protected:
   /// Optional functor: wall distance d (used for Yap and low-Re G')
   const Moose::Functor<Real> * _wall_distance_functor;
 
+  /// Optional functor: two-layer wall-proximity blending factor lambda
+  const Moose::Functor<Real> * _two_layer_lambda;
+  /// Optional functor: two-layer algebraic (damped) epsilon
+  const Moose::Functor<Real> * _two_layer_epsilon;
+
   /// Flags for optional functors
   const bool _has_T;
   const bool _has_beta;
@@ -142,6 +153,22 @@ protected:
   std::map<const Elem *, std::vector<Real>> _dist;
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
   ///@}
+
+  /**
+   * Bulk implicit destruction coefficient C2_eps f2 rho / T_e (per unit volume).
+   */
+  Real computeBulkDestructionCoeff(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
+
+  /**
+   * Bulk explicit production source C1_eps Pe / T_e (per unit volume).
+   */
+  Real computeBulkProductionRHS(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
+
+  /**
+   * Coefficient a_alg = rho eps_alg / k of the algebraic two-layer epsilon relation
+   * a_alg (eps - eps_alg), which has the same dimensions as the bulk destruction coefficient.
+   */
+  Real computeAlgebraicCoeff(const Moose::ElemArg & elem_arg, const Moose::StateArg & state) const;
 
   /**
    * Compute epsilon production "P_epsilon" in the bulk, based on the chosen

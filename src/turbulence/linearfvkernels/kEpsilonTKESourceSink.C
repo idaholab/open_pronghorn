@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "NavierStokesMethods.h"
+#include "LinearFVTurbulentBlended.h"
 
 registerMooseObject("OpenPronghornApp", kEpsilonTKESourceSink);
 
@@ -242,6 +243,18 @@ kEpsilonTKESourceSink::initialSetup()
       _wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _wall_bounded);
   NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _dist);
   NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _face_infos);
+
+  // Blending and the wall-bounded skip only apply to the epsilon transport
+  for (const auto kernel : NS::getTransportKernels(_fe_problem, _sys_num, _var_num, _tid))
+    if (dynamic_cast<const LinearFVTurbulentBlendedInterface *>(kernel))
+      mooseError("Kernel '",
+                 kernel->name(),
+                 "' is a blended kernel acting on '",
+                 _var.name(),
+                 "'; blended kernels only apply to epsilon.");
+    else if (kernel->isParamValid("walls") &&
+             !kernel->getParam<std::vector<BoundaryName>>("walls").empty())
+      kernel->paramError("walls", "Must be empty on the transport kernels of '", _var.name(), "'.");
 }
 
 Real

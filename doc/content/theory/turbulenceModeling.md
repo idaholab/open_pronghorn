@@ -8,7 +8,7 @@ For general background on turbulence and RANS closures, see Pope [!cite](pope200
 and Wilcox [!cite](wilcox2006turbulence). The baseline $k$–$\epsilon$ model follows
 Launder and Spalding [!cite](launder1974numerical), with additional options inspired by
 realizable, low-Reynolds-number, two-layer, curvature/rotation, buoyancy, and
-compressibility corrections [!cite](shih1995realizable,spalart1997rotation,yap1987correction,wolfstein1969velocity,norris1975oneequation).
+compressibility corrections [!cite](shih1995realizable,spalart1997rotation,yap1987correction,wolfstein1969velocity,norris1975oneequation,jongen1998simulation).
 
 
 ## Introduction
@@ -226,10 +226,10 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 - Near the wall, $\mu_t$ and the dissipation length scale $\ell_\epsilon$ are given by
   one of the two-layer prescriptions:
 - `twoLayerWolfstein` [!cite](wolfstein1969velocity),
-- `twoLayerNorrisReynolds` [!cite](norris1975oneequation),
-- `twoLayerXu` [!cite](xu1998new).
+- `twoLayerNorrisReynolds` [!cite](norris1975oneequation).
 - Away from the wall, the model reverts to the standard high-Re form.
-- A blending function based on wall-distance Reynolds numbers provides a smooth transition.
+- A blending function $\lambda(Re_d)$ [!cite](jongen1998simulation) gives a smooth transition
+  for both $\mu_t$ and the $\epsilon$ equation (see [#two-layer]).
 
 #### Realizable
 
@@ -272,22 +272,134 @@ This section explains the available corrections, their motivation, and how they 
   (b) `use_low_re_Gprime = true/false`,
   (c) near-wall mesh with $y^+ \approx 1$.
 
-### Two-layer near-wall models
+### Two-layer near-wall models id=two-layer
 
 - *Motivation*: Two-layer models avoid the need to fully resolve the viscous sublayer
-  while improving accuracy over simple wall functions. Near the wall, $\epsilon$ and
-  $\mu_t$ are driven by empirical formulas; away from the wall, the standard or realizable
-  $k$–$\epsilon$ equations are used
-  [!cite](wolfstein1969velocity,norris1975oneequation).
-- *Implementation*:
-  (a) The wall distance $d$ is obtained from `WallDistanceAux`,
-  (b) `twoLayerWolfstein`, `twoLayerNorrisReynolds`, or `twoLayerXu` compute $\ell_\epsilon$
-    and $\mu_t/\mu$ in the near-wall region,
-  (c) A blending function transitions between near-wall and outer-layer behavior.
-- *Activation*:
-  (a) `k_epsilon_variant = 'StandardTwoLayer'` or `'RealizableTwoLayer'`,
-  (b) `two_layer_flavor = 'Wolfstein' | 'NorrisReynolds' | 'Xu'`,
-  (c) `wall_distance` auxiliary variable and consistent `walls` list.
+  while improving accuracy over simple wall functions. Near the wall, the $k$ equation is
+  kept but $\epsilon$ and $\mu_t$ are given by algebraic length scales (a one-equation model);
+  away from the wall, the standard or realizable $k$–$\epsilon$ equations are used
+  [!cite](wolfstein1969velocity,norris1975oneequation). The two regions are blended
+  smoothly following Jongen ([!cite](jongen1998simulation)).
+
+#### Near-wall length scales
+
+All near-wall quantities are functions of the wall-distance Reynolds number
+
+\begin{equation}
+Re_d = \frac{\sqrt{k}\, d}{\nu},
+\end{equation}
+
+where $d$ is the distance to the closest wall. The inner layer is described by a dissipation
+length $\ell_\epsilon$ and a viscosity ratio $(\mu_t/\mu)_{2L}$, which give
+
+\begin{equation}
+\epsilon_{2L} = \frac{k^{3/2}}{\ell_\epsilon}, \qquad
+\mu_{t,2L} = \left(\frac{\mu_t}{\mu}\right)_{2L} \mu.
+\end{equation}
+
+The available flavors are:
+
+- Wolfstein ([!cite](wolfstein1969velocity)), with $c_\ell = 0.42\, C_\mu^{-3/4}$:
+  \begin{equation}
+  \ell_\epsilon = c_\ell\, d \left(1 - e^{-Re_d/(2 c_\ell)}\right), \qquad
+  \left(\frac{\mu_t}{\mu}\right)_{2L} = 0.42\, C_\mu^{1/4}\, Re_d \left(1 - e^{-Re_d/70}\right),
+  \end{equation}
+- Norris–Reynolds ([!cite](norris1975oneequation)):
+  \begin{equation}
+  \ell_\epsilon = c_\ell\, d \frac{Re_d}{Re_d + 5.3}, \qquad
+  \left(\frac{\mu_t}{\mu}\right)_{2L} = 0.42\, C_\mu^{1/4}\, Re_d \left(1 - e^{-Re_d/50.5}\right).
+  \end{equation}
+
+For both flavors the viscosity ratio is the one-equation
+viscosity $\rho C_\mu \ell_\mu \sqrt{k} / \mu$, with $\ell_\mu = c_\ell\, d\, (1 - e^{-Re_d/A_\mu})$.
+
+#### Blending function
+
+The inner and outer layers are blended with the function of Jongen ([!cite](jongen1998simulation)):
+
+\begin{equation}
+\lambda = \tfrac12\left[1 + \tanh\!\left(\frac{Re_d - Re^*}{A}\right)\right],
+\qquad A = \frac{\Delta Re}{\operatorname{atanh}(0.98)},
+\end{equation}
+
+so that $\lambda \to 0$ in the viscosity-affected region, $\lambda \to 1$ in the fully
+turbulent region, and $\lambda$ goes from 0.01 to 0.99 over $Re^* \pm \Delta Re$.
+$Re^*$ and $\Delta Re$ are the `Rey_star` (default 60) and `DeltaRey` (default 10) parameters of
+[kEpsilonTwoLayerFunctorMaterial.md]. The same $\lambda$ is used for both the turbulent viscosity
+and the $\epsilon$ equation, so the two never disagree about where the inner layer is.
+
+#### Turbulent viscosity
+
+\begin{equation}
+\mu_t = \lambda\, \mu_{t,k\epsilon} + (1 - \lambda)\, \mu_{t,2L},
+\end{equation}
+
+where $\mu_{t,k\epsilon}$ is the standard or realizable outer-layer viscosity.
+
+#### Dissipation equation
+
+The $\epsilon$ equation is blended *at the discrete level*: each cell's row is a
+$\lambda$-weighted combination of the transport equation and an algebraic relation that
+drives $\epsilon$ toward $\epsilon_{2L}$:
+
+\begin{equation}
+\lambda \left[ \frac{\partial \rho \epsilon}{\partial t} + \nabla \cdot (\rho \mathbf{u} \epsilon)
+- \nabla \cdot \left( \left(\mu + \frac{\mu_t}{\sigma_\epsilon}\right) \nabla \epsilon \right)
+- P_\epsilon + D_\epsilon \right]
++ (1 - \lambda)\, a_{2L} \left( \epsilon - \epsilon_{2L} \right) = 0,
+\qquad a_{2L} = \frac{\rho\, \epsilon_{2L}}{k}.
+\end{equation}
+
+The coefficient $a_{2L} = \rho \sqrt{k}/\ell_\epsilon$ is the inverse of the algebraic relaxation
+time scale. It keeps the algebraic part of the row of the same magnitude as the destruction term
+of the transport part. The limits are:
+
+- $\lambda \to 1$: the standard $\epsilon$ transport equation,
+- $\lambda \to 0$: $\epsilon = \epsilon_{2L}$ exactly, i.e. the classical two-layer model, where
+  the $\epsilon$ equation is not solved in the inner layer.
+
+The source and sink terms ($P_\epsilon$, $D_\epsilon$ and the algebraic part) are assembled by
+[kEpsilonTKEDSourceSink.md]. The time-derivative, advection and diffusion terms are assembled by
+the blended transport kernels [LinearFVTurbulentBlendedTimeDerivative.md],
+[LinearFVTurbulentBlendedAdvection.md] and [LinearFVTurbulentBlendedDiffusion.md]. These scale
+each row by the $\lambda$ of its cell.
+
+In wall-bounded cells the transport rows are removed, as for the high-Re wall functions, and
+$\epsilon$ is imposed as
+
+\begin{equation}
+\epsilon = \lambda\, \epsilon_\text{wall} + (1 - \lambda)\, \epsilon_{2L},
+\end{equation}
+
+where $\epsilon_\text{wall}$ is the wall-function value. Coarse meshes (first cell in the log
+layer, $\lambda \to 1$) therefore recover the standard wall-function behavior, and meshes with
+$y^+ \sim 1$ ($\lambda \to 0$) use the algebraic two-layer value.
+
+The $k$ equation is *not* blended. It is solved in every cell with the regular turbulent
+transport kernels and its usual destruction term $\rho \epsilon$. It sees the inner layer only
+through the blended $\epsilon$ and $\mu_t$.
+
+#### Activation
+
+- `k_epsilon_variant = 'StandardTwoLayer'` or `'RealizableTwoLayer'` in [kEpsilonViscosity.md],
+  [kEpsilonTKESourceSink.md] and [kEpsilonTKEDSourceSink.md],
+- a `wall_distance` field (e.g. from [WallDistanceAux.md]),
+- one [kEpsilonTwoLayerFunctorMaterial.md], which also selects
+  `two_layer_flavor = 'Wolfstein' | 'NorrisReynolds'` and sets `Rey_star` and `DeltaRey`,
+- `two_layer_lambda` and `two_layer_mu_t` set on [kEpsilonViscosity.md], and `two_layer_lambda`
+  and `two_layer_epsilon` set on [kEpsilonTKEDSourceSink.md], all pointing to the outputs of that
+  material,
+- every transport kernel of $\epsilon$ replaced by its blended counterpart, with
+  `blending_factor` set to the same `two_layer_lambda`, and the same `walls` list as
+  [kEpsilonTKEDSourceSink.md] (this is not checked),
+- the transport kernels of $k$ left as the regular, non-blended kernels with an empty `walls` list.
+
+All of these rules except the `walls` match are checked when the simulation is set up, and an
+inconsistent input stops with an error. A minimal setup is:
+
+!listing test/tests/kEpsilon/special-cases/channel_ERCOFTAC_buoyant.i block=FunctorMaterials/two_layer
+
+!listing test/tests/kEpsilon/special-cases/channel_ERCOFTAC_buoyant.i block=LinearFVKernels/TKED_advection
 
 ### Realizable formulation
 
@@ -384,7 +496,7 @@ OpenPronghorn.
 |----------------------|------------------------------------------|--------------------------|------------------------------------------------------|------------------------------------------------------------------------------|--------------------------------------------------------------------------------|----------|
 | `Standard`           | High-Re, wall functions                  | $30 \lesssim y^+ \lesssim 300$ | Coarse first cell in log layer; few cells across BL  | Fully turbulent attached flows, mild pressure gradients                      | Straight channels, simple pipe flows, external bluff body with mild separation | Fast and robust; good initial choice for simple internal flows. |
 | `StandardLowRe`      | Low-Re damping ($f_\mu$, $f_2$)         | $y^+ \approx 1$         | Strong wall clustering; many cells in viscous sublayer and buffer region | Heat-transfer-dominated internal flows, strong adverse pressure gradients | High-fidelity channel-flow benchmarks, heated rod bundles (resolved near wall) | More expensive; sensitive to near-wall mesh quality and wall-distance accuracy. |
-| `StandardTwoLayer`   | Two-layer (Wolfstein/NorrisReynolds/Xu)  | $1 \lesssim y^+ \lesssim 100$ | Moderate wall clustering; smooth near-wall blending  | Industrial internal flows, moderate separation, HVAC and ductwork           | Reactor auxiliary systems, plenum mixing with moderate separation             | Good compromise between cost and accuracy; pick `two_layer_flavor` based on target data. |
+| `StandardTwoLayer`   | Two-layer (Wolfstein/NorrisReynolds)     | $1 \lesssim y^+ \lesssim 100$ | Moderate wall clustering; smooth near-wall blending  | Industrial internal flows, moderate separation, HVAC and ductwork           | Reactor auxiliary systems, plenum mixing with moderate separation             | Good compromise between cost and accuracy; pick `two_layer_flavor` based on target data. |
 | `Realizable`         | High-Re, wall functions                  | $30 \lesssim y^+ \lesssim 300$ | Similar to `Standard`                                | Rotating, swirling, and separating flows                                     | Mixing tees, swirling jets, complex manifolds with recirculation              | Often preferred to `Standard` when rotation or separation is important. |
 | `RealizableTwoLayer` | Realizable + two-layer near-wall model   | $1 \lesssim y^+ \lesssim 100$ | Moderate wall clustering plus two-layer blending     | General-purpose model for complex internal flows with heat transfer          | Reactor primary loops with moderate mesh resolution near walls                | Recommended default in many industrial-like configurations when mesh allows $y^+ \lesssim 50$. |
 
