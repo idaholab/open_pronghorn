@@ -50,7 +50,6 @@ kEpsilonTKEDSourceSink::validParams()
                         "al. 1995).");
   params.addParam<Real>(
       "C3_eps", 1.0, "C3 epsilon buoyancy coefficient (may be modified by Gb sign).");
-  params.addParam<Real>("Ct", 6.0, "Ct coefficient used in Yap / ambient epsilon source terms.");
 
   params.addParam<Real>("C_lowRe",
                         0.3,
@@ -79,7 +78,10 @@ kEpsilonTKEDSourceSink::validParams()
   params.addParam<bool>("use_curvature_correction",
                         false,
                         "Apply a curvature correction factor f_c to the shear production.");
-  params.addParam<bool>("use_yap", false, "Include Yap correction gamma_y in epsilon.");
+  params.addParam<bool>("use_yap",
+                        false,
+                        "Include the Yap correction rho*gamma_y as an epsilon source "
+                        "(StandardTwoLayer and StandardLowRe only).");
   params.addParam<bool>(
       "use_low_re_Gprime", false, "Include additional low-Re production G' in epsilon.");
 
@@ -147,7 +149,6 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
                 : NS::defaultC2eps(
                       getParam<MooseEnum>("k_epsilon_variant").getEnum<NS::KEpsilonVariant>())),
     _C3_eps(getParam<Real>("C3_eps")),
-    _Ct(getParam<Real>("Ct")),
     _C_lowRe(getParam<Real>("C_lowRe")),
     _D_lowRe(getParam<Real>("D_lowRe")),
     _E_lowRe(getParam<Real>("E_lowRe")),
@@ -236,6 +237,12 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
 
   if (_switches.use_yap && !_has_wall_distance)
     paramError("wall_distance", "'use_yap=true' requires the 'wall_distance' functor.");
+
+  // Yap correction is defined for StandardTwoLayer and StandardLowRe only
+  if (_switches.use_yap && _variant != NS::KEpsilonVariant::StandardTwoLayer && !is_low_re)
+    paramError("use_yap",
+               "The Yap correction is only available for the StandardTwoLayer and StandardLowRe "
+               "variants.");
 
   if (_switches.use_low_re_Gprime && !_has_wall_distance)
     paramError("wall_distance", "'use_low_re_Gprime=true' requires the 'wall_distance' functor.");
@@ -531,7 +538,29 @@ kEpsilonTKEDSourceSink::computeBulkProductionRHS(const Moose::ElemArg & elem_arg
       _variant == NS::KEpsilonVariant::RealizableTwoLayer)
     production += computeRealizableShearProduction(elem_arg, state);
 
+  // Yap correction: a direct epsilon source rho * gamma_y (not scaled by C1_eps / T_e).
+  // The constructor restricts use_yap to StandardTwoLayer and StandardLowRe.
+  if (_switches.use_yap)
+    production += computeYapSource(elem_arg, state);
+
   return production;
+}
+
+Real
+kEpsilonTKEDSourceSink::computeYapSource(const Moose::ElemArg & elem_arg,
+                                         const Moose::StateArg & state) const
+{
+  // Yap (1987): rho * gamma_y, gamma_y = C_w eps^2 / k max[(l/l_eps - 1)(l/l_eps)^2, 0]
+  // with the turbulence length l = k^{3/2} / eps and l_eps = C_l d.
+  const Real rho = _rho(elem_arg, state);
+  const Real k = std::max(_k(elem_arg, state), 0.0);
+  const Real eps = std::max(_var.getElemValue(*_current_elem_info, state), 0.0);
+  const Real d = (*_wall_distance_functor)(elem_arg, state);
+
+  const Real l = std::pow(k, 1.5) / std::max(eps, 1e-20);
+  const Real l_eps = NS::cl_from_Cmu(_C_mu) * d;
+
+  return rho * NS::computeGammaY(_Cw, eps, k, l, l_eps);
 }
 
 Real
@@ -702,29 +731,8 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     Gprime = NS::computeGprime(_D_lowRe, _E_lowRe, f2_LRe, Gk, mu, k, d, Re_d);
   }
 
-  // Yap correction gamma_y => translated into a source term (rho / Ct) * gamma_y
-  Real yap_source = 0.0;
-  if (_switches.use_yap)
-  {
-    const Real d = (*_wall_distance_functor)(elem_arg, state);
-    const Real nu = mu / rho;
-
-    // Limited turbulence time scale for Yap
-    const Real eps_safe = std::max(eps, 1e-20);
-    const Real T1 = k / eps_safe;
-    const Real T2 = 6.0 * nu / eps_safe;
-    const Real T3 = std::pow(T1, 1.625) * T2;
-    const Real Teff = std::pow(T3, 1.0 / (1.625 + 1.0));
-
-    // Yap length scale from Teff
-    const Real l = std::sqrt(std::max(Teff * eps_safe, 0.0));
-
-    const Real cl = NS::cl_from_Cmu(_C_mu);
-    const Real l_eps = cl * d;
-
-    const Real gamma_y = NS::computeGammaY(_Cw, eps, k, l, l_eps);
-    yap_source = rho / _Ct * gamma_y;
-  }
+  // The Yap correction is not part of Pe: it is added as rho * gamma_y in
+  // computeBulkProductionRHS() (see computeYapSource()).
 
   // Variant-dependent Pe definition
   Real Pe = 0.0;
@@ -739,13 +747,13 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     }
 
     case NS::KEpsilonVariant::StandardTwoLayer:
-      // Pepsilon = Gk + Gnl + C3_eps Gb + rho/Ct gamma_y
-      Pe = Gk + Gnl + C3_eps_local * Gb + yap_source;
+      // Pepsilon = Gk + Gnl + C3_eps Gb (Yap added separately)
+      Pe = Gk + Gnl + C3_eps_local * Gb;
       break;
 
     case NS::KEpsilonVariant::StandardLowRe:
-      // Pepsilon = Gk + Gnl + G' + C3_eps Gb + rho/Ct gamma_y
-      Pe = Gk + Gnl + Gprime + C3_eps_local * Gb + yap_source;
+      // Pepsilon = Gk + Gnl + G' + C3_eps Gb (Yap added separately)
+      Pe = Gk + Gnl + Gprime + C3_eps_local * Gb;
       break;
 
     case NS::KEpsilonVariant::Realizable:
@@ -755,8 +763,8 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
       break;
 
     case NS::KEpsilonVariant::RealizableTwoLayer:
-      // Realizable two-layer: same, with optional Yap term
-      Pe = C3_eps_local * Gb + yap_source;
+      // Realizable two-layer: same
+      Pe = C3_eps_local * Gb;
       break;
 
     default:

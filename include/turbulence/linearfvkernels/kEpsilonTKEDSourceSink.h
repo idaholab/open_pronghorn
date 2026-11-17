@@ -86,8 +86,6 @@ protected:
   const Real _C2_eps;
   /// C3_epsilon (buoyancy coefficient)
   Real _C3_eps;
-  /// C_t (used with Yap / ambient source)
-  const Real _Ct;
 
   /// Low-Re / damping constant C in f2_SKE_LRe
   const Real _C_lowRe;
@@ -175,7 +173,7 @@ protected:
    * k–epsilon variant and switches. The returned value does *not* include
    * the C1_epsilon / T_e factor; that is applied by the kernel when assembling
    * the RHS. For the realizable variants it excludes the shear production, which is
-   * computeRealizableShearProduction().
+   * computeRealizableShearProduction(). It also excludes the Yap source (computeYapSource()).
    */
   Real computeBulkPe(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
 
@@ -185,6 +183,12 @@ protected:
    */
   Real computeRealizableShearProduction(const Moose::ElemArg & elem_arg,
                                         const Moose::StateArg & state) const;
+
+  /**
+   * Yap correction source rho * gamma_y (per unit volume), with the turbulence length
+   * l = k^{3/2} / eps and l_eps = C_l d (Yap 1987). Added directly to the epsilon RHS.
+   */
+  Real computeYapSource(const Moose::ElemArg & elem_arg, const Moose::StateArg & state) const;
 
   /**
    * Compute the turbulent time scale T_e used in the epsilon equation.

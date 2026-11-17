@@ -107,6 +107,11 @@ def is_skipped_permutation(p) -> bool:
     if variant.startswith("Realizable") and nonlinear != "none":
         return True
 
+    # The Yap correction is only defined for StandardTwoLayer and StandardLowRe
+    # (the kernel rejects it for other variants)
+    if use_yap and variant not in ("StandardTwoLayer", "StandardLowRe"):
+        return True
+
     # Skip StandardTwoLayer + NorrisReynolds flavor for quadratic/cubic (with or without YAP)
     if (
         variant == "StandardTwoLayer"
@@ -159,8 +164,8 @@ def build_file_base(p) -> str:
     observed patterns, e.g.:
 
       channel_ERCOFTAC_k_epsilon_realizable
-      channel_ERCOFTAC_k_epsilon_realizable_quadratic_yap
-      channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_quadratic_yap
+      channel_ERCOFTAC_k_epsilon_standardlowre_quadratic_yap
+      channel_ERCOFTAC_k_epsilon_standardtwolayer_wolfstein_quadratic_yap
     """
     parts = ["channel_ERCOFTAC", "k_epsilon"]
 
@@ -229,13 +234,8 @@ def make_cli_args(p, file_base: str) -> str:
             )
         args.extend(TWO_LAYER_ARGS)
 
-    # Yap correction is only supported for StandardTwoLayer, StandardLowRe, RealizableTwoLayer
-    yap_supported = variant in (
-        "StandardTwoLayer",
-        "StandardLowRe",
-        "RealizableTwoLayer",
-    )
-    if use_yap and yap_supported:
+    # Yap correction (StandardTwoLayer and StandardLowRe only; see is_skipped_permutation)
+    if use_yap:
         args.append("LinearFVKernels/TKED_source_sink/use_yap=true")
 
     # Output base so CSVs are unique per permutation

@@ -372,7 +372,7 @@ equation.
    \quad
    \text{tmp} = (r - 1) r^2,
    \end{equation}
-   where $\ell = \frac{k^{3/2}}{\epsilon}$ is the bulk eddy lenght scale, then take
+   where $\ell = \frac{k^{3/2}}{\epsilon}$ is the bulk eddy length scale and $\ell_\epsilon = C_l d$, then take
    \begin{equation}
    \text{val} = \max(\text{tmp}, 0).
    \end{equation}
@@ -382,7 +382,8 @@ equation.
    \gamma_Y = C_w \, \frac{\epsilon^2}{k} \, \text{val}.
    \end{equation}
 
-So $\gamma_Y$ injects extra dissipation whenever $\ell / \ell_\epsilon > 1$.
+So $\gamma_Y$ injects extra dissipation whenever $\ell / \ell_\epsilon > 1$. The TKED kernel adds
+$\rho\gamma_Y$ to the $\epsilon$ equation (StandardTwoLayer and StandardLowRe only).
 
 
 ## 15. `computeGprime`

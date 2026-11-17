@@ -289,6 +289,9 @@ Real computeGammaM(const Real rho, const Real C_M, const Real k, const Real eps,
  * Yap correction gamma_y.
  *
  * gamma_y = C_w epsilon^2 / k * max[(l / l_eps - 1) (l / l_eps)^2, 0]
+ *
+ * with the turbulence length l = k^{3/2} / epsilon and l_eps = C_l d,
+ * C_l = 0.42 C_mu^{-3/4} ~ 2.55 (Yap 1987). The epsilon equation gets the source rho * gamma_y.
  */
 Real computeGammaY(const Real C_w, const Real eps, const Real k, const Real l, const Real l_eps);
 

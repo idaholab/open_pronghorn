@@ -12,17 +12,6 @@
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Standard variant.'
   []
-  [channel_ERCOFTAC_k_epsilon_standard_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Standard variant and YAP correction.'
-  []
   [channel_ERCOFTAC_k_epsilon_standard_quadratic]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
@@ -34,17 +23,6 @@
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard LinearFVKernels/TKE_source_sink/nonlinear_model=quadratic LinearFVKernels/TKED_source_sink/nonlinear_model=quadratic Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_quadratic'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Standard variant and quadratic non-linear model.'
   []
-  [channel_ERCOFTAC_k_epsilon_standard_quadratic_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_quadratic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_quadratic_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard LinearFVKernels/TKE_source_sink/nonlinear_model=quadratic LinearFVKernels/TKED_source_sink/nonlinear_model=quadratic Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_quadratic_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Standard variant, quadratic non-linear model, and YAP correction.'
-  []
   [channel_ERCOFTAC_k_epsilon_standard_cubic]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
@@ -55,17 +33,6 @@
     max_threads = 1
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard LinearFVKernels/TKE_source_sink/nonlinear_model=cubic LinearFVKernels/TKED_source_sink/nonlinear_model=cubic Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_cubic'
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Standard variant and cubic non-linear model.'
-  []
-  [channel_ERCOFTAC_k_epsilon_standard_cubic_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_standard_cubic_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_standard_cubic_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Standard LinearFVKernels/TKED_source_sink/k_epsilon_variant=Standard AuxKernels/compute_mu_t/k_epsilon_variant=Standard LinearFVKernels/TKE_source_sink/nonlinear_model=cubic LinearFVKernels/TKED_source_sink/nonlinear_model=cubic Outputs/file_base=channel_ERCOFTAC_k_epsilon_standard_cubic_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Standard variant, cubic non-linear model, and YAP correction.'
   []
   [channel_ERCOFTAC_k_epsilon_standardlowre]
     type = 'CSVDiff'
@@ -237,18 +204,6 @@
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Realizable variant.'
     min_slots = 2 # 382 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
   []
-  [channel_ERCOFTAC_k_epsilon_realizable_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_realizable_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizable_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizable_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable AuxKernels/compute_mu_t/k_epsilon_variant=Realizable Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizable_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using Realizable variant and YAP correction.'
-    min_slots = 2 # 384 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
-  []
   [channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC.i'
@@ -273,35 +228,18 @@
     requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using RealizableTwoLayer variant and NorrisReynolds two-layer flavor.'
     min_slots = 2 # 386 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
   []
-  [channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer FunctorMaterials/two_layer/two_layer_flavor=Wolfstein LinearFVKernels/TKED_source_sink/use_yap=true LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_wolfstein_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using RealizableTwoLayer variant, Wolfstein two-layer flavor, and YAP correction.'
-    min_slots = 2 # 384 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
-  []
-  [channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap]
-    type = 'CSVDiff'
-    input = 'channel_ERCOFTAC.i'
-    csvdiff = 'channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap_line_center_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap_line_quarter_radius_channel_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap_side_bottom_0002.csv channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap_side_top_0002.csv'
-    abs_zero = 1e-3
-    rel_err = 1e-3
-    recover = false
-    max_threads = 1
-    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=RealizableTwoLayer LinearFVKernels/TKED_source_sink/k_epsilon_variant=RealizableTwoLayer AuxKernels/compute_mu_t/k_epsilon_variant=RealizableTwoLayer FunctorMaterials/two_layer/two_layer_flavor=NorrisReynolds LinearFVKernels/TKED_source_sink/use_yap=true LinearFVKernels/TKED_advection/type=LinearFVTurbulentBlendedAdvection LinearFVKernels/TKED_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_turb_diffusion/type=LinearFVTurbulentBlendedDiffusion LinearFVKernels/TKED_advection/blending_factor=two_layer_lambda LinearFVKernels/TKED_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_turb_diffusion/blending_factor=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_lambda=two_layer_lambda LinearFVKernels/TKED_source_sink/two_layer_epsilon=two_layer_epsilon AuxKernels/compute_mu_t/two_layer_lambda=two_layer_lambda AuxKernels/compute_mu_t/two_layer_mu_t=two_layer_mu_t Outputs/file_base=channel_ERCOFTAC_k_epsilon_realizabletwolayer_norrisreynolds_yap'
-    requirement = 'The system shall be able to solve fluid flow problems with k-epsilon turbulence model for a standard channel with linear FV discretization, and reach converged results with segregated solvers using RealizableTwoLayer variant, NorrisReynolds two-layer flavor, and YAP correction.'
-    min_slots = 2 # 382 MB per slot observed during https://civet.inl.gov/job/4244750/ during step Test debug. Usage is over or within 100 MB of the total memory limit based on a 400 MB per slot limit.
-  []
   [channel_ERCOFTAC_k_epsilon_realizable_nonlinear_error]
     type = RunException
     input = 'channel_ERCOFTAC.i'
     expect_err = 'Nonlinear constitutive relations \(quadratic/cubic\) are only available for the Standard'
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKE_source_sink/nonlinear_model=quadratic LinearFVKernels/TKED_source_sink/nonlinear_model=quadratic'
     requirement = 'The system shall report an error if a nonlinear constitutive relation is requested together with a realizable k-epsilon variant.'
+  []
+  [channel_ERCOFTAC_k_epsilon_variant_yap_error]
+    type = RunException
+    input = 'channel_ERCOFTAC.i'
+    expect_err = 'The Yap correction is only available for the StandardTwoLayer and StandardLowRe'
+    cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/use_yap=true'
+    requirement = 'The system shall report an error if the Yap correction is requested for a k-epsilon variant other than StandardTwoLayer or StandardLowRe.'
   []
 []

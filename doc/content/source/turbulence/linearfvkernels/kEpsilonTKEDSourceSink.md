@@ -82,13 +82,12 @@ These invariants are used to construct:
 
 ## $\epsilon$-production term $P_\epsilon$
 
-The $\epsilon$-production term $P_\epsilon$ is built from several contributions. Here, $P_\epsilon$ denotes the full non-destruction part of the $\epsilon$ source term (i.e., it already includes terms that are sometimes written separately as $S_\epsilon$, such as Yap or other near-wall/low-Re corrections):
+The $\epsilon$-production term $P_\epsilon$ is built from several contributions. Here, $P_\epsilon$ denotes the full non-destruction part of the $\epsilon$ source term (i.e., it already includes terms that are sometimes written separately as $S_\epsilon$, such as low-Re corrections). The Yap source $\rho\gamma_y$ is added separately (see below):
 
 - $G_k$: shear production of k,
 - $G_{\text{nl}}$: nonlinear production (optional quadratic/cubic constitutive relations),
 - $G'$: low-Re extra production (StandardLowRe only),
 - $G_b$: buoyancy production,
-- $Y_y$: Yap correction (two-layer and low-Re variants),
 - $f_c$: curvature correction factor (realizable variants).
 
 The exact combination depends on the chosen k–$\epsilon$ variant.
@@ -130,16 +129,11 @@ The production limiter is consistent with the one used in the k-equation kernel.
 For the *StandardTwoLayer* model, the $\epsilon$-production is
 
 \begin{equation}
-G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+G_k + G_{\text{nl}} + C_{\epsilon3} G_b,
 \end{equation}
 
-where
-
-- the shear production $G_k$ is taken without limiter,
-- the Yap correction $Y_y$ provides an additional near-wall sink/source and is multiplied by
-  $\rho C_{\epsilon1}$.
-
-The Yap term is especially important near walls and is detailed in a separate section below.
+where the shear production $G_k$ is taken without limiter. The optional Yap source is described
+below.
 
 
 ### StandardLowRe k–$\epsilon$ (low-Re model)
@@ -148,14 +142,14 @@ For the *StandardLowRe* model, low-Re corrections are included via damping funct
 extra production term $G'$. The $\epsilon$-production is
 
 \begin{equation}
-G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b,
 \end{equation}
 
 where
 
 - $G'$ is the low-Re extra production (see below),
 - $f_2$ damping appears in the destruction term,
-- Yap correction $Y_y$ is applied similarly to the two-layer model.
+- the optional Yap source is the same as in the two-layer model.
 
 ### Realizable k–$\epsilon$
 
@@ -179,15 +173,8 @@ $G_{\text{nl}}$ and $G'$ do not enter the realizable $\epsilon$ equation.
 
 ### RealizableTwoLayer k–$\epsilon$
 
-The *RealizableTwoLayer* model combines the realizable bulk behavior with a two-layer near-wall
-enhancement via Yap:
-
-\begin{equation}
-f_c \, \rho C_1 S \epsilon + C_{\epsilon1} \frac{\epsilon}{k} \left( C_{\epsilon3} G_b + \rho Y_y \right),
-\end{equation}
-
-with the same definitions of $C_1$, $S$, $f_c$, and $G_b$ as in the realizable model and the Yap
-term as described below.
+The *RealizableTwoLayer* model uses the realizable bulk $\epsilon$ source above, blended with the
+two-layer near-wall $\epsilon$. The Yap correction is not available for this variant.
 
 
 ## nonlinear $\epsilon$-production $G_{\text{nl}}$
@@ -203,12 +190,12 @@ for the Standard-family variants (selecting a nonlinear relation with a realizab
 
 - `StandardTwoLayer`:
   \begin{equation}
-  \text{Production} = G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+  \text{Production} = G_k + G_{\text{nl}} + C_{\epsilon3} G_b,
   \end{equation}
 
 - `StandardLowRe`:
   \begin{equation}
-  \text{Production} = G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+  \text{Production} = G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b.
   \end{equation}
 
 The term $G_{\text{nl}}$ is based on the quadratic or cubic
@@ -227,7 +214,7 @@ is applied multiplicatively to $S_k$ in the $\epsilon$-production:
 
 - `RealizableTwoLayer`:
   \begin{equation}
-  \text{Production} = f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+  \text{Production} = f_c S_k + C_{\epsilon3} G_b.
   \end{equation}
 
 The same curvature model (e.g. `curvature_model = standard`) is used in both the k-equation and
@@ -236,80 +223,25 @@ the $\epsilon$-equation kernels for consistency.
 
 ## Yap correction
 
-The *Yap correction* is an additional near-wall term that modifies the $\epsilon$-equation source in
-two-layer and low-Re variants. It is enabled when
-[!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_yap) is `true` and a wall-distance functor is
-available.
-
-### Yap length scales
-
-The Yap correction is built from two length scales:
-
-- a turbulence length scale $l$,
-- an $\epsilon$ length scale $l_\epsilon$.
-
-The implementation uses a *limited* turbulence time scale
-to obtain $l$. The effective time scale $T_{\text{eff}}$ is computed as
-
-\begin{equation}
-T_1 = \frac{k}{\epsilon},
-\end{equation}
-
-\begin{equation}
-T_2 = \frac{6\nu}{\epsilon},
-\end{equation}
-
-\begin{equation}
-T_3 = T_1^{1.625} T_2,
-\end{equation}
-
-\begin{equation}
-T_{\text{eff}} = T_3^{1/(1.625 + 1)},
-\end{equation}
-
-where $\nu = \mu / \rho$ is the kinematic viscosity. The Yap turbulence length scale is then
-
-\begin{equation}
-l = \sqrt{T_{\text{eff}} \epsilon}.
-\end{equation}
-
-The $\epsilon$ length scale is defined as
-
-\begin{equation}
-l_\epsilon = C_l d,
-\end{equation}
-
-where $d$ is the wall distance and
-
-\begin{equation}
-C_l = 0.42 C_\mu^{-3/4}
-\end{equation}
-
-with $C_\mu$ the model’s closure constant (or a realizable value when applicable).
-
-### Yap correction term $Y_y$
-
-The Yap correction term $\gamma_y$ is computed as
+The Yap correction [!cite](yap1987correction) is enabled with
+[!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_yap) and is only available for the
+`StandardTwoLayer` and `StandardLowRe` variants (any other variant is an error). It needs the
+wall distance $d$. The term adds the source $\rho\gamma_y$ directly to the $\epsilon$ equation
+(it does not pass through $C_{\epsilon1}/T_e$):
 
 \begin{equation}
 \gamma_y =
 C_w \frac{\epsilon^2}{k}
 \max\left[\left(\frac{l}{l_\epsilon} - 1\right)\left(\frac{l}{l_\epsilon}\right)^2, 0\right],
+\qquad l = \frac{k^{3/2}}{\epsilon}, \qquad l_\epsilon = C_l d,
 \end{equation}
 
-where $C_w$ is a model coefficient. In the $\epsilon$-equation, this is translated into a source term
-
-\begin{equation}
-\rho C_{\epsilon1} Y_y = \rho C_{\epsilon1} \gamma_y,
-\end{equation}
-
-and added to $P_\epsilon$ for the variants that include Yap.
-
-The Yap contribution appears in:
-
-- `StandardTwoLayer`,
-- `StandardLowRe`,
-- `RealizableTwoLayer`.
+with $C_w = 0.83$ ([!param](/LinearFVKernels/kEpsilonTKEDSourceSink/Cw)) and
+$C_l = 0.42 C_\mu^{-3/4} \approx 2.55$ (from the constant
+[!param](/LinearFVKernels/kEpsilonTKEDSourceSink/C_mu)). In an equilibrium log layer $l = l_\epsilon$,
+so the term is zero. It is non-negative and acts where the turbulence length exceeds its
+equilibrium value, e.g. near reattachment or impingement. In two-layer variants it is part of the
+bulk source and is blended with $\lambda$.
 
 
 ## Low-Re extra production $G'$
@@ -343,7 +275,7 @@ Defaults: $C = 0.3$ (`C_lowRe`), $D = 1$ (`D_lowRe`), $E = 0.00375$ (`E_lowRe`)
 In the $\epsilon$-production for the StandardLowRe variant the production term is
 
 \begin{equation}
-G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b.
 \end{equation}
 
 The term $G'$ vanishes as $\mathrm{Re}_d \to \infty$ due to the exponential damping and is

@@ -144,7 +144,7 @@ where
 - $P_k$ is shear production of turbulent kinetic energy;
 - $G_b$ is production (or destruction) of turbulence by buoyancy;
 - $S_k$ and $S_\epsilon$ collect additional user- or model-specific source terms, including
-  compressibility ($\gamma_M$, $k$ equation only), Yap ($\gamma_Y$, $\epsilon$ equation), and
+  compressibility ($\gamma_M$, $k$ equation only), Yap ($\rho\gamma_Y$, $\epsilon$ equation, StandardTwoLayer and StandardLowRe only), and
   low-Re corrections ($G'$, $\epsilon$ equation);
 - $f_1$ and $f_2$ are damping functions (typically $f_1 = 1$ in high-Re models, with
   $f_2$ used in low-Re variants).
@@ -216,9 +216,8 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 - Optional terms:
 
 1. compressibility correction $\gamma_M$ (dilatation dissipation) as an extra sink in the $k$ equation,
-2. Yap correction $\gamma_Y$ in $S_\epsilon$,
-3. curvature factor $f_c$ multiplying $P_k$,
-4. nonlinear production $G_\text{nl}$ added to $P_k$.
+2. curvature factor $f_c$ multiplying $P_k$,
+3. nonlinear production $G_\text{nl}$ added to $P_k$.
 
 #### StandardLowRe
 
@@ -455,15 +454,13 @@ inconsistent input stops with an error. A minimal setup is:
 
 - *Motivation*: In separated and impinging flows, classical $k$–$\epsilon$ models may
   overpredict the turbulence length scale, leading to excessive eddy viscosity and overly
-  diffused separation zones. Yap’s correction adds an extra sink term for $\epsilon$ to
+  diffused separation zones. Yap’s correction adds an extra source of $\epsilon$ to
   limit the growth of the length scale [!cite](yap1987correction).
 - *Implementation*:
-  (a) `computeGammaY` computes $\gamma_Y$ based on $\ell$, $\ell_\epsilon$, and model
-    constants,
-  (b) $\gamma_Y$ is added to $S_\epsilon$ in `kEpsilonTKEDSourceSink` when enabled.
-- *Activation*:
-  (a) `use_yap = true`,
-  (b) consistent wall-distance and two-layer settings if applicable.
+  (a) `computeGammaY` computes $\gamma_Y$ from $\ell = k^{3/2}/\epsilon$ and $\ell_\epsilon = C_l d$,
+  (b) $\rho\gamma_Y$ is added to the $\epsilon$ equation in `kEpsilonTKEDSourceSink`.
+- *Activation*: `use_yap = true` with `StandardTwoLayer` or `StandardLowRe` (other variants are
+  an error) and a `wall_distance` functor.
 
 
 ### Buoyancy production
