@@ -83,7 +83,9 @@ kEpsilonTKESourceSink::validParams()
   MooseEnum nonlinear_model("none quadratic cubic", "none");
   params.addParam<MooseEnum>("nonlinear_model",
                              nonlinear_model,
-                             "Non-linear constitutive relation for standard k-epsilon.");
+                             "Non-linear constitutive relation (quadratic or cubic) adding the "
+                             "production G_nl. Only available for the Standard, StandardTwoLayer "
+                             "and StandardLowRe variants.");
 
   MooseEnum curvature_model("none standard", "none");
   params.addParam<MooseEnum>("curvature_model",
@@ -151,6 +153,15 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
     paramError("C_mu", "C_mu must be > 0.");
   if (_C_pl <= 0.0)
     paramError("C_pl", "C_pl must be > 0.");
+
+  // Nonlinear constitutive relations are defined for the Standard variants only
+  const bool is_realizable_variant = (_variant == NS::KEpsilonVariant::Realizable ||
+                                      _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+  if (is_realizable_variant && nl_local != "none")
+    paramError("nonlinear_model",
+               "Nonlinear constitutive relations (quadratic/cubic) are only available for the "
+               "Standard, StandardTwoLayer and StandardLowRe variants. Set nonlinear_model = none "
+               "for realizable variants.");
 
   // Two-layer variants require wall information (blending / wall-distance-based behavior)
   if (is_two_layer_variant && _wall_boundary_names.empty())
@@ -435,7 +446,8 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
     Gb = NS::computeGb(beta, mu_t, _Pr_t, grad_T, _g);
   }
 
-  // Optional extra non-linear production G_nl from pre-coded turbulence methods
+  // Optional extra non-linear production G_nl (Standard variants only; realizable variants are
+  // rejected in the constructor when nonlinear_model != none)
   Real Gnl = 0.0;
   if (_nonlinear_model != NS::NonlinearConstitutiveRelation::None)
   {

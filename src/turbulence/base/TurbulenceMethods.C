@@ -326,9 +326,11 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
 
   // Invariants given in StrainRotationInvariants:
   // S2 = 2 S_ij S_ij, W2 = 2 W_ij W_ij
-  const Real SdotS = 0.5 * inv.S2;
-  const Real WdotW = 0.5 * inv.W2;
-  const Real Sstar = std::sqrt(std::max(SdotS, 0.0)); // |S| = sqrt(S_ij S_ij)
+  const Real SdotS = 0.5 * inv.S2; // S_ij S_ij
+  const Real WdotW = 0.5 * inv.W2; // W_ij W_ij = tr(W W^T)
+
+  // Dimensionless strain rate S_bar = (k/eps) sqrt(2 S_ij S_ij)
+  const Real S_bar = (k / eps) * std::sqrt(std::max(inv.S2, 0.0));
 
   // Variable C_mu
   const Real Cmu = Cmu_nonlinear(Ca0, Ca1, Ca2, Ca3, inv, k, eps);
@@ -336,8 +338,8 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
   if (Cmu <= 0.0)
     return Tnl;
 
-  // Denominator used in C1, C2, C3
-  const Real denom = (CNL6 + CNL7 * Sstar) * Cmu;
+  // Denominator used in C1, C2, C3: (C_NL6 + C_NL7 S_bar^3) C_mu
+  const Real denom = (CNL6 + CNL7 * S_bar * S_bar * S_bar) * Cmu;
   if (denom <= 0.0)
     return Tnl;
 
@@ -350,14 +352,14 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
   I.zero();
   I.addIa(1.0);
 
-  // Quadratic bracket
+  // Quadratic bracket. Every term is symmetric; the C1 and C3 terms are traceless.
   const RankTwoTensor SS = S * S;
-  const RankTwoTensor WW = W * W;
+  const RankTwoTensor WWt = W * W.transpose();
   const RankTwoTensor WS = W * S;
   const RankTwoTensor SWt = S * W.transpose();
 
   const RankTwoTensor quad_bracket =
-      C1 * (SS - (SdotS / 3.0) * I) + C2 * (WS + SWt) + C3 * (WW - (WdotW / 3.0) * I);
+      C1 * (SS - (SdotS / 3.0) * I) + C2 * (WS + SWt) + C3 * (WWt - (WdotW / 3.0) * I);
 
   // T_RANS,quad
   const RankTwoTensor Tquad = -4.0 * mu_t * (k / eps) * quad_bracket;
@@ -372,11 +374,12 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
     const Real C5 = CNL5 * Cmu * Cmu;
     const Real k2_over_eps2 = (k * k) / (eps * eps);
 
-    RankTwoTensor SSw = (S * S) * W;
-    RankTwoTensor WtSS = W.transpose() * (S * S);
-    RankTwoTensor term4 = SSw + WtSS;
+    const RankTwoTensor SSw = SS * W;
+    const RankTwoTensor WtSS = W.transpose() * SS;
+    const RankTwoTensor term4 = SSw + WtSS;
 
-    RankTwoTensor term5 = (SdotS - WdotW) * (S - W.transpose());
+    // (S:S - W:W^T) [S - 1/3 tr(S) I]; W:W^T = W_ij W_ij
+    const RankTwoTensor term5 = (SdotS - WdotW) * (S - (S.trace() / 3.0) * I);
 
     RankTwoTensor cubic_bracket = C4 * term4 + C5 * term5;
 

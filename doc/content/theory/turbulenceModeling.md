@@ -442,12 +442,13 @@ inconsistent input stops with an error. A minimal setup is:
 - *Motivation*: Linear eddy-viscosity models cannot reproduce some important features of
   anisotropic turbulence (secondary flows, normal stress differences) [!cite](pope2000turbulent).
   Nonlinear constitutive relations add higher-order dependencies on $\mathbf{S}$ and
-  $\mathbf{W}$.
+  $\mathbf{W}$ [!cite](lien1996low).
 - *Implementation*:
   (a) `computeTRANS_NL` constructs nonlinear tensor bases,
   (b) `computeGnl` computes additional production $G_\text{nl}$,
   (c) `Cmu_nonlinear` keeps $\mu_t$ consistent with the nonlinear stress model.
-- *Activation*: `nonlinear_model = 'quadratic'` or `'cubic'` (in the $k$–$\epsilon$ kernels).
+- *Activation*: `nonlinear_model = 'quadratic'` or `'cubic'` (in both the $k$ and $\epsilon$ kernels).
+  Only available for the `Standard`, `StandardTwoLayer` and `StandardLowRe` variants.
 
 
 ### Yap correction

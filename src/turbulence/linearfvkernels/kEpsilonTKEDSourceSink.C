@@ -106,7 +106,9 @@ kEpsilonTKEDSourceSink::validParams()
   MooseEnum nonlinear_model("none quadratic cubic", "none");
   params.addParam<MooseEnum>("nonlinear_model",
                              nonlinear_model,
-                             "Non-linear constitutive relation for standard k-epsilon.");
+                             "Non-linear constitutive relation (quadratic or cubic) adding the "
+                             "production G_nl. Only available for the Standard, StandardTwoLayer "
+                             "and StandardLowRe variants.");
 
   params.addParam<bool>(
       "check_sigma_eps",
@@ -194,6 +196,15 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
   // Pull enums locally so we don't depend on other names being in-scope
   const MooseEnum nl_local = getParam<MooseEnum>("nonlinear_model");
   const MooseEnum cm_local = getParam<MooseEnum>("curvature_model");
+
+  // Nonlinear constitutive relations are defined for the Standard variants only
+  const bool is_realizable_variant = (_variant == NS::KEpsilonVariant::Realizable ||
+                                      _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+  if (is_realizable_variant && nl_local != "none")
+    paramError("nonlinear_model",
+               "Nonlinear constitutive relations (quadratic/cubic) are only available for the "
+               "Standard, StandardTwoLayer and StandardLowRe variants. Set nonlinear_model = none "
+               "for realizable variants.");
 
   // ---- Wall-distance requirements (variants + enabled options) ----
   if ((is_two_layer || is_low_re) && !_has_wall_distance)

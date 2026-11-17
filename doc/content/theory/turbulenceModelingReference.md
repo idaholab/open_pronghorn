@@ -430,14 +430,14 @@ This tensor is then used by the nonlinear constitutive relation and curvature co
 
 ## 17. Nonlinear constitutive relation utilities
 
-The remaining utilities implement *quadratic and cubic nonlinear eddy-viscosity models*
-and associated terms.
+The remaining utilities implement the *quadratic and cubic nonlinear constitutive relations* of
+[!cite](lien1996low) and the associated production term.
 
 There are fixed model coefficients in an anonymous namespace:
 
 - Quadratic/cubic model coefficients: `CNL1`–`CNL7`,
-- `Ca0`–`Ca3` for the nonlinear $C_\mu$ expression. These are used internally by
-  `computeTRANS_NL` and `computeGnl`.
+- `Ca0`–`Ca3` for the nonlinear $C_\mu$ expression (`Cmu_nonlinear`), used inside
+  `computeTRANS_NL` for $C_1, \dots, C_5$.
 
 
 ### 17.1 `computeTRANS_NL`
@@ -456,10 +456,10 @@ a quadratic or cubic constitutive relation.
 
 3. Use the invariants in `inv` to compute
    \begin{equation}
-   S\cdot S = \frac{1}{2} S^2, \qquad
-   W\cdot W = \frac{1}{2} W^2,
-   \quad
-   S^\star = \sqrt{\max(S\cdot S, 0)}.
+   S:S = \frac{1}{2} S^2, \qquad
+   W:W^T = \frac{1}{2} W^2,
+   \qquad
+   \bar{S} = \frac{k}{\epsilon} \sqrt{\max(S^2, 0)} = \frac{k}{\epsilon}\sqrt{2 S:S}.
    \end{equation}
 
 4. Compute the nonlinear-compatible $C_\mu$
@@ -468,7 +468,7 @@ a quadratic or cubic constitutive relation.
    \end{equation}
    and then form the denominator
    \begin{equation}
-   \text{denom} = (C_{NL6} + C_{NL7} S^\star) C_\mu.
+   \text{denom} = (C_{NL6} + C_{NL7} \bar{S}^3) C_\mu.
    \end{equation}
 
 5. From this denominator define
@@ -480,17 +480,18 @@ a quadratic or cubic constitutive relation.
 
 6. Build the *identity tensor* $I$ and the quadratic tensor products:
    \begin{equation}
-   SS = S S, \qquad WW = W W,
+   SS = S S, \qquad WW^T = W W^T,
    \qquad WS = W S, \qquad SW^T = S W^T.
    \end{equation}
 
 7. Construct the *quadratic bracket*:
    \begin{equation}
    \mathcal{Q} =
-   C_1 \left( S S - \frac{S\cdot S}{3} I \right)
+   C_1 \left( S S - \frac{S:S}{3} I \right)
  + C_2 (W S + S W^T)
- + C_3 \left( W W - \frac{W\cdot W}{3} I \right).
+ + C_3 \left( W W^T - \frac{W:W^T}{3} I \right).
    \end{equation}
+   Every term is symmetric, and the $C_1$ and $C_3$ terms are traceless.
 
 8. The *quadratic nonlinear Reynolds-stress* contribution is
    \begin{equation}
@@ -512,7 +513,7 @@ a quadratic or cubic constitutive relation.
      \end{equation}
      and
      \begin{equation}
-     \text{term}_5 = (S\cdot S - W\cdot W) (S - W^T).
+     \text{term}_5 = (S:S - W:W^T) \left(S - \tfrac{1}{3}\operatorname{tr}(S) I\right).
      \end{equation}
 
    - Let

@@ -194,7 +194,9 @@ where $\mathbf{T}_{\text{RANS,NL}}$ depends on:
 - $\mu_t$, $k$, $\epsilon$,
 - fixed model coefficients $C_{\text{NL}1\ldots 7}$ and a variable $C_\mu$.
 
-In all k–$\epsilon$ variants, `kEpsilonTKESourceSink` adds $G_{\text{nl}}$ to the k-equation’s production:
+For the `Standard`, `StandardTwoLayer` and `StandardLowRe` variants, `kEpsilonTKESourceSink` adds
+$G_{\text{nl}}$ to the k-equation’s production. Nonlinear relations are not available for the
+realizable variants; selecting one with `nonlinear_model != none` is an error.
 
 \begin{equation}
 \text{source} = (P_k + G_b + G_{\text{nl}} - \gamma_M) - \epsilon.

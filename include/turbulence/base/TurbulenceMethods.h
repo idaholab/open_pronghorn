@@ -322,7 +322,7 @@ RankTwoTensor computeVelocityGradient(const Moose::Functor<Real> & u,
 
 /**
  * Build the non-linear Reynolds stress contribution T_RANS,NL for the
- * Standard k-epsilon model using either the quadratic or cubic
+ * Standard k-epsilon variants using either the quadratic or cubic
  * constitutive relation.
  *
  * S and W are built from grad_u:

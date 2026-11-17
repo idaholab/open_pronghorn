@@ -102,6 +102,11 @@ def is_skipped_permutation(p) -> bool:
     nonlinear = p["nonlinear_model"]
     use_yap = p["use_yap"]
 
+    # Nonlinear constitutive relations are only defined for the Standard variants
+    # (the kernels reject them for realizable variants)
+    if variant.startswith("Realizable") and nonlinear != "none":
+        return True
+
     # Skip StandardTwoLayer + NorrisReynolds flavor for quadratic/cubic (with or without YAP)
     if (
         variant == "StandardTwoLayer"
@@ -109,19 +114,6 @@ def is_skipped_permutation(p) -> bool:
         and nonlinear in ("quadratic", "cubic")
     ):
         return True
-
-    if variant == "RealizableTwoLayer":
-        # NorrisReynolds, quadratic/cubic, with YAP
-        if (
-            flavor == "NorrisReynolds"
-            and use_yap
-            and nonlinear in ("quadratic", "cubic")
-        ):
-            return True
-
-        # Wolfstein, cubic with YAP
-        if flavor == "Wolfstein" and nonlinear == "cubic" and use_yap:
-            return True
 
     return False
 

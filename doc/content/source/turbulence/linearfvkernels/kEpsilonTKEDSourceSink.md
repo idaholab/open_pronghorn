@@ -194,7 +194,7 @@ term as described below.
 
 When [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/nonlinear_model) is set to `quadratic` or
 `cubic`, `kEpsilonTKEDSourceSink` includes the contribution $G_{\text{nl}}$ in the $\epsilon$-production
-for Standard-family variants:
+for the Standard-family variants (selecting a nonlinear relation with a realizable variant is an error):
 
 - `Standard`:
   \begin{equation}
