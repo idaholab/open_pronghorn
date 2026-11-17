@@ -70,7 +70,8 @@ These invariants are used to construct:
   \begin{equation}
   G_k = \mu_t S^2 \;\; (\text{plus compressible terms if enabled}),
   \end{equation}
-- the shear-based $\epsilon$-production term $S_k = \mu_t S^2$ for realizable variants (note that $G_k$ may be limited so a disctinction is made with the non-limited $S_k$),
+- the strain magnitude $S = \sqrt{S^2}$ and $\eta = S k / \epsilon$ used by the realizable
+  production $\rho C_1 S \epsilon$,
 - the curvature correction factor $f_c$ (for realizable models when enabled),
 - the normalized strain/rotation quantities used by the nonlinear constitutive relations.
 
@@ -154,22 +155,23 @@ where
 
 ### Realizable k–$\epsilon$
 
-For the *Realizable* high-Re model, the $\epsilon$-production is written in terms of the shear-based
+For the *Realizable* high-Re model [!cite](shih1995realizable), the shear production of
+$\epsilon$ does not contain $G_k$. The $\epsilon$ source is
 
-production $S_k$:
 \begin{equation}
-f_c S_k + C_{\epsilon3} G_b,
+f_c \, \rho C_1 S \epsilon + C_{\epsilon1} \frac{\epsilon}{k} C_{\epsilon3} G_b,
+\qquad
+C_1 = \max\left(0.43, \frac{\eta}{\eta + 5}\right), \qquad \eta = S \frac{k}{\epsilon},
 \end{equation}
 
 where
 
-- $S_k = \mu_t S^2$ is the shear contribution,
+- $S = \sqrt{2 S_{ij} S_{ij}}$ is the strain magnitude,
 - $f_c$ is the curvature correction factor (if `curvature_model != none`),
-- $C_{\epsilon3} G_b$ is the buoyancy contribution.
+- the shear term $\rho C_1 S \epsilon$ is added directly, not through $C_{\epsilon1}/T_e$,
+- only the buoyancy term uses the fixed $C_{\epsilon1}$ = [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/C1_eps).
 
-In realizable models the nonlinear constitutive relation affects the viscosity (via realizable
-$C_\mu$) and the k-equation, but $P_\epsilon$ itself is expressed in terms of $S_k$ rather
-than $G_k$ or $G_{\text{nl}}$.
+$G_{\text{nl}}$ and $G'$ do not enter the realizable $\epsilon$ equation.
 
 ### RealizableTwoLayer k–$\epsilon$
 
@@ -177,10 +179,10 @@ The *RealizableTwoLayer* model combines the realizable bulk behavior with a two-
 enhancement via Yap:
 
 \begin{equation}
-f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+f_c \, \rho C_1 S \epsilon + C_{\epsilon1} \frac{\epsilon}{k} \left( C_{\epsilon3} G_b + \rho Y_y \right),
 \end{equation}
 
-with the same definitions of $S_k$, $f_c$, and $G_b$ as in the realizable model and the Yap
+with the same definitions of $C_1$, $S$, $f_c$, and $G_b$ as in the realizable model and the Yap
 term as described below.
 
 
@@ -350,10 +352,17 @@ D_\epsilon = \rho C_{\epsilon2} f_2 \frac{\epsilon^2}{k},
 where $C_{\epsilon2}$ is the model coefficient and $f_2$ is a damping function that depends on
 the k–$\epsilon$ variant:
 
-- `Standard`, `StandardTwoLayer`, `Realizable`, `RealizableTwoLayer`:
+- `Standard`, `StandardTwoLayer`:
   \begin{equation}
   f_2 = 1,
   \end{equation}
+
+- `Realizable`, `RealizableTwoLayer` [!cite](shih1995realizable):
+  \begin{equation}
+  f_2 = \frac{k}{k + \sqrt{\nu\epsilon}},
+  \end{equation}
+  so that $D_\epsilon = \rho C_{\epsilon2} \epsilon^2 / (k + \sqrt{\nu\epsilon})$, which stays finite
+  as $k \to 0$,
 
 - `StandardLowRe`:
   \begin{equation}
@@ -363,6 +372,21 @@ the k–$\epsilon$ variant:
 
 The same function is used for both the extra production term and the destruction
 damping in the low-Re model.
+
+### Model constants
+
+The default of [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/C2_eps) depends on the variant:
+1.92 for the Standard variants [!cite](launder1974numerical) and 1.9 for the Realizable variants
+[!cite](shih1995realizable). A value set in the input is always used.
+
+The turbulent Prandtl number $\sigma_\epsilon$ is not a parameter of this kernel: it is the
+`scaling_coeff` of the $\epsilon$ turbulent diffusion kernel (`LinearFVTurbulentDiffusion` or
+`LinearFVTurbulentBlendedDiffusion`), whose default is 1. When
+[!param](/LinearFVKernels/kEpsilonTKEDSourceSink/check_sigma_eps) is `true` (default), the kernel
+warns if a constant `scaling_coeff` of an $\epsilon$ diffusion kernel differs from the calibrated
+value of the selected variant: $\sigma_\epsilon = 1.3$ for the Standard variants and
+$\sigma_\epsilon = 1.2$ for the Realizable variants. A diffusion kernel without `scaling_coeff`
+(for example the molecular `LinearFVDiffusion`) and a non-constant functor are not checked.
 
 
 !syntax parameters /LinearFVKernels/kEpsilonTKEDSourceSink

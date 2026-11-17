@@ -202,20 +202,41 @@ Real fmu_SKE_LRe(const Real Cd0, const Real Cd1, const Real Cd2, const Real Re_d
 Real f2_RKE(const Real k, const Real nu, const Real eps);
 
 /**
- * Realizable k-epsilon C_mu expression based on invariants of S and W.
+ * Realizable k-epsilon C_mu of Shih et al. (1995):
  *
- * Cmu = Ca0 / (Ca1 + Ca2 S_bar + Ca3 W_bar)
- * where S_bar = (k/eps) sqrt(S2) and W_bar = (k/eps) sqrt(W2)
- * with S2 = 2 S_ij S_ij and W2 = 2 W_ij W_ij.
+ *   C_mu = 1 / (A0 + As k U* / eps)
+ *   U*   = sqrt(S_ij S_ij + Omega_ij Omega_ij)
+ *   As   = sqrt(6) cos(phi),  phi = 1/3 acos(sqrt(6) W)
+ *   W    = S_ij S_jk S_ki / S_tilde^3,  S_tilde = sqrt(S_ij S_ij)
+ *
+ * with S_ij and Omega_ij the mean strain-rate and rotation-rate tensors. The system-rotation
+ * term of Omega_ij is not included (stationary frame).
+ *
+ * @param grad_u velocity gradient tensor, grad_u(i, j) = du_i/dx_j
+ * @param k turbulent kinetic energy
+ * @param eps turbulent kinetic energy dissipation rate
+ * @param A0 model constant A0
  */
-Real Cmu_realizable(const Real Ca0,
-                    const Real Ca1,
-                    const Real Ca2,
-                    const Real Ca3,
-                    const Real S2,
-                    const Real W2,
-                    const Real k,
-                    const Real eps);
+Real Cmu_realizable(const RankTwoTensor & grad_u, const Real k, const Real eps, const Real A0);
+
+/**
+ * Calibrated epsilon destruction coefficient C2_eps of a k-epsilon variant:
+ * 1.92 for the Standard variants (Launder-Spalding), 1.9 for the Realizable variants (Shih et al.)
+ */
+Real defaultC2eps(const KEpsilonVariant variant);
+
+/**
+ * Calibrated turbulent Prandtl number sigma_epsilon of a k-epsilon variant:
+ * 1.3 for the Standard variants (Launder-Spalding), 1.2 for the Realizable variants (Shih et al.)
+ */
+Real defaultSigmaEps(const KEpsilonVariant variant);
+
+/**
+ * Variable epsilon production coefficient of the realizable k-epsilon model:
+ *
+ *   C1 = max(0.43, eta / (eta + 5)),  eta = S k / eps,  S = sqrt(2 S_ij S_ij)
+ */
+Real C1_realizable(const Real eta);
 
 /**
  * Compute the variable C_mu used with non-linear constitutive relations.

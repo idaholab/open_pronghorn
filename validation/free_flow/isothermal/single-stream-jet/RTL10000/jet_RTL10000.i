@@ -479,10 +479,6 @@ outlet = 'back bottom top left right'
     # Cd0 = 0.091      # defaults, can omit if you keep Standard
     # Cd1 = 0.0042
     # Cd2 = 0.00011
-    Ca0 = 0.667      # Realizable C_mu coefficients
-    Ca1 = 1.25
-    Ca2 = 1.0
-    Ca3 = 0.9
     wall_distance = wall_distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_y_plus]

@@ -31,7 +31,7 @@ kEpsilonViscosity::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::mu, "Dynamic viscosity.");
 
   params.addParam<Real>("C_mu", 0.09, "Base turbulent kinetic energy closure constant C_mu.");
-  params.addParam<Real>("mu_t_ratio_max", 1e5, "Maximum allowable mu_t_ratio : mu/mu_t.");
+  params.addParam<Real>("mu_t_ratio_max", 1e5, "Maximum allowable ratio mu_t/mu.");
 
   params.addParam<std::vector<BoundaryName>>(
       "walls", {}, "Boundaries that correspond to solid walls.");
@@ -79,15 +79,9 @@ kEpsilonViscosity::validParams()
                         "Low-Re coefficient Cd2 used in the f_mu damping function "
                         "for the Standard k-epsilon Low-Re model.");
 
-  // Realizable C_mu coefficients (Ca0..Ca3)
+  // Realizable C_mu constant: C_mu = 1 / (A0 + As k U* / eps) (Shih et al.)
   params.addParam<Real>(
-      "Ca0", 0.667, "Realizable k-epsilon coefficient Ca0 used in the C_mu expression.");
-  params.addParam<Real>(
-      "Ca1", 1.25, "Realizable k-epsilon coefficient Ca1 used in the C_mu expression.");
-  params.addParam<Real>(
-      "Ca2", 1.0, "Realizable k-epsilon coefficient Ca2 used in the C_mu expression.");
-  params.addParam<Real>(
-      "Ca3", 0.9, "Realizable k-epsilon coefficient Ca3 used in the C_mu expression.");
+      "A0", 4.04, "Realizable k-epsilon constant A0 in C_mu = 1 / (A0 + As k U* / epsilon).");
 
   // Time-scale coefficient C_t for T = max(Te, C_t sqrt(nu/epsilon))
   params.addParam<Real>("Ct",
@@ -123,10 +117,7 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
     _Cd0(getParam<Real>("Cd0")),
     _Cd1(getParam<Real>("Cd1")),
     _Cd2(getParam<Real>("Cd2")),
-    _Ca0(getParam<Real>("Ca0")),
-    _Ca1(getParam<Real>("Ca1")),
-    _Ca2(getParam<Real>("Ca2")),
-    _Ca3(getParam<Real>("Ca3")),
+    _A0(getParam<Real>("A0")),
     _Ct(getParam<Real>("Ct")),
     _wall_distance_functor(
         params.isParamValid("wall_distance") ? &(getFunctor<Real>("wall_distance")) : nullptr),
@@ -204,21 +195,9 @@ kEpsilonViscosity::kEpsilonViscosity(const InputParameters & params)
       "Parameter 'Cd2' is only applicable when 'k_epsilon_variant' is 'StandardLowRe'.");
 
   // ---- Realizable coefficients only apply to realizable variants ----
-  check_param_applicability("Ca0",
+  check_param_applicability("A0",
                             is_realizable_variant,
-                            "Parameter 'Ca0' is only applicable when 'k_epsilon_variant' is "
-                            "'Realizable' or 'RealizableTwoLayer'.");
-  check_param_applicability("Ca1",
-                            is_realizable_variant,
-                            "Parameter 'Ca1' is only applicable when 'k_epsilon_variant' is "
-                            "'Realizable' or 'RealizableTwoLayer'.");
-  check_param_applicability("Ca2",
-                            is_realizable_variant,
-                            "Parameter 'Ca2' is only applicable when 'k_epsilon_variant' is "
-                            "'Realizable' or 'RealizableTwoLayer'.");
-  check_param_applicability("Ca3",
-                            is_realizable_variant,
-                            "Parameter 'Ca3' is only applicable when 'k_epsilon_variant' is "
+                            "Parameter 'A0' is only applicable when 'k_epsilon_variant' is "
                             "'Realizable' or 'RealizableTwoLayer'.");
 
   // Error if using cylindrical coordinates - gradients won't be correct
@@ -363,7 +342,6 @@ kEpsilonViscosity::computeValue()
     const Real Te = k / std::max(eps, 1e-20);
 
     // Time scale with optional limiter:
-    //   T = max(Te, Ct * sqrt(nu/eps))  (STAR-CCM+ Eq. 1046)
     Real time_scale = Te;
     if (_scale_limiter == "standard")
     {
@@ -384,8 +362,8 @@ kEpsilonViscosity::computeValue()
     else if (_variant == NS::KEpsilonVariant::Realizable ||
              _variant == NS::KEpsilonVariant::RealizableTwoLayer)
     {
-      auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
-      Cmu_eff = NS::Cmu_realizable(_Ca0, _Ca1, _Ca2, _Ca3, inv.S2, inv.W2, k, std::max(eps, 1e-20));
+      const auto grad_u = NS::computeVelocityGradient(_u_var, _v_var, _w_var, elem_arg, state);
+      Cmu_eff = NS::Cmu_realizable(grad_u, k, eps, _A0);
     }
 
     // Base k-epsilon turbulent viscosity

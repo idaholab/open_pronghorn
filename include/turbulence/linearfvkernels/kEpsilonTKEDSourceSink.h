@@ -155,6 +155,12 @@ protected:
   ///@}
 
   /**
+   * Warn if a constant sigma_epsilon ('scaling_coeff' of an epsilon turbulent diffusion kernel)
+   * differs from the calibrated value of the selected variant.
+   */
+  void checkSigmaEps() const;
+
+  /**
    * Bulk implicit destruction coefficient C2_eps f2 rho / T_e (per unit volume).
    */
   Real computeBulkDestructionCoeff(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
@@ -174,9 +180,17 @@ protected:
    * Compute epsilon production "P_epsilon" in the bulk, based on the chosen
    * k–epsilon variant and switches. The returned value does *not* include
    * the C1_epsilon / T_e factor; that is applied by the kernel when assembling
-   * the RHS.
+   * the RHS. For the realizable variants it excludes the shear production, which is
+   * computeRealizableShearProduction().
    */
   Real computeBulkPe(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
+
+  /**
+   * Shear production of epsilon in the realizable variants, f_c rho C1 S eps with
+   * C1 = max(0.43, eta / (eta + 5)), eta = S k / eps (per unit volume).
+   */
+  Real computeRealizableShearProduction(const Moose::ElemArg & elem_arg,
+                                        const Moose::StateArg & state) const;
 
   /**
    * Compute the turbulent time scale T_e used in the epsilon equation.

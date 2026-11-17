@@ -195,7 +195,12 @@ The standard high-Re $k$–$\epsilon$ model uses the classical constants
 
 These can be overridden through the parameters of the relevant kernels
 ([kEpsilonTKESourceSink.md], [kEpsilonTKEDSourceSink.md], and [kEpsilonViscosity.md]) if a different
-calibration is required.
+calibration is required. The realizable variants use the calibration of
+[!cite](shih1995realizable), $C_{2} = 1.9$ and $\sigma_\epsilon = 1.2$ (see [#realizable-variant]).
+The default of `C2_eps` in [kEpsilonTKEDSourceSink.md] follows the selected variant. $\sigma_k$ and
+$\sigma_\epsilon$ are the `scaling_coeff` of the turbulent diffusion kernels and must be set in the
+input; [kEpsilonTKEDSourceSink.md] warns when a constant $\sigma_\epsilon$ differs from the
+calibrated value of the selected variant.
 
 ### Variant-specific forms
 
@@ -234,15 +239,28 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 - A blending function $\lambda(Re_d)$ [!cite](jongen1998simulation) gives a smooth transition
   for both $\mu_t$ and the $\epsilon$ equation (see [#two-layer]).
 
-#### Realizable
+#### Realizable id=realizable-variant
 
-- Uses the realizable form of $C_\mu$ [!cite](shih1995realizable):
+- Uses the realizable eddy viscosity of [!cite](shih1995realizable):
   \begin{equation}
-  C_\mu^\text{real} =
-  \frac{C_{a0}}{C_{a1} + C_{a2} \bar{S} + C_{a3} \bar{W}},
+  C_\mu^\text{real} = \frac{1}{A_0 + A_s \, k U^* / \epsilon}, \qquad
+  U^* = \sqrt{S_{ij}S_{ij} + \Omega_{ij}\Omega_{ij}},
   \end{equation}
-  where $\bar{S} = (k/\epsilon) \sqrt{S^2}$ and $\bar{W} = (k/\epsilon) \sqrt{W^2}$.
-- Optionally uses a realizable low-Re damping function `f2_RKE`.
+  with $A_0 = 4.04$, $A_s = \sqrt{6}\cos\phi$, $\phi = \tfrac{1}{3}\arccos(\sqrt{6}\,W)$,
+  $W = S_{ij}S_{jk}S_{ki}/\tilde{S}^3$ and $\tilde{S} = \sqrt{S_{ij}S_{ij}}$. The system-rotation
+  term of $\Omega_{ij}$ is not included (stationary frame). In an equilibrium logarithmic layer
+  $C_\mu^\text{real} \approx 0.09$.
+- The $k$ equation is the same as in the standard model.
+- The $\epsilon$ equation is replaced by
+  \begin{equation}
+  \rho C_1 S \epsilon - \rho C_{2} \frac{\epsilon^2}{k + \sqrt{\nu\epsilon}}
+  + C_{1\epsilon}\frac{\epsilon}{k} C_{3\epsilon} G_b, \qquad
+  C_1 = \max\left(0.43, \frac{\eta}{\eta+5}\right), \qquad \eta = S\frac{k}{\epsilon},
+  \end{equation}
+  with $S = \sqrt{2 S_{ij} S_{ij}}$. The production term does not contain $G_k$, and the destruction
+  term uses `f2_RKE` $= k/(k+\sqrt{\nu\epsilon})$, so it stays finite as $k \to 0$.
+- Model constants: $C_{1\epsilon} = 1.44$ (buoyancy term only), $C_{2} = 1.9$, $\sigma_k = 1.0$,
+  $\sigma_\epsilon = 1.2$.
 - Improves predictions for rotating, swirling, and separating flows while maintaining
   realizability of the normal stresses [!cite](shih1995realizable).
 
@@ -411,9 +429,10 @@ inconsistent input stops with an error. A minimal setup is:
   for $C_\mu$ and a modified $\epsilon$ equation to enforce these constraints, improving
   predictions in rotating and separating flows [!cite](shih1995realizable).
 - *Implementation*:
-  (a) `Cmu_realizable` provides $C_\mu^\text{real}$ based on $S^2$, $W^2$, $k$, and
-    $\epsilon$.
-  (b) Optional low-Re damping via `f2_RKE` may be applied.
+  (a) `Cmu_realizable` computes $C_\mu^\text{real}$ from the mean strain-rate and rotation-rate
+    tensors, $k$ and $\epsilon$,
+  (b) `C1_realizable` gives $C_1(\eta)$ for the production term $\rho C_1 S \epsilon$,
+  (c) `f2_RKE` is always applied in the destruction term.
 - *Activation*: `k_epsilon_variant = 'Realizable'` or `'RealizableTwoLayer'`.
 
 

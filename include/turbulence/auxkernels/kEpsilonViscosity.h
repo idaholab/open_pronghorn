@@ -88,11 +88,8 @@ protected:
   const Real _Cd1;
   const Real _Cd2;
 
-  /// Realizable C_mu coefficients (Ca0..Ca3)
-  const Real _Ca0;
-  const Real _Ca1;
-  const Real _Ca2;
-  const Real _Ca3;
+  /// Realizable C_mu constant A0 (Shih et al.)
+  const Real _A0;
 
   /// Time-scale constant C_t used in the k-epsilon time scale
   const Real _Ct;

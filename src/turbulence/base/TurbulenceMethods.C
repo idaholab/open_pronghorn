@@ -13,6 +13,7 @@
 #include "LinearFVFluxKernel.h"
 #include "LinearFVTimeDerivative.h"
 #include "TheWarehouse.h"
+#include "libmesh/utility.h"
 
 namespace NS
 {
@@ -124,19 +125,55 @@ f2_RKE(const Real k, const Real nu, const Real eps)
 }
 
 Real
-Cmu_realizable(const Real Ca0,
-               const Real Ca1,
-               const Real Ca2,
-               const Real Ca3,
-               const Real S2,
-               const Real W2,
-               const Real k,
-               const Real eps)
+Cmu_realizable(const RankTwoTensor & grad_u, const Real k, const Real eps, const Real A0)
 {
-  const Real k_over_eps = k / eps;
-  const Real S_bar = k_over_eps * std::sqrt(S2);
-  const Real W_bar = k_over_eps * std::sqrt(W2);
-  return Ca0 / (Ca1 + Ca2 * S_bar + Ca3 * W_bar);
+  // Mean strain-rate and rotation-rate tensors
+  const RankTwoTensor S = 0.5 * (grad_u + grad_u.transpose());
+  const RankTwoTensor Omega = 0.5 * (grad_u - grad_u.transpose());
+
+  const Real SS = S.doubleContraction(S);
+  const Real S_tilde = std::sqrt(std::max(SS, 0.0));
+
+  // W = S_ij S_jk S_ki / S_tilde^3 = tr(S^3) / S_tilde^3; W = 0 for vanishing strain
+  Real W = 0.0;
+  if (S_tilde > 1e-20)
+    W = (S * S * S).trace() / Utility::pow<3>(S_tilde);
+
+  // sqrt(6) W lies in [-1, 1] analytically; clamp against round-off before acos
+  const Real arg = std::max(-1.0, std::min(1.0, std::sqrt(6.0) * W));
+  const Real phi = std::acos(arg) / 3.0;
+  const Real As = std::sqrt(6.0) * std::cos(phi);
+
+  const Real U_star = std::sqrt(std::max(SS + Omega.doubleContraction(Omega), 0.0));
+
+  return 1.0 / (A0 + As * std::max(k, 0.0) * U_star / std::max(eps, 1e-20));
+}
+
+namespace
+{
+bool
+isRealizable(const KEpsilonVariant variant)
+{
+  return variant == KEpsilonVariant::Realizable || variant == KEpsilonVariant::RealizableTwoLayer;
+}
+}
+
+Real
+defaultC2eps(const KEpsilonVariant variant)
+{
+  return isRealizable(variant) ? 1.9 : 1.92;
+}
+
+Real
+defaultSigmaEps(const KEpsilonVariant variant)
+{
+  return isRealizable(variant) ? 1.2 : 1.3;
+}
+
+Real
+C1_realizable(const Real eta)
+{
+  return std::max(0.43, eta / (eta + 5.0));
 }
 
 Real

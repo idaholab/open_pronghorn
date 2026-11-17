@@ -13,6 +13,7 @@
 #include "SubProblem.h"
 #include "NavierStokesMethods.h"
 #include "LinearFVTurbulentBlended.h"
+#include "MooseUtils.h"
 
 registerMooseObject("OpenPronghornApp", kEpsilonTKEDSourceSink);
 
@@ -43,7 +44,10 @@ kEpsilonTKEDSourceSink::validParams()
 
   // ---- Epsilon model constants ----
   params.addParam<Real>("C1_eps", 1.44, "C1 epsilon production coefficient.");
-  params.addParam<Real>("C2_eps", 1.92, "C2 epsilon destruction coefficient.");
+  params.addParam<Real>("C2_eps",
+                        "C2 epsilon destruction coefficient. Defaults to 1.92 for the Standard "
+                        "variants (Launder-Spalding) and 1.9 for the Realizable variants (Shih et "
+                        "al. 1995).");
   params.addParam<Real>(
       "C3_eps", 1.0, "C3 epsilon buoyancy coefficient (may be modified by Gb sign).");
   params.addParam<Real>("Ct", 6.0, "Ct coefficient used in Yap / ambient epsilon source terms.");
@@ -106,6 +110,13 @@ kEpsilonTKEDSourceSink::validParams()
                              nonlinear_model,
                              "Non-linear constitutive relation for standard k-epsilon.");
 
+  params.addParam<bool>(
+      "check_sigma_eps",
+      true,
+      "Warn if a constant 'scaling_coeff' (sigma_epsilon) of an epsilon turbulent diffusion "
+      "kernel differs from the calibrated value of the selected variant (1.3 for the Standard "
+      "variants, 1.2 for the Realizable variants).");
+
   MooseEnum curvature_model("none standard", "none");
   params.addParam<MooseEnum>("curvature_model",
                              curvature_model,
@@ -129,7 +140,10 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _wall_treatment(getParam<MooseEnum>("wall_treatment").getEnum<NS::WallTreatmentEnum>()),
     _C_mu(getParam<Real>("C_mu")),
     _C1_eps(getParam<Real>("C1_eps")),
-    _C2_eps(getParam<Real>("C2_eps")),
+    _C2_eps(params.isParamValid("C2_eps")
+                ? getParam<Real>("C2_eps")
+                : NS::defaultC2eps(
+                      getParam<MooseEnum>("k_epsilon_variant").getEnum<NS::KEpsilonVariant>())),
     _C3_eps(getParam<Real>("C3_eps")),
     _Ct(getParam<Real>("Ct")),
     _C_lowRe(getParam<Real>("C_lowRe")),
@@ -312,6 +326,47 @@ kEpsilonTKEDSourceSink::initialSetup()
           b && b->blendingFactorName())
         kernel->paramError(
             "blending_factor", "Only applicable to two-layer variants of '", name(), "'.");
+
+  if (getParam<bool>("check_sigma_eps") && _tid == 0)
+    checkSigmaEps();
+}
+
+void
+kEpsilonTKEDSourceSink::checkSigmaEps() const
+{
+  // sigma_epsilon is the 'scaling_coeff' of the epsilon turbulent diffusion kernel, so it cannot
+  // get a variant-dependent default here. Check the constant values against the calibration.
+  const Real sigma_eps = NS::defaultSigmaEps(_variant);
+  const bool realizable = _variant == NS::KEpsilonVariant::Realizable ||
+                          _variant == NS::KEpsilonVariant::RealizableTwoLayer;
+
+  for (const auto kernel : NS::getTransportKernels(_fe_problem, _sys_num, _var_num, _tid))
+  {
+    const auto & kernel_params = kernel->parameters();
+    if (!kernel_params.have_parameter<MooseFunctorName>("scaling_coeff"))
+      continue;
+
+    // Only constants can be checked; a functor sigma_epsilon is the user's choice
+    Real value;
+    if (!MooseUtils::parsesToReal(kernel_params.get<MooseFunctorName>("scaling_coeff"), &value))
+      continue;
+
+    if (!MooseUtils::absoluteFuzzyEqual(value, sigma_eps))
+      kernel->paramWarning("scaling_coeff",
+                           "sigma_epsilon = ",
+                           value,
+                           " differs from the calibrated value ",
+                           sigma_eps,
+                           " of the '",
+                           getParam<MooseEnum>("k_epsilon_variant"),
+                           "' variant used by '",
+                           name(),
+                           "' (",
+                           realizable ? "Shih et al. 1995" : "Launder-Spalding",
+                           "). Set 'check_sigma_eps = false' in '",
+                           name(),
+                           "' to silence this warning.");
+  }
 }
 
 void
@@ -475,7 +530,35 @@ kEpsilonTKEDSourceSink::computeBulkProductionRHS(const Moose::ElemArg & elem_arg
   // Production term C1_eps * Pe / T_e (per unit volume)
   const Real Pe = computeBulkPe(elem_arg, state);
   const Real Te = computeTimeScale(elem_arg, state);
-  return _C1_eps * Pe / std::max(Te, 1e-20);
+  Real production = _C1_eps * Pe / std::max(Te, 1e-20);
+
+  // Realizable: the shear production of epsilon is rho C1 S eps rather than C1_eps G_k / T_e
+  if (_variant == NS::KEpsilonVariant::Realizable ||
+      _variant == NS::KEpsilonVariant::RealizableTwoLayer)
+    production += computeRealizableShearProduction(elem_arg, state);
+
+  return production;
+}
+
+Real
+kEpsilonTKEDSourceSink::computeRealizableShearProduction(const Moose::ElemArg & elem_arg,
+                                                         const Moose::StateArg & state) const
+{
+  // rho C1 S eps with C1 = max(0.43, eta / (eta + 5)), eta = S k / eps, S = sqrt(2 S_ij S_ij)
+  const Real rho = _rho(elem_arg, state);
+  const Real k = std::max(_k(elem_arg, state), 0.0);
+  const Real eps = std::max(_var.getElemValue(*_current_elem_info, state), 0.0);
+
+  const auto inv = NS::computeStrainRotationInvariants(_u_var, _v_var, _w_var, elem_arg, state);
+  const Real S = std::sqrt(std::max(inv.S2, 0.0));
+  const Real eta = S * k / std::max(eps, 1e-20);
+
+  // Optional curvature / rotation correction of the shear production
+  Real fc = 1.0;
+  if (_curvature_model != NS::CurvatureCorrectionModel::None)
+    fc = NS::computeCurvatureFactor(_curvature_model, inv);
+
+  return fc * rho * NS::C1_realizable(eta) * S * eps;
 }
 
 Real
@@ -575,9 +658,6 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
                           inv.div_u,
                           /*include_compressibility_terms*/ _switches.use_compressibility);
 
-  // For Realizable Pe we also need the pure shear production S_k = mu_t S^2
-  const Real Sk = mu_t * inv.S2;
-
   // Buoyancy production G_b
   Real Gb = 0.0;
   Real C3_eps_local = _C3_eps;
@@ -615,11 +695,6 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     auto grad_u = NS::computeVelocityGradient(_u_var, _v_var, _w_var, elem_arg, state);
     Gnl = NS::computeGnl(_nonlinear_model, grad_u, inv, mu_t, k, eps);
   }
-
-  // Curvature / rotation correction factor f_c
-  Real fc = 1.0;
-  if (_curvature_model != NS::CurvatureCorrectionModel::None)
-    fc = NS::computeCurvatureFactor(_curvature_model, inv);
 
   // Optional low-Re extra production G'
   Real Gprime = 0.0;
@@ -680,13 +755,14 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
       break;
 
     case NS::KEpsilonVariant::Realizable:
-      // Realizable: Pe = f_c S_k + C3_eps Gb
-      Pe = fc * Sk + C3_eps_local * Gb;
+      // Realizable: no G_k in Pe; the shear production rho C1 S eps (with f_c) is added in
+      // computeBulkProductionRHS(). Only buoyancy goes through C1_eps / T_e.
+      Pe = C3_eps_local * Gb;
       break;
 
     case NS::KEpsilonVariant::RealizableTwoLayer:
       // Realizable two-layer: same, with optional Yap term
-      Pe = fc * Sk + C3_eps_local * Gb + yap_source;
+      Pe = C3_eps_local * Gb + yap_source;
       break;
 
     default:

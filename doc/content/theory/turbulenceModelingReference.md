@@ -215,39 +215,65 @@ This is used to modify $\mu_t$ as $\mu_t \gets f_\mu \mu_t$ for the first cell n
 
 ## 8. `f2_RKE`
 
-This is another *damping function* $f_2$ (used in realizable or low-Re variants):
+This is the destruction *damping function* $f_2$ of the realizable variants:
 \begin{equation}
 f_2(k,\nu,\epsilon) = \frac{k}{k + \sqrt{\nu \epsilon}}.
 \end{equation}
 
-It approaches 0 near the wall (small $k$), and 1 away from the wall.
+It approaches 0 near the wall (small $k$), and 1 away from the wall. It is always applied in the
+destruction term of the `Realizable` and `RealizableTwoLayer` variants, which gives
+$\rho C_2 \epsilon^2/(k + \sqrt{\nu\epsilon})$ [!cite](shih1995realizable).
 
 
 ## 9. `Cmu_realizable`
 
-This function computes a *realizable* eddy-viscosity constant $C_\mu$ based on the
-invariants $S^2$ and $W^2$:
+This function computes the realizable eddy-viscosity coefficient of
+[!cite](shih1995realizable) from the velocity gradient $\nabla \mathbf{u}$, $k$, $\epsilon$ and the
+constant $A_0$ (parameter `A0` of [kEpsilonViscosity.md], default 4.04):
 
-1. First compute the ratio
+1. Build the mean strain-rate and rotation-rate tensors
    \begin{equation}
-   \frac{k}{\epsilon} = k_\epsilon,
-   \end{equation}
-   and then
-   \begin{equation}
-   \bar{S} = k_\epsilon \sqrt{S^2}, \qquad
-   \bar{W} = k_\epsilon \sqrt{W^2}.
+   S_{ij} = \tfrac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right),
+   \qquad
+   \Omega_{ij} = \tfrac{1}{2}\left(\frac{\partial u_i}{\partial x_j} - \frac{\partial u_j}{\partial x_i}\right).
    \end{equation}
 
-2. The realizable $C_\mu$ is then
+2. Compute
    \begin{equation}
-   C_\mu^\text{real} =
-   \frac{C_{a0}}{C_{a1} + C_{a2} \bar{S} + C_{a3} \bar{W}}.
+   \tilde{S} = \sqrt{S_{ij}S_{ij}}, \qquad
+   U^* = \sqrt{S_{ij}S_{ij} + \Omega_{ij}\Omega_{ij}}, \qquad
+   W = \frac{S_{ij}S_{jk}S_{ki}}{\tilde{S}^3},
    \end{equation}
+   with $W = 0$ when $\tilde{S}$ vanishes.
 
-with the constants pre-defined realizability constants
-$C_{a0} = 0.667$, $C_{a1} = 1.25$, $C_{a2} = 1.0$, and $C_{a3} = 0.9$.
+3. Then
+   \begin{equation}
+   A_s = \sqrt{6}\cos\phi, \qquad \phi = \tfrac{1}{3}\arccos\left(\sqrt{6}\,W\right), \qquad
+   C_\mu^\text{real} = \frac{1}{A_0 + A_s \, k U^*/\epsilon}.
+   \end{equation}
+   The argument $\sqrt{6}\,W$ is clipped to $[-1, 1]$ before the $\arccos$.
 
-This quantity is used in realizable $k\text{–}\epsilon$ models to define $\mu_t$.
+The system-rotation term of $\Omega_{ij}$ is not included (stationary frame). In an equilibrium
+logarithmic layer ($Sk/\epsilon \approx 3.3$, plane shear) this gives $C_\mu^\text{real} \approx 0.09$.
+This quantity is used in the realizable $k\text{–}\epsilon$ models to define $\mu_t$.
+
+
+## 9b. `C1_realizable`
+
+The variable production coefficient of the realizable $\epsilon$ equation,
+\begin{equation}
+C_1 = \max\left(0.43, \frac{\eta}{\eta + 5}\right), \qquad \eta = S\frac{k}{\epsilon}, \qquad
+S = \sqrt{2 S_{ij} S_{ij}},
+\end{equation}
+used in the production term $\rho C_1 S \epsilon$ [!cite](shih1995realizable).
+
+
+## 9c. `defaultC2eps` and `defaultSigmaEps`
+
+The calibrated values of $C_{2\epsilon}$ and $\sigma_\epsilon$ for each variant: 1.92 and 1.3 for the
+Standard variants [!cite](launder1974numerical), 1.9 and 1.2 for the Realizable variants
+[!cite](shih1995realizable). The first is the default of `C2_eps`; the second is used to check the
+`scaling_coeff` of the $\epsilon$ diffusion kernels.
 
 
 ## 10. `Cmu_nonlinear`
@@ -268,8 +294,8 @@ $\epsilon \le 0$, it returns 0. Otherwise:
    \frac{C_{a0}}{C_{a1} + C_{a2} \bar{S} + C_{a3} \bar{W}}.
    \end{equation}
 
-This has the same functional form as `Cmu_realizable`, but uses the invariants packaged in
-`StrainRotationInvariants` and is used with nonlinear constitutive relations.
+This is the $C_\mu$ of the nonlinear constitutive relations. It uses the invariants packaged in
+`StrainRotationInvariants` and is not used by the realizable variants (see `Cmu_realizable`).
 
 
 ## 11. `computeGk`

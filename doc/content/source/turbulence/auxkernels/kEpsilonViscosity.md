@@ -93,20 +93,24 @@ and $d$ is the wall distance (supplied via a functor).
 
 #### Realizable k–$\epsilon$
 
-The realizable model computes $C_\mu$ dynamically as a function of strain and rotation:
+The realizable model computes $C_\mu$ from the mean strain and rotation
+[!cite](shih1995realizable):
 
 \begin{equation}
-C_\mu^{\mathrm{eff}}
-= \frac{C_{a0}}
-        {C_{a1} + C_{a2} S^* + C_{a3} W^*},
+C_\mu^{\mathrm{eff}} = \frac{1}{A_0 + A_s \, k U^* / \epsilon},
 \end{equation}
 
 where:
 
-- $S^* = (k/\epsilon)\sqrt{S^2}$,
-- $W^* = (k/\epsilon)\sqrt{W^2}$.
+- $U^* = \sqrt{S_{ij}S_{ij} + \Omega_{ij}\Omega_{ij}}$, with $S_{ij}$ and $\Omega_{ij}$ the mean
+  strain-rate and rotation-rate tensors (no system-rotation term),
+- $A_s = \sqrt{6}\cos\phi$, $\phi = \tfrac{1}{3}\arccos(\sqrt{6}\,W)$,
+  $W = S_{ij}S_{jk}S_{ki}/\tilde{S}^3$, $\tilde{S} = \sqrt{S_{ij}S_{ij}}$,
+- $A_0$ is set by [!param](/AuxKernels/kEpsilonViscosity/A0) (default 4.04).
 
-This value replaces the standard constant $C_\mu$ everywhere in the model.
+In an equilibrium logarithmic layer this gives $C_\mu^{\mathrm{eff}} \approx 0.09$. This value
+replaces $C_\mu$ in the bulk $\mu_t$ only; the wall functions and the two-layer quantities keep the
+constant [!param](/AuxKernels/kEpsilonViscosity/C_mu).
 
 #### Two-layer models (StandardTwoLayer and RealizableTwoLayer)
 
