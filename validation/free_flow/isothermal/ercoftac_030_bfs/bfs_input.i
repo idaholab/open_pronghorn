@@ -38,7 +38,6 @@ nonlinear_model     = 'none'
 curvature_model     = 'none'
 use_yap             = false
 use_low_re_Gprime   = false
-bulk_wall_treatment = false
 
 [Mesh]
   [load_mesh]
@@ -89,7 +88,7 @@ bulk_wall_treatment = false
       rhie_chow_uo_name = 'rc'
       pressure_projection_method = 'consistent'
     []
-    [TurbulenceSegregated/k-epsilon]
+    [TurbulenceSegregatedExtended/k-epsilon]
       # Model
       turbulence_handling = 'k-epsilon'
       tke_name = TKE
@@ -186,36 +185,7 @@ bulk_wall_treatment = false
 []
 
 [AuxKernels]
-  [compute_mu_t]
-    type = kEpsilonViscosity
-    variable = mu_t
-
-    C_mu = ${C_mu}
-    tke = TKE
-    epsilon = TKED
-    mu = ${mu}
-    rho = ${rho}
-    u = vel_x
-    v = vel_y
-
-    bulk_wall_treatment = ${bulk_wall_treatment}
-    walls = ${walls}
-    wall_treatment = ${wall_treatment}
-    mu_t_ratio_max = 1e20
-    execute_on = 'NONLINEAR'
-
-    # NEW (optional) – choose model and options
-    k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
-    # two_layer_flavor  = ${two_layer_flavor}   # ignored unless *TwoLayer variants
-    # Cd0 = 0.091      # defaults, can omit if you keep Standard
-    # Cd1 = 0.0042
-    # Cd2 = 0.00011
-    # Ca0 = 0.667      # Realizable C_mu coefficients
-    # Ca1 = 1.25
-    # Ca2 = 1.0
-    # Ca3 = 0.9
-    wall_distance = distance   # only needed for LowRe/TwoLayer (see below)
-  []
+  # The turbulent viscosity is computed by the turbulence Physics
   [compute_mu_t_wall_neq]
     type = ParsedAux
     variable = 'mu_t_wall'
