@@ -105,6 +105,19 @@ where
 - $G_{\text{nl}}$ is the nonlinear production term (if `nonlinear_model != none`),
 - $C_{\epsilon3}$ is the buoyancy coefficient (usually model-dependent).
 
+When `use_buoyancy = true` and the gravity vector is nonzero, $C_{\epsilon3}$ is computed in each
+cell as
+
+\begin{equation}
+C_{\epsilon3} = \tanh\left|\frac{u_\parallel}{u_\perp}\right|,
+\end{equation}
+
+where $u_\parallel$ and $u_\perp$ are the velocity components parallel and perpendicular to
+$\mathbf{g}$. The coefficient is close to 1 in vertical buoyant shear layers and close to 0 in
+horizontal ones. The user value `C3_eps` is used only where $u_\perp = 0$. The same $C_{\epsilon3} G_b$
+term is used by every variant, including the realizable ones, where it enters as
+$C_{\epsilon1} C_{\epsilon3} G_b\,\epsilon/k$.
+
 The production limiter is consistent with the one used in the k-equation kernel.
 
 ### StandardTwoLayer k–$\epsilon$

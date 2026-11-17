@@ -173,11 +173,14 @@ corrections that vanish when the flow is strictly incompressible. Buoyancy produ
 modeled as
 
 \begin{equation}
-G_b = - \frac{\mu_t}{\Pr_t} \, \mathbf{g} \cdot \nabla T \, \beta(T),
+G_b = \beta(T) \, \frac{\mu_t}{\Pr_t} \, \mathbf{g} \cdot \nabla T,
 \end{equation}
 
 where $\Pr_t$ is the turbulent Prandtl number, $\mathbf{g}$ is gravity, $T$ is
-temperature, and $\beta(T)$ is the thermal expansion coefficient.
+temperature, and $\beta(T)$ is the thermal expansion coefficient. This follows from
+$G_b = -\frac{\mu_t}{\rho \Pr_t} \mathbf{g} \cdot \nabla \rho$ with
+$\nabla \rho = -\rho \beta \nabla T$: in a stable stratification ($\nabla T$ opposite to
+$\mathbf{g}$) $G_b < 0$ and buoyancy destroys turbulence.
 
 ### Model constants (standard high-Re model)
 
@@ -453,7 +456,8 @@ inconsistent input stops with an error. A minimal setup is:
     by $C_{3\epsilon}$.
 - *Activation*:
   (a) `use_buoyancy = true`,
-  (b) `gravity`, `T_fluid`, `beta`, and `Pr_t` set appropriately.
+  (b) `gravity`, `temperature`, `beta`, and `Pr_t` set appropriately (in both the
+    $k$ and $\epsilon$ kernels).
 
 
 ### Compressibility correction
