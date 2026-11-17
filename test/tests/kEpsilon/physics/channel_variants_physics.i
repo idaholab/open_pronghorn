@@ -2,7 +2,7 @@
 # ERCOFTAC test case for turbulent channel flow
 # Case Number: 032
 # Turbulent model using:
-# k-epsilon, set up with the KEpsilonVariantsTurbulencePhysics
+# k-epsilon, set up with the AdvancedKEpsilonPhysics
 # Equilibrium + Newton wall treatment
 # SIMPLE solve
 ##########################################################

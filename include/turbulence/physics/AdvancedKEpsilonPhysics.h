@@ -23,12 +23,12 @@
  * variants, along with the buoyancy, compressibility, Yap, non-linear constitutive and
  * curvature corrections.
  */
-class KEpsilonVariantsTurbulencePhysics final : public WCNSLinearFVTurbulencePhysics
+class AdvancedKEpsilonPhysics final : public WCNSLinearFVTurbulencePhysics
 {
 public:
   static InputParameters validParams();
 
-  KEpsilonVariantsTurbulencePhysics(const InputParameters & parameters);
+  AdvancedKEpsilonPhysics(const InputParameters & parameters);
 
 protected:
   virtual void addAuxiliaryVariables() override;

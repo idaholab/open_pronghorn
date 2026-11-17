@@ -12,7 +12,7 @@
 //* ALL RIGHTS RESERVED
 //*
 
-#include "KEpsilonVariantsTurbulencePhysics.h"
+#include "AdvancedKEpsilonPhysics.h"
 
 #include "WCNSFVFlowPhysicsBase.h"
 #include "WCNSFVFluidHeatTransferPhysicsBase.h"
@@ -21,15 +21,15 @@
 #include "kEpsilonTKEDSourceSink.h"
 #include "WallDistanceAux.h"
 
-registerWCNSFVTurbulenceBaseTasks("OpenPronghornApp", KEpsilonVariantsTurbulencePhysics);
+registerWCNSFVTurbulenceBaseTasks("OpenPronghornApp", AdvancedKEpsilonPhysics);
 registerMooseAction("OpenPronghornApp",
-                    KEpsilonVariantsTurbulencePhysics,
+                    AdvancedKEpsilonPhysics,
                     "add_interpolation_method_physics");
-registerMooseAction("OpenPronghornApp", KEpsilonVariantsTurbulencePhysics, "add_functor_material");
+registerMooseAction("OpenPronghornApp", AdvancedKEpsilonPhysics, "add_functor_material");
 
 // Parameters with the same name and meaning in the three OpenPronghorn k-epsilon objects, and
 // which can therefore be forwarded verbatim. Each object only picks up the subset it declares.
-const std::vector<std::string> KEpsilonVariantsTurbulencePhysics::_variant_parameters = {
+const std::vector<std::string> AdvancedKEpsilonPhysics::_variant_parameters = {
     "k_epsilon_variant",
     "two_layer_flavor",
     "scale_limiter",
@@ -56,7 +56,7 @@ const std::vector<std::string> KEpsilonVariantsTurbulencePhysics::_variant_param
     "speed_of_sound"};
 
 InputParameters
-KEpsilonVariantsTurbulencePhysics::validParams()
+AdvancedKEpsilonPhysics::validParams()
 {
   InputParameters params = WCNSLinearFVTurbulencePhysics::validParams();
   params.addClassDescription(
@@ -131,8 +131,7 @@ KEpsilonVariantsTurbulencePhysics::validParams()
   return params;
 }
 
-KEpsilonVariantsTurbulencePhysics::KEpsilonVariantsTurbulencePhysics(
-    const InputParameters & parameters)
+AdvancedKEpsilonPhysics::AdvancedKEpsilonPhysics(const InputParameters & parameters)
   : WCNSLinearFVTurbulencePhysics(parameters),
     _wall_distance_name(getParam<MooseFunctorName>(NS::wall_distance)),
     _create_wall_distance(needsWallDistance() && !isParamSetByUser(NS::wall_distance))
@@ -145,7 +144,7 @@ KEpsilonVariantsTurbulencePhysics::KEpsilonVariantsTurbulencePhysics(
 }
 
 bool
-KEpsilonVariantsTurbulencePhysics::needsWallDistance() const
+AdvancedKEpsilonPhysics::needsWallDistance() const
 {
   const auto variant = getParam<MooseEnum>("k_epsilon_variant");
   return variant == "StandardTwoLayer" || variant == "RealizableTwoLayer" ||
@@ -154,7 +153,7 @@ KEpsilonVariantsTurbulencePhysics::needsWallDistance() const
 }
 
 Real
-KEpsilonVariantsTurbulencePhysics::getConstantCoefficient(const std::string & param_name) const
+AdvancedKEpsilonPhysics::getConstantCoefficient(const std::string & param_name) const
 {
   const auto & functor_name = getParam<MooseFunctorName>(param_name);
   if (!MooseUtils::isFloat(functor_name))
@@ -167,7 +166,7 @@ KEpsilonVariantsTurbulencePhysics::getConstantCoefficient(const std::string & pa
 }
 
 void
-KEpsilonVariantsTurbulencePhysics::addAuxiliaryVariables()
+AdvancedKEpsilonPhysics::addAuxiliaryVariables()
 {
   WCNSLinearFVTurbulencePhysics::addAuxiliaryVariables();
 
@@ -184,7 +183,7 @@ KEpsilonVariantsTurbulencePhysics::addAuxiliaryVariables()
 }
 
 void
-KEpsilonVariantsTurbulencePhysics::addAuxiliaryKernels()
+AdvancedKEpsilonPhysics::addAuxiliaryKernels()
 {
   WCNSLinearFVTurbulencePhysics::addAuxiliaryKernels();
 
@@ -202,7 +201,7 @@ KEpsilonVariantsTurbulencePhysics::addAuxiliaryKernels()
 }
 
 void
-KEpsilonVariantsTurbulencePhysics::addTurbulentViscosityAuxKernel()
+AdvancedKEpsilonPhysics::addTurbulentViscosityAuxKernel()
 {
   const std::string u_names[3] = {"u", "v", "w"};
   const std::string kernel_type = "kEpsilonViscosity";
@@ -231,7 +230,7 @@ KEpsilonVariantsTurbulencePhysics::addTurbulentViscosityAuxKernel()
 }
 
 void
-KEpsilonVariantsTurbulencePhysics::addKEpsilonSink()
+AdvancedKEpsilonPhysics::addKEpsilonSink()
 {
   const std::string u_names[3] = {"u", "v", "w"};
   const bool use_buoyancy = getParam<bool>("use_buoyancy");

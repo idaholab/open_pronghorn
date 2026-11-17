@@ -1,6 +1,6 @@
-# KEpsilonVariantsTurbulencePhysics
+# AdvancedKEpsilonPhysics
 
-`KEpsilonVariantsTurbulencePhysics` sets up a k-$\epsilon$ turbulence model with a linear finite
+`AdvancedKEpsilonPhysics` sets up a k-$\epsilon$ turbulence model with a linear finite
 volume discretization, for use alongside a segregated flow Physics such as
 [WCNSLinearFVFlowPhysics.md]. It derives from MOOSE's
 [WCNSLinearFVTurbulencePhysics.md] and reuses its variables, advection and diffusion kernels,
@@ -49,8 +49,8 @@ The OpenPronghorn k-$\epsilon$ objects take the `C1_eps`, `C2_eps` and `Pr_t` cl
 coefficients as constants, while the base Physics declares them as functors. Specifying a
 non-constant functor for one of these is an error.
 
-!syntax parameters /Physics/NavierStokes/AdvancedKEpsilon/KEpsilonVariantsTurbulencePhysics
+!syntax parameters /Physics/NavierStokes/AdvancedKEpsilon/AdvancedKEpsilonPhysics
 
-!syntax inputs /Physics/NavierStokes/AdvancedKEpsilon/KEpsilonVariantsTurbulencePhysics
+!syntax inputs /Physics/NavierStokes/AdvancedKEpsilon/AdvancedKEpsilonPhysics
 
-!syntax children /Physics/NavierStokes/AdvancedKEpsilon/KEpsilonVariantsTurbulencePhysics
+!syntax children /Physics/NavierStokes/AdvancedKEpsilon/AdvancedKEpsilonPhysics

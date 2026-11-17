@@ -1,5 +1,5 @@
 [Tests]
-  design = 'KEpsilonVariantsTurbulencePhysics.md'
+  design = 'AdvancedKEpsilonPhysics.md'
   issues = '#50'
   [standard]
     type = 'CSVDiff'
