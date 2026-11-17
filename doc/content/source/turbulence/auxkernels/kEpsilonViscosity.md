@@ -90,6 +90,7 @@ Re_d = \frac{\sqrt{k}\,d}{\nu},
 \end{equation}
 
 and $d$ is the wall distance (supplied via a functor).
+Defaults $C_{d0} = 0.091$, $C_{d1} = 0.0042$, $C_{d2} = 0.00011$ [!cite](lien1996low).
 
 #### Realizable k–$\epsilon$
 

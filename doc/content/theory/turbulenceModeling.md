@@ -225,8 +225,9 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 - Same basic structure as the standard model, but:
 - $\mu_t$ is multiplied by a low-Re damping function $f_\mu$,
 - $f_2$ is given by `f2_SKE_LRe(Re_t)`,
-- an additional $G'$ term may appear in the $\epsilon$ equation, scaled by
-    a low-Re damping factor.
+- an extra production
+  $G' = D f_2 (G_k + 2\mu k/d^2)\exp(-E\,Re_d^2)$ is added to $P_\epsilon$ when
+  `use_low_re_Gprime = true` [!cite](lien1996low).
 - These modifications allow integration to the wall ($y^+ \approx 1$) without wall
   functions, but require much finer near-wall meshes [!cite](wilcox2006turbulence).
 
@@ -285,8 +286,7 @@ This section explains the available corrections, their motivation, and how they 
   Low-Re formulations include damping functions that allow integration to the wall at
   $y^+ \approx 1$ [!cite](wilcox2006turbulence).
 - *Implementation*:
-  (a) $\mu_t \gets f_\mu \, \rho k^2/\epsilon$ with `fmu_SKE_LRe` (standard) or
-    combined realizable damping,
+  (a) $\mu_t \gets f_\mu \, \rho C_\mu k^2/\epsilon$ with `fmu_SKE_LRe`,
   (b) The $\epsilon$ equation uses $f_2 = f2_SKE_LRe$ or `f2_RKE`,
   (c) An additional production term $G'$ (via `computeGprime`) can be added to $S_\epsilon$.
 - *Activation*:

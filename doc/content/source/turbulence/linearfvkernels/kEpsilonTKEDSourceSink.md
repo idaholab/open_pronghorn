@@ -321,7 +321,7 @@ and a wall-distance functor is provided.
 The term $G'$ is defined as
 
 \begin{equation}
-G' = D f_2 \left(G_k + 2 \mu_t \frac{k}{d^2}\right) \exp(-E \mathrm{Re}_d^2),
+G' = D f_2 \left(G_k + 2 \mu \frac{k}{d^2}\right) \exp(-E \mathrm{Re}_d^2),
 \end{equation}
 
 where
@@ -332,8 +332,13 @@ where
   f_2 = 1 - C \exp(-\mathrm{Re}_t^2),
   \end{equation}
   with $C$ a low-Re coefficient,
+- $\mu$ is the molecular dynamic viscosity, so that $2\mu k/d^2 = \rho\epsilon_w$ is the wall
+  value of $\epsilon$,
 - $\mathrm{Re}_d = \sqrt{k} d / \nu$ is the wall-distance Reynolds number,
 - $\mathrm{Re}_t = k^2 / (\nu \epsilon)$ is the turbulence Reynolds number.
+
+Defaults: $C = 0.3$ (`C_lowRe`), $D = 1$ (`D_lowRe`), $E = 0.00375$ (`E_lowRe`)
+[!cite](lien1996low).
 
 In the $\epsilon$-production for the StandardLowRe variant the production term is
 

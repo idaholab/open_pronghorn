@@ -330,7 +330,7 @@ including:
 
 1. realizable production terms,
 2. nonlinear contributions,
-3. ow-Re extra production $G'$,
+3. low-Re extra production $G'$,
 4. Yap correction,
 5. buoyancy source for $\epsilon$;
 

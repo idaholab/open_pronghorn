@@ -194,8 +194,8 @@ standard $k\text{–}\epsilon$ model:
 \begin{equation}
 f_2(\mathrm{Re}_t) = 1 - C \exp(-\mathrm{Re}_t^2),
 \end{equation}
-where $C$ is a model constant and $\mathrm{Re}_t$ is a turbulent Reynolds number
-(typically $k^2/(\nu \epsilon)$).
+where $C$ is a model constant (default $C = 0.3$ [!cite](lien1996low)) and
+$\mathrm{Re}_t = k^2/(\nu \epsilon)$ is the turbulence Reynolds number.
 
 
 ## 7. `fmu_SKE_LRe`
@@ -210,7 +210,11 @@ f_\mu(\mathrm{Re}_d) &= 1 - e^{-\text{arg}}.
 \end{aligned}
 \end{equation}
 
-This is used to modify $\mu_t$ as $\mu_t \gets f_\mu \mu_t$ for the first cell near the wall.
+with $\mathrm{Re}_d = \sqrt{k}\,d/\nu$ and the defaults $C_{d0} = 0.091$, $C_{d1} = 0.0042$,
+$C_{d2} = 0.00011$ [!cite](lien1996low).
+
+This is used as $C_\mu^{\mathrm{eff}} = f_\mu C_\mu$ in every bulk cell of the
+StandardLowRe variant.
 
 
 ## 8. `f2_RKE`
@@ -388,19 +392,22 @@ $\epsilon$-equation.
 
 1. First build
    \begin{equation}
-   \text{term} = G_k + 2 \mu_t \frac{k}{d^2},
+   \text{term} = G_k + 2 \mu \frac{k}{d^2},
    \end{equation}
    where
 
    - $G_k$ is the shear-production term,
+   - $\mu$ is the molecular dynamic viscosity, so that $2\mu k/d^2 = \rho\epsilon_w$, the
+     wall value of $\epsilon$,
    - $d$ is wall distance.
 
 2. Then
    \begin{equation}
    G' = D \, f_2 \, \text{term} \, \exp(-E \, \mathrm{Re}_d^2),
    \end{equation}
-   where $D$ and $E$ are constants, $f_2$ is typically a low-Re damping function,
-   and $\mathrm{Re}_d$ is a Reynolds number based on wall distance.
+   where $D$ and $E$ are constants (defaults $D = 1$, $E = 0.00375$ [!cite](lien1996low)),
+   $f_2$ is `f2_SKE_LRe`, and $\mathrm{Re}_d = \sqrt{k}\,d/\nu$ is the wall-distance
+   Reynolds number.
 
 
 ## 16. `computeVelocityGradient`

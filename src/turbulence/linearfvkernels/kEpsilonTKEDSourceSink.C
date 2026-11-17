@@ -52,8 +52,10 @@ kEpsilonTKEDSourceSink::validParams()
       "C3_eps", 1.0, "C3 epsilon buoyancy coefficient (may be modified by Gb sign).");
   params.addParam<Real>("Ct", 6.0, "Ct coefficient used in Yap / ambient epsilon source terms.");
 
-  params.addParam<Real>(
-      "C_lowRe", 1.0, "Low-Re f2 constant C used in the standard low-Re k-epsilon model.");
+  params.addParam<Real>("C_lowRe",
+                        0.3,
+                        "Low-Re f2 constant C in f2 = 1 - C exp(-Re_t^2) (StandardLowRe; Lien et "
+                        "al. 1996).");
   params.addParam<Real>("D_lowRe", 1.0, "Low-Re extra production coefficient D for G'.");
   params.addParam<Real>("E_lowRe", 0.00375, "Low-Re extra production coefficient E for G'.");
   params.addParam<Real>("Cw", 0.83, "Yap correction constant Cw for epsilon equation.");
@@ -697,7 +699,7 @@ kEpsilonTKEDSourceSink::computeBulkPe(const Moose::ElemArg & elem_arg,
     const Real Re_d = std::sqrt(k) * d / std::max(nu, 1e-12);
     const Real Re_t = k * k / std::max(nu * eps, 1e-20);
     const Real f2_LRe = NS::f2_SKE_LRe(_C_lowRe, Re_t);
-    Gprime = NS::computeGprime(_D_lowRe, _E_lowRe, f2_LRe, Gk, mu_t, k, d, Re_d);
+    Gprime = NS::computeGprime(_D_lowRe, _E_lowRe, f2_LRe, Gk, mu, k, d, Re_d);
   }
 
   // Yap correction gamma_y => translated into a source term (rho / Ct) * gamma_y

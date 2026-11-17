@@ -242,12 +242,13 @@ computeGprime(const Real D,
               const Real E,
               const Real f2,
               const Real Gk,
-              const Real mu_t,
+              const Real mu,
               const Real k,
               const Real d,
               const Real Re_d)
 {
-  const Real term = Gk + 2.0 * mu_t * k / (d * d);
+  // 2 mu k / d^2 = rho eps_wall: molecular viscosity (Lien et al. 1996)
+  const Real term = Gk + 2.0 * mu * k / (d * d);
   return D * f2 * term * std::exp(-E * Re_d * Re_d);
 }
 

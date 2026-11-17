@@ -295,13 +295,15 @@ Real computeGammaY(const Real C_w, const Real eps, const Real k, const Real l, c
 /**
  * Low-Re additional production G' for the standard k-epsilon model.
  *
- * G' = D f2 (Gk + 2 mu_t k / d^2) exp(-E Re_d^2)
+ * G' = D f2 (Gk + 2 mu k / d^2) exp(-E Re_d^2)
+ *
+ * with mu the molecular dynamic viscosity (2 mu k / d^2 = rho eps at the wall).
  */
 Real computeGprime(const Real D,
                    const Real E,
                    const Real f2,
                    const Real Gk,
-                   const Real mu_t,
+                   const Real mu,
                    const Real k,
                    const Real d,
                    const Real Re_d);
