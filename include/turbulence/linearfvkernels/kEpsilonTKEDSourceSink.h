@@ -115,9 +115,6 @@ protected:
   /// Turbulent Prandtl number for buoyancy (if used)
   const Real _Pr_t;
 
-  /// Compressibility coefficient C_M (even though gamma_M mainly acts in the k-equation)
-  const Real _C_M;
-
   /// Gravity vector (for buoyancy production)
   const libMesh::VectorValue<Real> _g;
 
@@ -125,8 +122,6 @@ protected:
   const Moose::Functor<Real> * _T_functor;
   /// Optional functor: thermal expansion coefficient beta(T)
   const Moose::Functor<Real> * _beta_functor;
-  /// Optional functor: speed of sound c
-  const Moose::Functor<Real> * _c_functor;
   /// Optional functor: wall distance d (used for Yap and low-Re G')
   const Moose::Functor<Real> * _wall_distance_functor;
 
@@ -138,7 +133,6 @@ protected:
   /// Flags for optional functors
   const bool _has_T;
   const bool _has_beta;
-  const bool _has_c;
   const bool _has_wall_distance;
 
   /// Nonlinear constitutive model

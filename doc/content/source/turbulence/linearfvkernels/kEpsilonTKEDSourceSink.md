@@ -70,6 +70,10 @@ These invariants are used to construct:
   \begin{equation}
   G_k = \mu_t S^2 \;\; (\text{plus compressible terms if enabled}),
   \end{equation}
+  With [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_compressibility) set to `true`, the
+  $\tfrac{2}{3}$ dilatation terms are included in $G_k$ (set the same value as in the $k$ kernel).
+  The compressibility sink $\gamma_M$ acts in the $k$ equation only (see
+  [kEpsilonTKESourceSink.md]), so this kernel needs no `speed_of_sound` or `C_M`.
 - the strain magnitude $S = \sqrt{S^2}$ and $\eta = S k / \epsilon$ used by the realizable
   production $\rho C_1 S \epsilon$,
 - the curvature correction factor $f_c$ (for realizable models when enabled),

@@ -55,7 +55,8 @@ kEpsilonTKESourceSink::validParams()
       "use_buoyancy", false, "Include buoyancy production Gb in the bulk k-equation.");
   params.addParam<bool>("use_compressibility",
                         false,
-                        "Include compressibility correction gamma_M in the bulk k-equation.");
+                        "Include the compressible dilatation terms in G_k and the Sarkar "
+                        "dilatation dissipation gamma_M in the bulk k-equation.");
   params.addParam<bool>("use_curvature_correction",
                         false,
                         "Apply a curvature correction factor f_c to the shear production.");
@@ -63,7 +64,11 @@ kEpsilonTKESourceSink::validParams()
   params.addParam<Real>(
       "Pr_t", 0.9, "Turbulent Prandtl number used in the buoyancy production term.");
 
-  params.addParam<Real>("C_M", 1.0, "Coefficient used in the compressibility correction gamma_M.");
+  params.addParam<Real>("C_M",
+                        2.0,
+                        "Coefficient C_M in the Sarkar dilatation dissipation "
+                        "gamma_M = rho C_M k eps / c^2 (C_M = 2 corresponds to Sarkar et al. 1991 "
+                        "and the Fluent Y_M term).");
 
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0.0, 0.0, 0.0), "Gravity vector used for buoyancy production.");
@@ -379,7 +384,7 @@ kEpsilonTKESourceSink::computeRightHandSideContribution()
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end())
     return 0.0;
 
-  // Bulk production term (with optional corrections)
+  // Bulk production term (with optional corrections, without gamma_M)
   Real production = computeBulkProduction(elem_arg, state);
 
   // Production limiter to avoid excessive TKE in stagnation zones
@@ -388,7 +393,17 @@ kEpsilonTKESourceSink::computeRightHandSideContribution()
   const Real production_limit = _C_pl * rho * eps;
   production = std::min(production, production_limit);
 
-  return production * _current_elem_volume;
+  // Compressibility correction gamma_M is a dissipation (sink), so it is applied after the
+  // production limiter and is never clipped by it.
+  Real gamma_M = 0.0;
+  if (_switches.use_compressibility && _has_c)
+  {
+    const Real k = _var.getElemValue(*_current_elem_info, state);
+    const Real c = (*_c_functor)(elem_arg, state);
+    gamma_M = NS::computeGammaM(rho, _C_M, k, eps, c);
+  }
+
+  return (production - gamma_M) * _current_elem_volume;
 }
 
 Real
@@ -433,14 +448,6 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
   if (_curvature_model != NS::CurvatureCorrectionModel::None)
     fc = NS::computeCurvatureFactor(_curvature_model, inv);
 
-  // Compressibility correction gamma_M (subtracted)
-  Real gamma_M = 0.0;
-  if (_switches.use_compressibility && _has_c)
-  {
-    const Real c = (*_c_functor)(elem_arg, state);
-    gamma_M = NS::computeGammaM(rho, _C_M, k, eps, c);
-  }
-
   // Variant-dependent form of the shear production (fc only affects realizable variants)
   Real shear_prod = 0.0;
   switch (_variant)
@@ -460,6 +467,6 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
       mooseError("kEpsilonTKESourceSink: unsupported k-epsilon variant.");
   }
 
-  // Total bulk production passed to the RHS
-  return shear_prod + Gb + Gnl - gamma_M;
+  // Total bulk production passed to the RHS (gamma_M is subtracted after the limiter)
+  return shear_prod + Gb + Gnl;
 }

@@ -71,8 +71,9 @@ kEpsilonTKEDSourceSink::validParams()
       "use_buoyancy", false, "Include buoyancy production Gb in the epsilon equation.");
   params.addParam<bool>("use_compressibility",
                         false,
-                        "Include compressibility correction gamma_M in the epsilon "
-                        "formulation (mainly in the k-equation, kept for parity).");
+                        "Include the compressible dilatation terms in G_k used by the epsilon "
+                        "production. Must match the setting in kEpsilonTKESourceSink. "
+                        "(gamma_M acts in the k-equation only.)");
   params.addParam<bool>("use_curvature_correction",
                         false,
                         "Apply a curvature correction factor f_c to the shear production.");
@@ -82,7 +83,6 @@ kEpsilonTKEDSourceSink::validParams()
 
   params.addParam<Real>(
       "Pr_t", 0.9, "Turbulent Prandtl number used in the buoyancy production term.");
-  params.addParam<Real>("C_M", 1.0, "Coefficient used in the compressibility correction gamma_M.");
 
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0.0, 0.0, 0.0), "Gravity vector used for buoyancy production.");
@@ -91,8 +91,6 @@ kEpsilonTKEDSourceSink::validParams()
                                     "Temperature functor used for buoyancy production.");
   params.addParam<MooseFunctorName>(
       "beta", "Thermal expansion coefficient functor used for buoyancy production (beta(T)).");
-  params.addParam<MooseFunctorName>(
-      "speed_of_sound", "Speed of sound functor used for compressibility correction gamma_M.");
   params.addParam<MooseFunctorName>(
       "wall_distance", "Distance to the closest wall; used for Yap and low-Re corrections.");
 
@@ -161,12 +159,9 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
               /*use_nonlinear*/ false,
               /*use_curvature_correction*/ getParam<bool>("use_curvature_correction")},
     _Pr_t(getParam<Real>("Pr_t")),
-    _C_M(getParam<Real>("C_M")),
     _g(getParam<RealVectorValue>("gravity")),
     _T_functor(params.isParamValid("temperature") ? &(getFunctor<Real>("temperature")) : nullptr),
     _beta_functor(params.isParamValid("beta") ? &(getFunctor<Real>("beta")) : nullptr),
-    _c_functor(params.isParamValid("speed_of_sound") ? &(getFunctor<Real>("speed_of_sound"))
-                                                     : nullptr),
     _wall_distance_functor(
         params.isParamValid("wall_distance") ? &(getFunctor<Real>("wall_distance")) : nullptr),
     _two_layer_lambda(params.isParamValid("two_layer_lambda")
@@ -177,7 +172,6 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
                            : nullptr),
     _has_T(params.isParamValid("temperature")),
     _has_beta(params.isParamValid("beta")),
-    _has_c(params.isParamValid("speed_of_sound")),
     _has_wall_distance(params.isParamValid("wall_distance")),
     _nonlinear_model(
         getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
@@ -271,19 +265,6 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
                  "Parameter 'temperature' is only applicable when use_buoyancy = true.");
     if (user_set("beta"))
       paramError("beta", "Parameter 'beta' is only applicable when use_buoyancy = true.");
-  }
-
-  if (_switches.use_compressibility)
-  {
-    if (!_has_c)
-      paramError("speed_of_sound",
-                 "'use_compressibility=true' requires the 'speed_of_sound' functor.");
-  }
-  else
-  {
-    if (user_set("speed_of_sound"))
-      paramError("speed_of_sound",
-                 "Parameter 'speed_of_sound' is only applicable when use_compressibility = true.");
   }
 
   // Error if using cylindrical coordinates - gradients won't be correct

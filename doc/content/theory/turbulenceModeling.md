@@ -144,7 +144,8 @@ where
 - $P_k$ is shear production of turbulent kinetic energy;
 - $G_b$ is production (or destruction) of turbulence by buoyancy;
 - $S_k$ and $S_\epsilon$ collect additional user- or model-specific source terms, including
-  compressibility ($\gamma_M$), Yap ($\gamma_Y$), and low-Re corrections ($G'$);
+  compressibility ($\gamma_M$, $k$ equation only), Yap ($\gamma_Y$, $\epsilon$ equation), and
+  low-Re corrections ($G'$, $\epsilon$ equation);
 - $f_1$ and $f_2$ are damping functions (typically $f_1 = 1$ in high-Re models, with
   $f_2$ used in low-Re variants).
 
@@ -214,7 +215,7 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 - No explicit low-Re damping; near-wall behavior is typically handled by wall functions.
 - Optional terms:
 
-1. compressibility correction $\gamma_M$ in $S_\epsilon$,
+1. compressibility correction $\gamma_M$ (dilatation dissipation) as an extra sink in the $k$ equation,
 2. Yap correction $\gamma_Y$ in $S_\epsilon$,
 3. curvature factor $f_c$ multiplying $P_k$,
 4. nonlinear production $G_\text{nl}$ added to $P_k$.
@@ -481,16 +482,21 @@ inconsistent input stops with an error. A minimal setup is:
 
 ### Compressibility correction
 
-- *Motivation*: At high Mach numbers, dilatational effects can alter the turbulence
-  structure and time scales. Compressibility corrections add an extra term to the
-  $\epsilon$ equation to account for these effects [!cite](wilcox2006turbulence).
+- *Motivation*: In compressible turbulence, part of the dissipation is dilatational.
+  Sarkar et al. model it as an extra dissipation proportional to the turbulent Mach number
+  $M_t^2 = k/c^2$ [!cite](sarkar1991analysis).
 - *Implementation*:
-  (a) `computeGammaM` computes $\gamma_M$ based on $k$, $\epsilon$, and local speed of
-    sound,
-  (b) $\gamma_M$ is added to $S_\epsilon$ when `use_compressibility = true`.
+  (a) `computeGammaM` returns $\gamma_M = \rho C_M k \epsilon / c^2$, which is subtracted
+    from the source of the $k$ equation only ($C_M = 2$, the default, recovers Sarkar's
+    $2\rho\epsilon M_t^2$ with $M_t^2 = k/c^2$). It is applied after the $C_{PL}$ production
+    limiter, so the limiter never removes it,
+  (b) the same switch adds the dilatation terms
+    $-\tfrac{2}{3}\rho k\nabla\cdot\mathbf{u} - \tfrac{2}{3}\mu_t(\nabla\cdot\mathbf{u})^2$ to $G_k$,
+    which reach the $\epsilon$ equation through $C_{1\epsilon} G_k \epsilon/k$ (not in the
+    realizable variants, whose $\epsilon$ production is $\rho C_1 S \epsilon$).
 - *Activation*:
-  (a) `use_compressibility = true`,
-  (b) a `speed_of_sound` functor is provided and consistent with the equation of state.
+  (a) `use_compressibility = true` in **both** the $k$ and $\epsilon$ kernels,
+  (b) a `speed_of_sound` functor in the $k$ kernel, consistent with the equation of state.
 
 
 ### Curvature / rotation correction
@@ -541,7 +547,7 @@ OpenPronghorn.
 
 - For incompressible or low-Mach flows, set `use_compressibility = false` and omit
      `speed_of_sound`.
-- For compressible flows, provide a consistent `speed_of_sound` functor and consider
+- For compressible flows, provide a consistent `speed_of_sound` functor (to the $k$ kernel) and consider
      tighter nonlinear and linear solver tolerances.
 
 4. *Buoyancy-driven and stratified flows*

@@ -121,6 +121,9 @@ G_k = \mu_t S^2
 \end{equation}
 
 consistent with the constitutive relation for the Reynolds stress tensor in compressible flow.
+These terms are turned on by
+[!param](/LinearFVKernels/kEpsilonTKESourceSink/use_compressibility), the same switch that
+turns on $\gamma_M$.
 
 The shear production is then modified depending on the k–$\epsilon$ variant and curvature correction model
 (see below).
@@ -206,9 +209,11 @@ correction is added to the sink term:
 \gamma_M = \rho C_M \frac{k \epsilon}{c^2},
 \end{equation}
 
-where $C_M$ is a model coefficient and $c$ is the speed of sound. This term is computed by
-`NS::computeGammaM` and is subtracted from total production, representing the transfer of TKE into
-acoustic modes in compressible flow.
+where $C_M$ is a model coefficient and $c$ is the speed of sound. This is the dilatation
+dissipation of [!cite](sarkar1991analysis): the default $C_M = 2$ recovers Sarkar's
+$2\rho\epsilon M_t^2$ with $M_t^2 = k/c^2$ (the $Y_M$ term in Fluent). This term is computed by
+`NS::computeGammaM` and is subtracted after the production limiter (see below). The same switch also
+adds the $\tfrac{2}{3}$ dilatation terms to $G_k$ described above.
 
 ### Production limiter
 
@@ -220,7 +225,9 @@ G_k \le C_{PL}\,\rho\,\epsilon.
 
 The limiter coefficient $C_{PL}$ is available as
 [!param](/LinearFVKernels/kEpsilonTKESourceSink/C_pl). This limiter follows the standard approach
-from [!cite](menter1994two) and is applied in the bulk region.
+from [!cite](menter1994two) and is applied in the bulk region. It acts on the production sum
+$P_k + G_b + G_{\text{nl}}$. The compressibility sink $\gamma_M$ is subtracted afterwards, so the
+limiter never removes it.
 
 ### Summary of bulk source
 

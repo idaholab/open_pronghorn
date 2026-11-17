@@ -129,8 +129,9 @@ protected:
   std::map<const Elem *, std::vector<const FaceInfo *>> _face_infos;
 
   /**
-   * Compute the bulk production term G_k for the current element,
-   * including selected turbulence-model corrections.
+   * Compute the bulk production term for the current element, including selected
+   * turbulence-model corrections (G_k, G_b, G_nl, f_c). The compressibility sink gamma_M is
+   * not included; it is subtracted after the C_pl production limiter.
    *
    * This function is only used for elements that are *not* in the near-wall
    * set; near-wall production/destruction is handled in computeMatrixContribution.

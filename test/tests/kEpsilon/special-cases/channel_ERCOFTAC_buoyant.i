@@ -324,13 +324,11 @@ use_low_re_Gprime   = false
     use_low_re_Gprime   = ${use_low_re_Gprime}
 
     Pr_t = 0.9
-    C_M  = 1.0
     gravity = '-9.81 0 0'
 
     # same functors as for TKE if you use them:
     temperature       = T
     beta              = ${alpha_b}
-    speed_of_sound    = ${c}
     # nonlinear_production = Gnl
     # curvature_factor  = fc
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms

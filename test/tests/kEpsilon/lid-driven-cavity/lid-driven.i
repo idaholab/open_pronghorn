@@ -239,7 +239,6 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     # same functors as for TKE if you use them:
     # temperature       = T
     # beta              = beta
-    # speed_of_sound    = c
     # nonlinear_production = Gnl
     # curvature_factor  = fc
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
