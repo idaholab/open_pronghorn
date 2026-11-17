@@ -107,7 +107,7 @@ Pr_t = 0.9
         energy_advection_interpolation = ${advected_interp_method}
       []
     []
-    [TurbulenceSegregatedExtended/k-epsilon]
+    [AdvancedKEpsilon/k-epsilon]
       turbulence_handling = 'k-epsilon'
       tke_name = TKE
       tked_name = TKED

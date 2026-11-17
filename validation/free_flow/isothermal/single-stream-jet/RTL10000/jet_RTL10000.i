@@ -156,7 +156,7 @@ outlet = 'back bottom top left right'
       rhie_chow_uo_name = 'rc'
       pressure_projection_method = 'consistent'
     []
-    [TurbulenceSegregatedExtended/k-epsilon]
+    [AdvancedKEpsilon/k-epsilon]
       # Model
       turbulence_handling = 'k-epsilon'
       tke_name = TKE

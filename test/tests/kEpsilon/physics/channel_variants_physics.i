@@ -105,7 +105,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
       rhie_chow_uo_name = 'rc'
       pressure_projection_method = 'consistent'
     []
-    [TurbulenceSegregatedExtended/k-epsilon]
+    [AdvancedKEpsilon/k-epsilon]
       turbulence_handling = 'k-epsilon'
       tke_name = TKE
       tked_name = TKED

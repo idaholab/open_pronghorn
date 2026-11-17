@@ -88,7 +88,7 @@ use_low_re_Gprime   = false
       rhie_chow_uo_name = 'rc'
       pressure_projection_method = 'consistent'
     []
-    [TurbulenceSegregatedExtended/k-epsilon]
+    [AdvancedKEpsilon/k-epsilon]
       # Model
       turbulence_handling = 'k-epsilon'
       tke_name = TKE

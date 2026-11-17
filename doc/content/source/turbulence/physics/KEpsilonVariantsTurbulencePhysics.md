@@ -49,8 +49,8 @@ The OpenPronghorn k-$\epsilon$ objects take the `C1_eps`, `C2_eps` and `Pr_t` cl
 coefficients as constants, while the base Physics declares them as functors. Specifying a
 non-constant functor for one of these is an error.
 
-!syntax parameters /Physics/NavierStokes/TurbulenceSegregatedExtended/KEpsilonVariantsTurbulencePhysics
+!syntax parameters /Physics/NavierStokes/AdvancedKEpsilon/KEpsilonVariantsTurbulencePhysics
 
-!syntax inputs /Physics/NavierStokes/TurbulenceSegregatedExtended/KEpsilonVariantsTurbulencePhysics
+!syntax inputs /Physics/NavierStokes/AdvancedKEpsilon/KEpsilonVariantsTurbulencePhysics
 
-!syntax children /Physics/NavierStokes/TurbulenceSegregatedExtended/KEpsilonVariantsTurbulencePhysics
+!syntax children /Physics/NavierStokes/AdvancedKEpsilon/KEpsilonVariantsTurbulencePhysics
