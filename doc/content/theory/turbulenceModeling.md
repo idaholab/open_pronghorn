@@ -123,7 +123,7 @@ equations for $k$ and $\epsilon$ are
 =  \nabla \cdot \left[ \rho
     \left( \nu + \frac{\nu_t}{\sigma_k} \right) \nabla k
   \right]
- + \rho P_k + \rho G_b - \rho \epsilon + \rho S_k,
+ + P_k + G_b - \rho \epsilon + \rho S_k,
 \end{equation}
 
 \begin{equation}

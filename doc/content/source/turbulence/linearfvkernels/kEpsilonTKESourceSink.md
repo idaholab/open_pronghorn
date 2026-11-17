@@ -11,24 +11,31 @@ The turbulent kinetic energy (TKE) equation is written in conservative form as
 
 \begin{equation}
 \frac{\partial \rho k}{\partial t} + \nabla \cdot (\rho \mathbf{u} k)
-= \rho (P_k + G_b + G_{\text{nl}} - \gamma_M - \epsilon),
+= \nabla \cdot \left[ \left( \mu + \frac{\mu_t}{\sigma_k} \right) \nabla k \right]
++ P_k + G_b + G_{\text{nl}} - \gamma_M - \rho \epsilon,
 \end{equation}
 
 where:
 
 - $k$ is the turbulent kinetic energy,
 - $\mathbf{u}$ is the mean velocity,
+- $\mu$ and $\mu_t$ are the molecular and turbulent dynamic viscosities,
+- $\sigma_k$ is the turbulent Prandtl number for $k$ (set through the `scaling_coeff` of the
+  turbulent diffusion kernel, not by this kernel),
 - $P_k$ is the shear production,
 - $G_b$ is the buoyancy production,
 - $G_{\text{nl}}$ is the production due to nonlinear Reynolds stresses,
 - $\gamma_M$ is a compressibility correction, and
 - $\epsilon$ is the dissipation rate supplied by the $\epsilon$-equation.
 
-`kEpsilonTKESourceSink` forms the *right-hand side source term* for the k-equation by computing
+All source terms ($P_k$, $G_b$, $G_{\text{nl}}$, $\gamma_M$) are per unit volume
+(e.g. $P_k = \mu_t S^2$), so they already include the density.
+
+`kEpsilonTKESourceSink` forms the *source and sink terms* for the k-equation by computing
 the combination
 
 \begin{equation}
-\text{source} = P_k + G_b + G_{\text{nl}} - \gamma_M - \epsilon,
+\text{source} = P_k + G_b + G_{\text{nl}} - \gamma_M - \rho \epsilon,
 \end{equation}
 
 with expressions that depend on the chosen k–$\epsilon$ variant and options.
