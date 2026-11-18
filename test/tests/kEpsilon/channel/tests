@@ -234,6 +234,7 @@
     expect_err = 'Nonlinear constitutive relations \(quadratic/cubic\) are only available for the Standard'
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKE_source_sink/nonlinear_model=quadratic LinearFVKernels/TKED_source_sink/nonlinear_model=quadratic'
     requirement = 'The system shall report an error if a nonlinear constitutive relation is requested together with a realizable k-epsilon variant.'
+    max_threads = 1
   []
   [channel_ERCOFTAC_k_epsilon_variant_yap_error]
     type = RunException
@@ -241,5 +242,6 @@
     expect_err = 'The Yap correction is only available for the StandardTwoLayer and StandardLowRe'
     cli_args = 'LinearFVKernels/TKE_source_sink/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/k_epsilon_variant=Realizable AuxKernels/compute_mu_t/k_epsilon_variant=Realizable LinearFVKernels/TKED_source_sink/use_yap=true'
     requirement = 'The system shall report an error if the Yap correction is requested for a k-epsilon variant other than StandardTwoLayer or StandardLowRe.'
+    max_threads = 1
   []
 []
