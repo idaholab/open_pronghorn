@@ -165,7 +165,7 @@ C_1 = \max\left(0.43, \frac{\eta}{\eta + 5}\right), \qquad \eta = S \frac{k}{\ep
 where
 
 - $S = \sqrt{2 S_{ij} S_{ij}}$ is the strain magnitude,
-- $f_c$ is the curvature correction factor (if `curvature_model != none`),
+- $f_c$ is the curvature correction factor (if [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_curvature_correction) is `true`; see [kEpsilonTKESourceSink.md]),
 - the shear term $\rho C_1 S \epsilon$ is added directly, not through $C_{\epsilon1}/T_e$,
 - only the buoyancy term uses the fixed $C_{\epsilon1}$ = [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/C1_eps).
 
@@ -204,21 +204,14 @@ nonlinear Reynolds stress models and contracted with $\nabla \mathbf{u}$.
 
 ## Curvature correction in $\epsilon$-production
 
-For realizable variants, the curvature correction factor $f_c$
-is applied multiplicatively to $S_k$ in the $\epsilon$-production:
+For the `Realizable` and `RealizableTwoLayer` variants, the curvature correction factor $f_c$
+of [!cite](arolla2013modeling) multiplies the shear production of $\epsilon$:
+\begin{equation}
+\text{source} = f_c\,\rho C_1 S \epsilon + C_{\epsilon1} C_{\epsilon3} G_b \frac{\epsilon}{k}.
+\end{equation}
 
-- `Realizable`:
-  \begin{equation}
-  \text{Production} = f_c S_k + C_{\epsilon3} G_b,
-  \end{equation}
-
-- `RealizableTwoLayer`:
-  \begin{equation}
-  \text{Production} = f_c S_k + C_{\epsilon3} G_b.
-  \end{equation}
-
-The same curvature model (e.g. `curvature_model = standard`) is used in both the k-equation and
-the $\epsilon$-equation kernels for consistency.
+Set [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_curvature_correction) to the same value in
+the $k$ and $\epsilon$ kernels.
 
 
 ## Yap correction

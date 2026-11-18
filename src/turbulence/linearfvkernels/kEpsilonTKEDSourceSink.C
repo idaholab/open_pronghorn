@@ -77,7 +77,8 @@ kEpsilonTKEDSourceSink::validParams()
                         "(gamma_M acts in the k-equation only.)");
   params.addParam<bool>("use_curvature_correction",
                         false,
-                        "Apply a curvature correction factor f_c to the shear production.");
+                        "Apply the Arolla & Durbin (2013) curvature / rotation correction factor "
+                        "f_c to the shear production (Realizable variants only).");
   params.addParam<bool>("use_yap",
                         false,
                         "Include the Yap correction rho*gamma_y as an epsilon source "
@@ -120,12 +121,6 @@ kEpsilonTKEDSourceSink::validParams()
       "Warn if a constant 'scaling_coeff' (sigma_epsilon) of an epsilon turbulent diffusion "
       "kernel differs from the calibrated value of the selected variant (1.3 for the Standard "
       "variants, 1.2 for the Realizable variants).");
-
-  MooseEnum curvature_model("none standard", "none");
-  params.addParam<MooseEnum>("curvature_model",
-                             curvature_model,
-                             "Curvature / rotation correction model: "
-                             "'none' (default) or 'standard' (Spalart–Shur style).");
 
   return params;
 }
@@ -179,8 +174,7 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     _has_beta(params.isParamValid("beta")),
     _has_wall_distance(params.isParamValid("wall_distance")),
     _nonlinear_model(
-        getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
-    _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>())
+        getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>())
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
@@ -198,7 +192,6 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
 
   // Pull enums locally so we don't depend on other names being in-scope
   const MooseEnum nl_local = getParam<MooseEnum>("nonlinear_model");
-  const MooseEnum cm_local = getParam<MooseEnum>("curvature_model");
 
   // Nonlinear constitutive relations are defined for the Standard variants only
   const bool is_realizable_variant = (_variant == NS::KEpsilonVariant::Realizable ||
@@ -252,23 +245,11 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
     paramError("use_low_re_Gprime",
                "'use_low_re_Gprime=true' is only supported for the StandardLowRe variant.");
 
-  // ---- Cross-parameter consistency: use_curvature_correction vs curvature_model ----
-  const bool use_curv_flag = getParam<bool>("use_curvature_correction");
-  const bool curv_model_enabled = (cm_local != "none");
-
-  if ((user_set("use_curvature_correction") || user_set("curvature_model")) &&
-      (use_curv_flag != curv_model_enabled))
-  {
-    if (use_curv_flag && !curv_model_enabled)
-      paramError(
-          "curvature_model",
-          "use_curvature_correction=true but curvature_model='none'. "
-          "Select a curvature_model (e.g. 'standard') or set use_curvature_correction=false.");
-    else if (!use_curv_flag && curv_model_enabled)
-      paramError("use_curvature_correction",
-                 "curvature_model is enabled but use_curvature_correction=false. "
-                 "Either set use_curvature_correction=true or set curvature_model='none'.");
-  }
+  // Curvature correction (Arolla & Durbin 2013): realizable variants only
+  if (_switches.use_curvature_correction && !is_realizable_variant)
+    paramError("use_curvature_correction",
+               "The curvature correction is only available for the Realizable and "
+               "RealizableTwoLayer variants.");
 
   // ---- Dependent-functor checks for enabled physics toggles ----
   if (_switches.use_buoyancy)
@@ -301,7 +282,6 @@ kEpsilonTKEDSourceSink::kEpsilonTKEDSourceSink(const InputParameters & params)
 
   // keep the switches struct up to date
   _switches.use_nonlinear = (_nonlinear_model != NS::NonlinearConstitutiveRelation::None);
-  _switches.use_curvature_correction = (_curvature_model != NS::CurvatureCorrectionModel::None);
 }
 
 void
@@ -576,10 +556,13 @@ kEpsilonTKEDSourceSink::computeRealizableShearProduction(const Moose::ElemArg & 
   const Real S = std::sqrt(std::max(inv.S2, 0.0));
   const Real eta = S * k / std::max(eps, 1e-20);
 
-  // Optional curvature / rotation correction of the shear production
+  // Optional curvature / rotation correction of the shear production (Arolla & Durbin 2013)
   Real fc = 1.0;
-  if (_curvature_model != NS::CurvatureCorrectionModel::None)
-    fc = NS::computeCurvatureFactor(_curvature_model, inv);
+  if (_switches.use_curvature_correction)
+  {
+    const Real nu = _mu(elem_arg, state) / rho;
+    fc = NS::computeCurvatureFactor(inv, k, eps, nu);
+  }
 
   return fc * rho * NS::C1_realizable(eta) * S * eps;
 }

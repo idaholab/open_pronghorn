@@ -48,7 +48,6 @@ two_layer_flavor    = 'Wolfstein'             # Wolfstein | NorrisReynolds (only
 use_buoyancy        = true
 use_compressibility = true
 nonlinear_model     = 'none'
-curvature_model     = 'none'
 use_yap             = false
 use_low_re_Gprime   = false
 
@@ -261,7 +260,6 @@ use_low_re_Gprime   = false
     use_buoyancy             = ${use_buoyancy}
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
     Pr_t                     = 0.9
     C_M                      = 1.0
     gravity                  = '-9.81 0 0'
@@ -319,7 +317,6 @@ use_low_re_Gprime   = false
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
     nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
 

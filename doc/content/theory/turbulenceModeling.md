@@ -216,8 +216,7 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
 - Optional terms:
 
 1. compressibility correction $\gamma_M$ (dilatation dissipation) as an extra sink in the $k$ equation,
-2. curvature factor $f_c$ multiplying $P_k$,
-3. nonlinear production $G_\text{nl}$ added to $P_k$.
+2. nonlinear production $G_\text{nl}$ added to $P_k$.
 
 #### StandardLowRe
 
@@ -500,16 +499,28 @@ inconsistent input stops with an error. A minimal setup is:
 ### Curvature / rotation correction
 
 - *Motivation*: Simple eddy-viscosity models tend to mispredict turbulence levels in
-  rotating channels, swirling jets, and flows over curved surfaces. Spalart and Shur
-  proposed a correction factor $f_c$ that modifies production based on curvature/rotation
-  [!cite](spalart1997rotation).
-- *Implementation*:
-  (a) `computeCurvatureFactor` uses $S^2$ and $W^2$ to build $f_c$,
-  (b) $P_k$ is replaced by $f_c P_k$ in both the $k$ and $\epsilon$ equations when
-    curvature corrections are enabled.
-- *Activation*:
-  (a) `use_curvature_correction = true`,
-  (b) `curvature_model = 'standard'` (or similar option as implemented).
+  rotating channels, swirling jets, and flows over curved surfaces
+  [!cite](spalart1997rotation). Arolla and Durbin extended the idea to scalar two-equation
+  models with a factor $f_c$ that multiplies the production [!cite](arolla2013modeling).
+- *Implementation*: `computeCurvatureFactor` evaluates
+  \begin{equation}
+  f_c = \min\left(C_\text{max},\;
+  \frac{1}{C_{r1}\left(|\eta| - \eta\right) + \sqrt{1 - \min(C_{r2}\,\eta,\, 0.99)}}\right),
+  \qquad
+  \eta = \left(S_{ij}S_{ij} - W_{ij}W_{ij}\right) T^2,
+  \end{equation}
+  \begin{equation}
+  T = \max(T_1, T_3), \qquad T_1 = \frac{k}{\epsilon}, \qquad
+  T_2 = 6\sqrt{\frac{\nu}{\epsilon}}, \qquad T_3 = \left(T_1^{1.625}\, T_2\right)^{1/2.625},
+  \end{equation}
+  with $C_{r1} = 0.04645$, $C_{r2} = 0.25$ and $C_\text{max} = 1.25$.
+
+  For the Realizable variants, $G_k$ in the $k$ equation and $\rho C_1 S\epsilon$ in the
+  $\epsilon$ equation are multiplied by $f_c$. $f_c = 1$ in simple shear. Only the local
+  rotation tensor is used; the streamline-curvature term of [!cite](wallin2002modelling)
+  is not included.
+- *Activation*: `use_curvature_correction = true` in both the $k$ and $\epsilon$ kernels
+  (Realizable and RealizableTwoLayer only).
 
 
 ## Practical guidance for using each model

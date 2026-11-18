@@ -562,48 +562,32 @@ enabled.
 
 ## 18. `computeCurvatureFactor`
 
-This function computes a *curvature/rotation correction factor* $f_c$ (of Spalart–Shur
-type) that multiplies the shear-production term.
+This function computes the curvature / rotation correction factor $f_c$ of
+[!cite](arolla2013modeling), which multiplies the shear production of the realizable variants.
+Its inputs are the invariants `inv` ($S^2 = 2S_{ij}S_{ij}$, $W^2 = 2W_{ij}W_{ij}$), $k$, $\epsilon$ and
+$\nu$. It is only called when `use_curvature_correction = true`.
 
-1. If `model == None`, it returns $f_c = 1$.
-
-2. Otherwise it starts from the invariants (clamped to non-negative):
+1. With $k$ clipped at 0 and $\epsilon$ at $10^{-20}$, it builds the time scale
    \begin{equation}
-   S^2 = \max(\text{inv.S2}, 0), \qquad
-   W^2 = \max(\text{inv.W2}, 0).
+   T = \max(T_1, T_3), \quad T_1 = \frac{k}{\epsilon}, \quad
+   T_2 = 6\sqrt{\frac{\nu}{\epsilon}}, \quad T_3 = \left(T_1^{1.625} T_2\right)^{1/2.625},
+   \end{equation}
+   which keeps the correct near-wall asymptotic behavior.
+
+2. It forms
+   \begin{equation}
+   \eta = \tfrac{1}{2}\left(S^2 - W^2\right) T^2 = \left(S_{ij}S_{ij} - W_{ij}W_{ij}\right) T^2.
    \end{equation}
 
-3. If $S^2 \le 0$, it again returns 1. Otherwise define
+3. It returns
    \begin{equation}
-   S\cdot S = \frac{1}{2} S^2, \qquad
-   W\cdot W = \frac{1}{2} W^2.
+   f_c = \min\left(C_\text{max},\;
+   \frac{1}{C_{r1}\left(|\eta| - \eta\right) + \sqrt{1 - \min(C_{r2}\,\eta, 0.99)}}\right),
    \end{equation}
+   with $C_{r1} = 0.04645$, $C_{r2} = 0.25$ and $C_\text{max} = 1.25$.
 
-4. Construct dimensionless measures of rotation vs strain:
-   \begin{equation}
-   r_* = \frac{W\cdot W}{\max(S\cdot S, 10^{-16})}, \qquad
-   \tilde{r} = \frac{W\cdot W}{\max(S\cdot S + W\cdot W, 10^{-16})}.
-   \end{equation}
-
-5. With internal constants
-   \begin{equation}
-   C_\text{rot1} = 1.0,\quad C_\text{rot2} = 2.0,\quad
-   C_\text{rot3} = 1.0,\quad C_\text{max} = 1.25,
-   \end{equation}
-   it forms a Spalart–Shur-like correction
-   \begin{equation}
-   f_\text{rot} =
-   (1 + C_\text{rot1}) \,
-   \frac{2 \tilde{r}}{1 + \tilde{r}}
-   \left( 1 - C_\text{rot2} \frac{r_*}{1 + C_\text{rot3} r_*} \right)
-   - C_\text{rot1}.
-   \end{equation}
-
-6. The function then clamps $f_\text{rot}$ to be at least $-1$ and finally defines
-   \begin{equation}
-   f_c = \min(C_\text{max}, 1 + f_\text{rot}).
-   \end{equation}
-
-The resulting $f_c$ is used to scale production in curvature/rotation-corrected
-$k\text{–}\epsilon$ models, enhancing or damping turbulence depending on the local ratio
-of rotation to strain.
+So $f_c = 1$ in simple shear ($\eta = 0$), $f_c < 1$ where rotation dominates strain ($\eta < 0$),
+and $f_c > 1$ (capped at 1.25) where strain dominates. $W_{ij}$ is the local rotation tensor only. The
+streamline-curvature contribution of [!cite](wallin2002modelling) (coefficient $C_{ct} = 2$, which
+needs the material derivative of $S_{ij}$) and frame rotation are not included, which is equivalent
+to $C_{ct} = 1$.

@@ -408,43 +408,34 @@ computeGnl(const NonlinearConstitutiveRelation model,
 }
 
 Real
-computeCurvatureFactor(const CurvatureCorrectionModel model, const StrainRotationInvariants & inv)
+computeCurvatureFactor(const StrainRotationInvariants & inv,
+                       const Real k,
+                       const Real eps,
+                       const Real nu)
 {
-  // No correction requested
-  if (model == CurvatureCorrectionModel::None)
-    return 1.0;
-
-  // Spalart–Shur-style curvature correction using S2 and W2.
-  // inv.S2 = 2 S_ij S_ij, inv.W2 = 2 W_ij W_ij.
-  const Real S2 = std::max(inv.S2, 0.0);
-  const Real W2 = std::max(inv.W2, 0.0);
-
-  if (S2 <= 0.0)
-    return 1.0;
-
-  const Real SS = 0.5 * S2;
-  const Real WW = 0.5 * W2;
-
-  // Dimensionless measures of rotation vs strain
-  const Real r_star = WW / std::max(SS, 1e-16);       // rotation/strain ratio
-  const Real r_tilde = WW / std::max(SS + WW, 1e-16); // bounded (0,1)
-
-  // Model coefficients -- better not to change
-  static constexpr Real Crot1 = 1.0;
-  static constexpr Real Crot2 = 2.0;
-  static constexpr Real Crot3 = 1.0;
+  // Arolla & Durbin (2013) model coefficients
+  static constexpr Real Cr1 = 0.04645;
+  static constexpr Real Cr2 = 0.25;
   static constexpr Real Cmax = 1.25;
 
-  // Spalart–Shur rotation/curvature function (simplified form)
-  Real f_rot = (1.0 + Crot1) * (2.0 * r_tilde) / (1.0 + r_tilde) *
-                   (1.0 - Crot2 * r_star / (1.0 + Crot3 * r_star)) -
-               Crot1;
+  const Real k_c = std::max(k, 0.0);
+  const Real eps_c = std::max(eps, 1e-20);
+  const Real nu_c = std::max(nu, 0.0);
 
-  // Bound and shift to get a positive correction factor
-  f_rot = std::max(f_rot, -1.0);
-  const Real f_c = std::min(Cmax, 1.0 + f_rot);
+  // Time scale with Durbin's Kolmogorov limit for correct near-wall asymptotics:
+  // T = max(T1, T3), T1 = k/eps, T2 = 6 sqrt(nu/eps), T3 = (T1^1.625 T2)^(1/2.625)
+  const Real T1 = k_c / eps_c;
+  const Real T2 = 6.0 * std::sqrt(nu_c / eps_c);
+  const Real T3 = std::pow(std::pow(T1, 1.625) * T2, 1.0 / 2.625);
+  const Real T = std::max(T1, T3);
 
-  return f_c;
+  // eta = (S:S - W:W) T^2; inv.S2 = 2 S:S, inv.W2 = 2 W:W.
+  // W is the local rotation tensor only (no streamline-curvature term W_S, i.e. C_ct = 1).
+  const Real eta = 0.5 * (std::max(inv.S2, 0.0) - std::max(inv.W2, 0.0)) * T * T;
+
+  const Real denom = Cr1 * (std::abs(eta) - eta) + std::sqrt(1.0 - std::min(Cr2 * eta, 0.99));
+
+  return std::min(Cmax, 1.0 / denom);
 }
 
 std::vector<const MooseObject *>

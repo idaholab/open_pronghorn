@@ -116,9 +116,6 @@ protected:
   /// Nonlinear constitutive model
   NS::NonlinearConstitutiveRelation _nonlinear_model;
 
-  /// Curvature/rotation correction model for Realizable variants
-  NS::CurvatureCorrectionModel _curvature_model;
-
   /// Per-element flag: is this element adjacent to at least one wall?
   std::unordered_set<const Elem *> _wall_bounded;
 

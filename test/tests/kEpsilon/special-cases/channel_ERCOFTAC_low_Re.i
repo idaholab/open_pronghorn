@@ -43,7 +43,6 @@ use_low_re_Gprime   = true                    # low-Re production G' (StandardLo
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
-curvature_model     = 'none'
 use_yap             = false
 
 [Mesh]
@@ -234,7 +233,6 @@ use_yap             = false
     use_buoyancy             = ${use_buoyancy}
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
   []
 
   [TKED_advection]
@@ -279,7 +277,6 @@ use_yap             = false
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
     nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms

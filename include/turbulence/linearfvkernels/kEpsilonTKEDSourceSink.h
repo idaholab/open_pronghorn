@@ -136,9 +136,6 @@ protected:
   /// Nonlinear constitutive model
   NS::NonlinearConstitutiveRelation _nonlinear_model;
 
-  /// Curvature/rotation correction model for Realizable variants
-  NS::CurvatureCorrectionModel _curvature_model;
-
   ///@{
   /// Maps for wall treatment
   std::unordered_set<const Elem *> _wall_bounded;

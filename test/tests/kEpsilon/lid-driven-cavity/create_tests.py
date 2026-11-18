@@ -9,7 +9,7 @@ We explicitly do NOT vary:
   - two_layer_flavor
   - nonlinear_model
   - use_yap
-  - curvature_model
+  - use_curvature_correction
 
 Each test:
   - Uses 'lid-driven.i' as input

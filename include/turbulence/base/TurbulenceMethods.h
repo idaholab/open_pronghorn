@@ -56,12 +56,6 @@ enum class NonlinearConstitutiveRelation
   Cubic
 };
 
-enum class CurvatureCorrectionModel
-{
-  None,
-  Standard // Spalart–Shur-style rotation/curvature correction
-};
-
 /**
  * Convenience struct to hold run-time switches for optional corrections
  * that appear in a number of k-epsilon variants.
@@ -355,15 +349,29 @@ Real computeGnl(const NonlinearConstitutiveRelation model,
                 const Real eps);
 
 /**
- * Curvature / rotation correction factor f_c, based on the local
- * strain- and rotation-rate invariants.
+ * Curvature / rotation correction factor f_c of Arolla & Durbin (2013), "Modeling rotation and
+ * curvature effects within scalar eddy viscosity model framework", Int. J. Heat Fluid Flow 39:
  *
- * This is used to scale the production in the Realizable k-epsilon
- * variants:
+ *   f_c = min(C_max, 1 / [C_r1 (|eta| - eta) + sqrt(1 - min(C_r2 eta, 0.99))])
+ *   eta = (S:S - W:W) T^2,  T = max(T1, T3)
+ *   T1 = k/eps,  T2 = 6 sqrt(nu/eps),  T3 = (T1^1.625 T2)^(1/2.625)
+ *
+ * with C_r1 = 0.04645, C_r2 = 0.25, C_max = 1.25. W is the local rotation tensor only: the
+ * Wallin & Johansson (2002) streamline-curvature contribution W_S (C_ct = 1) and the frame
+ * rotation are not included. f_c = 1 in simple shear.
+ *
+ * It scales the shear production in the Realizable k-epsilon variants:
  *   P_k = f_c G_k
- *   P_eps = f_c S_k
+ *   P_eps = f_c rho C1 S eps
+ *
+ * @param inv  strain / rotation invariants (S2 = 2 S:S, W2 = 2 W:W)
+ * @param k    turbulent kinetic energy
+ * @param eps  turbulent dissipation rate
+ * @param nu   kinematic viscosity
  */
-Real computeCurvatureFactor(const CurvatureCorrectionModel model,
-                            const StrainRotationInvariants & inv);
+Real computeCurvatureFactor(const StrainRotationInvariants & inv,
+                            const Real k,
+                            const Real eps,
+                            const Real nu);
 
 } // namespace NS

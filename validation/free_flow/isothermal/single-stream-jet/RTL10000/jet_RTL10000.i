@@ -56,7 +56,6 @@ two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds (only used for *T
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
-curvature_model     = 'none'
 use_yap             = false
 use_low_re_Gprime   = false
 bulk_wall_treatment = false
@@ -283,7 +282,6 @@ outlet = 'back bottom top left right'
     use_buoyancy             = ${use_buoyancy}
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
   []
 
   [TKED_advection]
@@ -322,7 +320,6 @@ outlet = 'back bottom top left right'
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
     nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
