@@ -220,12 +220,6 @@ Real Cmu_realizable(const RankTwoTensor & grad_u, const Real k, const Real eps, 
 Real defaultC2eps(const KEpsilonVariant variant);
 
 /**
- * Calibrated turbulent Prandtl number sigma_epsilon of a k-epsilon variant:
- * 1.3 for the Standard variants (Launder-Spalding), 1.2 for the Realizable variants (Shih et al.)
- */
-Real defaultSigmaEps(const KEpsilonVariant variant);
-
-/**
  * Variable epsilon production coefficient of the realizable k-epsilon model:
  *
  *   C1 = max(0.43, eta / (eta + 5)),  eta = S k / eps,  S = sqrt(2 S_ij S_ij)

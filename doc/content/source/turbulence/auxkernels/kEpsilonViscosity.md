@@ -113,6 +113,14 @@ In an equilibrium logarithmic layer this gives $C_\mu^{\mathrm{eff}} \approx 0.0
 replaces $C_\mu$ in the bulk $\mu_t$ only; the wall functions and the two-layer quantities keep the
 constant [!param](/AuxKernels/kEpsilonViscosity/C_mu).
 
+!alert warning title=Set $\sigma_\epsilon = 1.2$ for the realizable variants
+$\sigma_\epsilon$ is not a parameter of [kEpsilonTKEDSourceSink.md]. It is the `scaling_coeff` of
+the $\epsilon$ turbulent diffusion kernel (the one with `diffusion_coeff = mu_t`), or it is built
+into a combined coefficient such as $\mu + \mu_t/\sigma_\epsilon$. Its default is 1 and nothing
+checks it. `Realizable` and `RealizableTwoLayer` are calibrated with $\sigma_\epsilon = 1.2$ and
+$C_2 = 1.9$ [!cite](shih1995realizable); the Standard variants use $\sigma_\epsilon = 1.3$.
+`C2_eps` follows the variant automatically, but $\sigma_\epsilon$ has to be set in the input.
+
 #### Two-layer models (StandardTwoLayer and RealizableTwoLayer)
 
 Two-layer models blend between:

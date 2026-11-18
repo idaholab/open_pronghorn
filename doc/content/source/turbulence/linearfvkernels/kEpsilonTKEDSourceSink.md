@@ -313,14 +313,13 @@ The default of [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/C2_eps) depends 
 1.92 for the Standard variants [!cite](launder1974numerical) and 1.9 for the Realizable variants
 [!cite](shih1995realizable). A value set in the input is always used.
 
-The turbulent Prandtl number $\sigma_\epsilon$ is not a parameter of this kernel: it is the
-`scaling_coeff` of the $\epsilon$ turbulent diffusion kernel (`LinearFVTurbulentDiffusion` or
-`LinearFVTurbulentBlendedDiffusion`), whose default is 1. When
-[!param](/LinearFVKernels/kEpsilonTKEDSourceSink/check_sigma_eps) is `true` (default), the kernel
-warns if a constant `scaling_coeff` of an $\epsilon$ diffusion kernel differs from the calibrated
-value of the selected variant: $\sigma_\epsilon = 1.3$ for the Standard variants and
-$\sigma_\epsilon = 1.2$ for the Realizable variants. A diffusion kernel without `scaling_coeff`
-(for example the molecular `LinearFVDiffusion`) and a non-constant functor are not checked.
+!alert warning title=Set $\sigma_\epsilon = 1.2$ for the realizable variants
+$\sigma_\epsilon$ is not a parameter of [kEpsilonTKEDSourceSink.md]. It is the `scaling_coeff` of
+the $\epsilon$ turbulent diffusion kernel (the one with `diffusion_coeff = mu_t`), or it is built
+into a combined coefficient such as $\mu + \mu_t/\sigma_\epsilon$. Its default is 1 and nothing
+checks it. `Realizable` and `RealizableTwoLayer` are calibrated with $\sigma_\epsilon = 1.2$ and
+$C_2 = 1.9$ [!cite](shih1995realizable); the Standard variants use $\sigma_\epsilon = 1.3$.
+`C2_eps` follows the variant automatically, but $\sigma_\epsilon$ has to be set in the input.
 
 
 !syntax parameters /LinearFVKernels/kEpsilonTKEDSourceSink

@@ -165,12 +165,6 @@ defaultC2eps(const KEpsilonVariant variant)
 }
 
 Real
-defaultSigmaEps(const KEpsilonVariant variant)
-{
-  return isRealizable(variant) ? 1.2 : 1.3;
-}
-
-Real
 C1_realizable(const Real eta)
 {
   return std::max(0.43, eta / (eta + 5.0));

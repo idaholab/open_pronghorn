@@ -199,9 +199,8 @@ These can be overridden through the parameters of the relevant kernels
 calibration is required. The realizable variants use the calibration of
 [!cite](shih1995realizable), $C_{2} = 1.9$ and $\sigma_\epsilon = 1.2$ (see [#realizable-variant]).
 The default of `C2_eps` in [kEpsilonTKEDSourceSink.md] follows the selected variant. $\sigma_k$ and
-$\sigma_\epsilon$ are the `scaling_coeff` of the turbulent diffusion kernels and must be set in the
-input; [kEpsilonTKEDSourceSink.md] warns when a constant $\sigma_\epsilon$ differs from the
-calibrated value of the selected variant.
+$\sigma_\epsilon$ are the `scaling_coeff` of the turbulent diffusion kernels (default 1) and must be
+set in the input; they are not checked.
 
 ### Variant-specific forms
 
@@ -261,6 +260,15 @@ differences in the $\epsilon$ equation and $\mu_t$ definition.
   term uses `f2_RKE` $= k/(k+\sqrt{\nu\epsilon})$, so it stays finite as $k \to 0$.
 - Model constants: $C_{1\epsilon} = 1.44$ (buoyancy term only), $C_{2} = 1.9$, $\sigma_k = 1.0$,
   $\sigma_\epsilon = 1.2$.
+
+!alert warning title=Set $\sigma_\epsilon = 1.2$ for the realizable variants
+$\sigma_\epsilon$ is not a parameter of [kEpsilonTKEDSourceSink.md]. It is the `scaling_coeff` of
+the $\epsilon$ turbulent diffusion kernel (the one with `diffusion_coeff = mu_t`), or it is built
+into a combined coefficient such as $\mu + \mu_t/\sigma_\epsilon$. Its default is 1 and nothing
+checks it. `Realizable` and `RealizableTwoLayer` are calibrated with $\sigma_\epsilon = 1.2$ and
+$C_2 = 1.9$ [!cite](shih1995realizable); the Standard variants use $\sigma_\epsilon = 1.3$.
+`C2_eps` follows the variant automatically, but $\sigma_\epsilon$ has to be set in the input.
+
 - Improves predictions for rotating, swirling, and separating flows while maintaining
   realizability of the normal stresses [!cite](shih1995realizable).
 
@@ -538,6 +546,47 @@ OpenPronghorn.
 | `Realizable`         | High-Re, wall functions                  | $30 \lesssim y^+ \lesssim 300$ | Similar to `Standard`                                | Rotating, swirling, and separating flows                                     | Mixing tees, swirling jets, complex manifolds with recirculation              | Often preferred to `Standard` when rotation or separation is important. |
 | `RealizableTwoLayer` | Realizable + two-layer near-wall model   | $1 \lesssim y^+ \lesssim 100$ | Moderate wall clustering plus two-layer blending     | General-purpose model for complex internal flows with heat transfer          | Reactor primary loops with moderate mesh resolution near walls                | Recommended default in many industrial-like configurations when mesh allows $y^+ \lesssim 50$. |
 
+### Model setup id=model-setup
+
+A $k$–$\epsilon$ model is set up across several objects: [kEpsilonTKESourceSink.md] ($k$),
+[kEpsilonTKEDSourceSink.md] ($\epsilon$), [kEpsilonViscosity.md] ($\mu_t$), and, for the two-layer
+variants, [kEpsilonTwoLayerFunctorMaterial.md]. The table shows which options each variant accepts.
+
+| Option | `Standard` | `StandardLowRe` | `StandardTwoLayer` | `Realizable` | `RealizableTwoLayer` |
+|---|---|---|---|---|---|
+| `nonlinear_model` ($k$, $\epsilon$) | yes | yes | yes | error | error |
+| `use_yap` ($\epsilon$) | error | yes | yes | error | error |
+| `use_low_re_Gprime` ($\epsilon$) | error | yes | error | error | error |
+| `curvature_model` ($k$, $\epsilon$) | error | error | error | yes | yes |
+| `use_buoyancy` ($k$, $\epsilon$) | yes | yes | yes | yes | yes |
+| `use_compressibility` ($k$, $\epsilon$) | yes | yes | yes | yes (1) | yes (1) |
+| `Cd0`, `Cd1`, `Cd2` ($\mu_t$) | error | yes | error | error | error |
+| `A0` ($\mu_t$) | error | error | error | yes | yes |
+| `two_layer_lambda`, `two_layer_epsilon`, `two_layer_mu_t` | error | error | required | error | required |
+| `wall_distance` ($\epsilon$, $\mu_t$) | -- | required | required ($\epsilon$) | -- | required ($\epsilon$) |
+| `walls` ($k$) | optional | optional | required | optional | required |
+
+"error" means the input stops with an error message. (1) In the realizable variants the
+$\epsilon$ production contains no $G_k$, so the flag only acts in the $k$ equation.
+
+Some constants are accepted but have no effect outside the model they belong to:
+`C_lowRe` (StandardLowRe only), `D_lowRe` and `E_lowRe` (only with `use_low_re_Gprime`), `Cw`
+(only with `use_yap`), `C3_eps`, `Pr_t` and `gravity` in [kEpsilonTKEDSourceSink.md] (only with
+`use_buoyancy`), and `Ct` in [kEpsilonViscosity.md] (only with `scale_limiter = standard`).
+
+!alert warning title=Keep the shared settings identical
+The following settings are read separately by each object, and nothing checks that they agree:
+`k_epsilon_variant`, `nonlinear_model`, `use_compressibility`, `use_buoyancy`, `curvature_model`,
+`gravity`, `Pr_t`, `temperature`, `beta`, `C_mu`, `walls` and `wall_treatment`. They must be the
+same in [kEpsilonTKESourceSink.md], [kEpsilonTKEDSourceSink.md] and [kEpsilonViscosity.md], where
+they apply. `C_mu` must also match in [kEpsilonTwoLayerFunctorMaterial.md] and in the wall-function
+boundary condition of $\mu_t$, and `walls` in the $\epsilon$ transport kernels. A mismatch, for
+example a different `k_epsilon_variant` in the $k$ and $\epsilon$ kernels, runs without error but
+does not solve any of the models described here. The defaults of `wall_treatment` also differ
+(`neq` in the $k$ and $\epsilon$ kernels and the wall-function boundary condition, `eq_newton` in
+[kEpsilonViscosity.md]), so set it explicitly in every object. Defining each shared value once
+as an input-file variable, as the test inputs do, avoids mismatches.
+
 ### Additional configuration guidelines
 
 1. *Wall-distance field*
@@ -550,7 +599,8 @@ OpenPronghorn.
 
 - Always include all three components: `kEpsilonTKESourceSink` (for $k$),
      `kEpsilonTKEDSourceSink` (for $\epsilon$), and `kEpsilonViscosity` (for $\mu_t$).
-- The `k_epsilon_variant` parameter should be the same in all of them.
+- The `k_epsilon_variant` parameter, and the other shared settings listed in
+     [#model-setup], must be the same in all of them.
 
 3. *Incompressible vs compressible*
 

@@ -144,12 +144,6 @@ protected:
   ///@}
 
   /**
-   * Warn if a constant sigma_epsilon ('scaling_coeff' of an epsilon turbulent diffusion kernel)
-   * differs from the calibrated value of the selected variant.
-   */
-  void checkSigmaEps() const;
-
-  /**
    * Bulk implicit destruction coefficient C2_eps f2 rho / T_e (per unit volume).
    */
   Real computeBulkDestructionCoeff(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);

@@ -13,7 +13,6 @@
 #include "SubProblem.h"
 #include "NavierStokesMethods.h"
 #include "LinearFVTurbulentBlended.h"
-#include "MooseUtils.h"
 
 registerMooseObject("OpenPronghornApp", kEpsilonTKEDSourceSink);
 
@@ -114,13 +113,6 @@ kEpsilonTKEDSourceSink::validParams()
                              "Non-linear constitutive relation (quadratic or cubic) adding the "
                              "production G_nl. Only available for the Standard, StandardTwoLayer "
                              "and StandardLowRe variants.");
-
-  params.addParam<bool>(
-      "check_sigma_eps",
-      true,
-      "Warn if a constant 'scaling_coeff' (sigma_epsilon) of an epsilon turbulent diffusion "
-      "kernel differs from the calibrated value of the selected variant (1.3 for the Standard "
-      "variants, 1.2 for the Realizable variants).");
 
   return params;
 }
@@ -307,47 +299,6 @@ kEpsilonTKEDSourceSink::initialSetup()
           b && b->blendingFactorName())
         kernel->paramError(
             "blending_factor", "Only applicable to two-layer variants of '", name(), "'.");
-
-  if (getParam<bool>("check_sigma_eps") && _tid == 0)
-    checkSigmaEps();
-}
-
-void
-kEpsilonTKEDSourceSink::checkSigmaEps() const
-{
-  // sigma_epsilon is the 'scaling_coeff' of the epsilon turbulent diffusion kernel, so it cannot
-  // get a variant-dependent default here. Check the constant values against the calibration.
-  const Real sigma_eps = NS::defaultSigmaEps(_variant);
-  const bool realizable = _variant == NS::KEpsilonVariant::Realizable ||
-                          _variant == NS::KEpsilonVariant::RealizableTwoLayer;
-
-  for (const auto kernel : NS::getTransportKernels(_fe_problem, _sys_num, _var_num, _tid))
-  {
-    const auto & kernel_params = kernel->parameters();
-    if (!kernel_params.have_parameter<MooseFunctorName>("scaling_coeff"))
-      continue;
-
-    // Only constants can be checked; a functor sigma_epsilon is the user's choice
-    Real value;
-    if (!MooseUtils::parsesToReal(kernel_params.get<MooseFunctorName>("scaling_coeff"), &value))
-      continue;
-
-    if (!MooseUtils::absoluteFuzzyEqual(value, sigma_eps))
-      kernel->paramWarning("scaling_coeff",
-                           "sigma_epsilon = ",
-                           value,
-                           " differs from the calibrated value ",
-                           sigma_eps,
-                           " of the '",
-                           getParam<MooseEnum>("k_epsilon_variant"),
-                           "' variant used by '",
-                           name(),
-                           "' (",
-                           realizable ? "Shih et al. 1995" : "Launder-Spalding",
-                           "). Set 'check_sigma_eps = false' in '",
-                           name(),
-                           "' to silence this warning.");
-  }
 }
 
 void

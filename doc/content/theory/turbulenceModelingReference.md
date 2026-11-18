@@ -272,12 +272,12 @@ S = \sqrt{2 S_{ij} S_{ij}},
 used in the production term $\rho C_1 S \epsilon$ [!cite](shih1995realizable).
 
 
-## 9c. `defaultC2eps` and `defaultSigmaEps`
+## 9c. `defaultC2eps`
 
-The calibrated values of $C_{2\epsilon}$ and $\sigma_\epsilon$ for each variant: 1.92 and 1.3 for the
-Standard variants [!cite](launder1974numerical), 1.9 and 1.2 for the Realizable variants
-[!cite](shih1995realizable). The first is the default of `C2_eps`; the second is used to check the
-`scaling_coeff` of the $\epsilon$ diffusion kernels.
+The calibrated value of $C_{2\epsilon}$ for each variant, used as the default of `C2_eps`: 1.92 for
+the Standard variants [!cite](launder1974numerical) and 1.9 for the Realizable variants
+[!cite](shih1995realizable). $\sigma_\epsilon$ (1.3 and 1.2) is the `scaling_coeff` of the
+$\epsilon$ turbulent diffusion kernel and has no default in the k-epsilon objects.
 
 
 ## 10. `Cmu_nonlinear`
