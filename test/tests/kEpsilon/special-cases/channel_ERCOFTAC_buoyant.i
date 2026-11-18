@@ -27,9 +27,9 @@ advected_interp_method = 'upwind'
 
 ### k-epsilon Closure Parameters ###
 sigma_k = 1.0
-sigma_eps = 1.3
+sigma_eps = 1.2 # Realizable (Shih et al. 1995)
 C1_eps = 1.44
-C2_eps = 1.92
+C2_eps = 1.9 # Realizable (Shih et al. 1995)
 C_mu = 0.09
 
 ### Initial and Boundary Conditions ###
