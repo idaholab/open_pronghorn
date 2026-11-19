@@ -555,8 +555,8 @@ use_low_re_Gprime   = false
 
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.2 0.2'
-  turbulence_field_relaxation = '0.2 0.2'
+  turbulence_equation_relaxation = '0.4 0.4'
+  turbulence_field_relaxation = '0.4 0.4'
   energy_equation_relaxation = 0.9
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-7
