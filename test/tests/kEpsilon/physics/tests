@@ -1,0 +1,51 @@
+[Tests]
+  design = 'AdvancedKEpsilonPhysics.md'
+  issues = '#50'
+  [standard]
+    type = 'CSVDiff'
+    input = 'channel_variants_physics.i'
+    csvdiff = 'standard_line_center_channel_0002.csv standard_line_quarter_radius_channel_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    cli_args = 'Physics/NavierStokes/AdvancedKEpsilon/k-epsilon/k_epsilon_variant=Standard Outputs/file_base=standard'
+    requirement = 'The system shall be able to set up a standard k-epsilon turbulence model with a linear finite volume discretization using a Physics syntax.'
+  []
+  [realizable_two_layer]
+    type = 'CSVDiff'
+    input = 'channel_variants_physics.i'
+    csvdiff = 'realizable_two_layer_line_center_channel_0002.csv realizable_two_layer_line_quarter_radius_channel_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    cli_args = 'Physics/NavierStokes/AdvancedKEpsilon/k-epsilon/k_epsilon_variant=RealizableTwoLayer Physics/NavierStokes/AdvancedKEpsilon/k-epsilon/two_layer_flavor=Wolfstein Outputs/file_base=realizable_two_layer'
+    requirement = 'The system shall be able to set up a realizable two-layer k-epsilon turbulence model using a Physics syntax, creating the wall distance auxiliary variable required by the two-layer formulation.'
+  []
+  [low_Re]
+    type = 'CSVDiff'
+    input = 'channel_variants_physics.i'
+    csvdiff = 'low_Re_line_center_channel_0002.csv low_Re_line_quarter_radius_channel_0002.csv'
+    abs_zero = 1e-3
+    rel_err = 1e-3
+    recover = false
+    max_threads = 1
+    cli_args = 'Physics/NavierStokes/AdvancedKEpsilon/k-epsilon/k_epsilon_variant=StandardLowRe Outputs/file_base=low_Re'
+    requirement = 'The system shall be able to set up a low-Reynolds number k-epsilon turbulence model using a Physics syntax.'
+  []
+  [error_buoyancy_without_energy_physics]
+    type = 'RunException'
+    input = 'channel_variants_physics.i'
+    cli_args = 'Physics/NavierStokes/AdvancedKEpsilon/k-epsilon/use_buoyancy=true'
+    expect_err = 'Buoyancy production of turbulence requires a fluid heat transfer Physics'
+    requirement = 'The system shall report an error if turbulent buoyancy production is requested without a fluid heat transfer Physics to provide the temperature field.'
+  []
+  [error_non_constant_coefficient]
+    type = 'RunException'
+    input = 'channel_variants_physics.i'
+    cli_args = 'Physics/NavierStokes/AdvancedKEpsilon/k-epsilon/C1_eps=some_functor'
+    expect_err = 'only accept a constant value for this coefficient'
+    requirement = 'The system shall report an error if a k-epsilon closure coefficient that must be constant is specified as a non-constant functor.'
+  []
+[]
