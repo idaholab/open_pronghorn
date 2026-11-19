@@ -39,16 +39,6 @@ k_eps_variants = [
         "base": "k_epsilon_realizable_two_layer",
         "label": r"Realizable k-$\varepsilon$ (two layer)",
     },
-    {
-        "key": "realizable_quadratic",
-        "base": "k_epsilon_realizable_quadratic",
-        "label": r"Realizable k-$\varepsilon$ (quadratic)",
-    },
-    {
-        "key": "realizable_cubic",
-        "base": "k_epsilon_realizable_cubic",
-        "label": r"Realizable k-$\varepsilon$ (cubic)",
-    },
 ]
 
 ############################ Plot settings #############################

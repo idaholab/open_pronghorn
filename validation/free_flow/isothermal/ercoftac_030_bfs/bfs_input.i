@@ -30,11 +30,10 @@ y_first_cell_2 = ${fparse (0.0127 - 0.0119) / 2}
 
 # Turbulence-model knobs (optional)
 k_epsilon_variant   = 'Standard'  # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-# two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds (only used by the two-layer material)
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
-curvature_model     = 'none'
 use_yap             = false
 use_low_re_Gprime   = false
 bulk_wall_treatment = false
@@ -222,7 +221,6 @@ bulk_wall_treatment = false
     use_buoyancy             = ${use_buoyancy}
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
   []
   [TKED_advection]
     type = LinearFVTurbulentAdvection
@@ -266,7 +264,6 @@ bulk_wall_treatment = false
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
     nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
     wall_distance       = distance
@@ -413,14 +410,9 @@ bulk_wall_treatment = false
 
     # NEW (optional) – choose model and options
     k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
-    # two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
     # Cd0 = 0.091      # defaults, can omit if you keep Standard
     # Cd1 = 0.0042
     # Cd2 = 0.00011
-    # Ca0 = 0.667      # Realizable C_mu coefficients
-    # Ca1 = 1.25
-    # Ca2 = 1.0
-    # Ca3 = 0.9
     wall_distance = distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_mu_t_wall_neq]
@@ -472,6 +464,21 @@ bulk_wall_treatment = false
     variable = 'distance'
     execute_on = 'initial'
     von_karman_const = 1.0
+  []
+[]
+
+[FunctorMaterials]
+  # Two-layer quantities; only used by the *TwoLayer variants
+  [two_layer]
+    type = kEpsilonTwoLayerFunctorMaterial
+    tke = TKE
+    rho = ${rho}
+    mu = ${mu}
+    C_mu = ${C_mu}
+    wall_distance = distance
+    two_layer_flavor = ${two_layer_flavor}
+    Rey_star = 60
+    DeltaRey = 10
   []
 []
 

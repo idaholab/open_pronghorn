@@ -108,7 +108,8 @@ This constant is used by the two-layer models (`twoLayerWolfstein`, `twoLayerNor
 
 ## 3. `twoLayerWolfstein`
 
-This function implements a *Wolfstein-type two-layer near-wall model*. It returns a
+This function implements a *Wolfstein-type two-layer near-wall model*
+[!cite](wolfstein1969velocity). It returns a
 `TwoLayerLengths` struct with
 
 - `l_eps`: dissipation length scale $\ell_\epsilon$,
@@ -119,45 +120,71 @@ Using $c_\ell = c_\ell(C_\mu)$ from `cl_from_Cmu`,
 \ell_\epsilon = c_\ell \, d \left(1 - e^{- \mathrm{Re}_d / (2 c_\ell)}\right),
 \end{equation}
 \begin{equation}
-\frac{\mu_t}{\mu} = 0.42 \, \mathrm{Re}_d^{0.25}
+\frac{\mu_t}{\mu} = 0.42 \, C_\mu^{1/4} \, \mathrm{Re}_d
 \left( 1 - e^{-\mathrm{Re}_d / 70} \right),
 \end{equation}
 where
 
 - $d$ is the wall distance,
-- $\mathrm{Re}_d$ is a Reynolds number based on wall distance.
+- $\mathrm{Re}_d = \sqrt{k}\, d / \nu$ is the wall-distance Reynolds number.
+
+The viscosity ratio is the one-equation viscosity $\rho C_\mu \ell_\mu \sqrt{k} / \mu$ with
+$\ell_\mu = c_\ell\, d\, (1 - e^{-\mathrm{Re}_d / 70})$.
 
 
 ## 4. `twoLayerNorrisReynolds`
 
-This function implements a *Norris–Reynolds-type two-layer model*. It returns
+This function implements a *Norris–Reynolds-type two-layer model*
+[!cite](norris1975oneequation). It returns
 
 \begin{equation}
 \ell_\epsilon = c_\ell \, d \frac{\mathrm{Re}_d}{\mathrm{Re}_d + 5.3},
 \end{equation}
 \begin{equation}
-\frac{\mu_t}{\mu} = 0.42 \, \mathrm{Re}_d^{0.25}
+\frac{\mu_t}{\mu} = 0.42 \, C_\mu^{1/4} \, \mathrm{Re}_d
 \left( 1 - e^{-\mathrm{Re}_d / 50.5} \right),
 \end{equation}
 
-with $c_\ell = c_\ell(C_\mu)$ as before.
+with $c_\ell = c_\ell(C_\mu)$ as before. As for `twoLayerWolfstein`, this is
+$\rho C_\mu \ell_\mu \sqrt{k} / \mu$ with $\ell_\mu = c_\ell\, d\, (1 - e^{-\mathrm{Re}_d / 50.5})$.
 
 
-## 5. `twoLayerXu`
+## 5. Two-layer helpers
 
-This function implements an *Xu-type two-layer correlation* using a modified wall
-coordinate $y_\nu^\ast$ (denoted `yv_star` in the code). It returns
 
+### 5.1 `twoLayerLengths`
+
+Dispatches to `twoLayerWolfstein` or `twoLayerNorrisReynolds` according to the
+selected `two_layer_flavor`.
+
+
+### 5.2 `twoLayerBlendingFactor`
+
+The wall-proximity blending factor of Jongen ([!cite](jongen1998simulation)), shared by the
+two-layer turbulent viscosity and the two-layer $\epsilon$ equation:
 \begin{equation}
-\ell_\epsilon = \frac{8.8 \, d}
-                      {1 + \frac{10}{y_\nu^\ast} + 5.15 \times 10^{-2} y_\nu^\ast},
+\lambda = \tfrac12\left[1 + \tanh\!\left(\frac{\mathrm{Re}_d - \mathrm{Re}^\ast}{A}\right)\right],
+\qquad A = \left|\frac{\Delta \mathrm{Re}}{\operatorname{atanh}(0.98)}\right|,
 \end{equation}
-\begin{equation}
-\frac{\mu_t}{\mu} = \frac{0.544 \, y_\nu^\ast}
-                         {1 + 5.025 \times 10^{-4} \, y_\nu^{\ast\,1.65}}.
-\end{equation}
+where $\mathrm{Re}^\ast$ (`Rey_star`) is the threshold and $\Delta \mathrm{Re}$ (`DeltaRey`) the
+half-width of the blending region. $\lambda$ goes from 0.01 at
+$\mathrm{Re}^\ast - \Delta\mathrm{Re}$ to 0.99 at $\mathrm{Re}^\ast + \Delta\mathrm{Re}$.
 
-Note that `Cmu` and `Re_d` are not used in this formulation.
+
+### 5.3 `turbulentBlendWeight`
+
+The weight applied to the rows of the blended turbulence transport kernels
+(time derivative, advection, diffusion) in an element $e$:
+\begin{equation}
+w_e =
+\begin{cases}
+0 & \text{if } e \text{ is wall bounded}, \\
+\lambda(e) & \text{if a blending functor is given}, \\
+1 & \text{otherwise}.
+\end{cases}
+\end{equation}
+Without a blending functor, this reproduces the binary wall-bounded skip of the regular
+turbulent kernels.
 
 
 ## 6. `f2_SKE_LRe`
@@ -167,8 +194,8 @@ standard $k\text{–}\epsilon$ model:
 \begin{equation}
 f_2(\mathrm{Re}_t) = 1 - C \exp(-\mathrm{Re}_t^2),
 \end{equation}
-where $C$ is a model constant and $\mathrm{Re}_t$ is a turbulent Reynolds number
-(typically $k^2/(\nu \epsilon)$).
+where $C$ is a model constant (default $C = 0.3$ [!cite](lien1996low)) and
+$\mathrm{Re}_t = k^2/(\nu \epsilon)$ is the turbulence Reynolds number.
 
 
 ## 7. `fmu_SKE_LRe`
@@ -183,44 +210,74 @@ f_\mu(\mathrm{Re}_d) &= 1 - e^{-\text{arg}}.
 \end{aligned}
 \end{equation}
 
-This is used to modify $\mu_t$ as $\mu_t \gets f_\mu \mu_t$ for the first cell near the wall.
+with $\mathrm{Re}_d = \sqrt{k}\,d/\nu$ and the defaults $C_{d0} = 0.091$, $C_{d1} = 0.0042$,
+$C_{d2} = 0.00011$ [!cite](lien1996low).
+
+This is used as $C_\mu^{\mathrm{eff}} = f_\mu C_\mu$ in every bulk cell of the
+StandardLowRe variant.
 
 
 ## 8. `f2_RKE`
 
-This is another *damping function* $f_2$ (used in realizable or low-Re variants):
+This is the destruction *damping function* $f_2$ of the realizable variants:
 \begin{equation}
 f_2(k,\nu,\epsilon) = \frac{k}{k + \sqrt{\nu \epsilon}}.
 \end{equation}
 
-It approaches 0 near the wall (small $k$), and 1 away from the wall.
+It approaches 0 near the wall (small $k$), and 1 away from the wall. It is always applied in the
+destruction term of the `Realizable` and `RealizableTwoLayer` variants, which gives
+$\rho C_2 \epsilon^2/(k + \sqrt{\nu\epsilon})$ [!cite](shih1995realizable).
 
 
 ## 9. `Cmu_realizable`
 
-This function computes a *realizable* eddy-viscosity constant $C_\mu$ based on the
-invariants $S^2$ and $W^2$:
+This function computes the realizable eddy-viscosity coefficient of
+[!cite](shih1995realizable) from the velocity gradient $\nabla \mathbf{u}$, $k$, $\epsilon$ and the
+constant $A_0$ (parameter `A0` of [kEpsilonViscosity.md], default 4.04):
 
-1. First compute the ratio
+1. Build the mean strain-rate and rotation-rate tensors
    \begin{equation}
-   \frac{k}{\epsilon} = k_\epsilon,
-   \end{equation}
-   and then
-   \begin{equation}
-   \bar{S} = k_\epsilon \sqrt{S^2}, \qquad
-   \bar{W} = k_\epsilon \sqrt{W^2}.
+   S_{ij} = \tfrac{1}{2}\left(\frac{\partial u_i}{\partial x_j} + \frac{\partial u_j}{\partial x_i}\right),
+   \qquad
+   \Omega_{ij} = \tfrac{1}{2}\left(\frac{\partial u_i}{\partial x_j} - \frac{\partial u_j}{\partial x_i}\right).
    \end{equation}
 
-2. The realizable $C_\mu$ is then
+2. Compute
    \begin{equation}
-   C_\mu^\text{real} =
-   \frac{C_{a0}}{C_{a1} + C_{a2} \bar{S} + C_{a3} \bar{W}}.
+   \tilde{S} = \sqrt{S_{ij}S_{ij}}, \qquad
+   U^* = \sqrt{S_{ij}S_{ij} + \Omega_{ij}\Omega_{ij}}, \qquad
+   W = \frac{S_{ij}S_{jk}S_{ki}}{\tilde{S}^3},
    \end{equation}
+   with $W = 0$ when $\tilde{S}$ vanishes.
 
-with the constants pre-defined realizability constants
-$C_{a0} = 0.667$, $C_{a1} = 1.25$, $C_{a2} = 1.0$, and $C_{a3} = 0.9$.
+3. Then
+   \begin{equation}
+   A_s = \sqrt{6}\cos\phi, \qquad \phi = \tfrac{1}{3}\arccos\left(\sqrt{6}\,W\right), \qquad
+   C_\mu^\text{real} = \frac{1}{A_0 + A_s \, k U^*/\epsilon}.
+   \end{equation}
+   The argument $\sqrt{6}\,W$ is clipped to $[-1, 1]$ before the $\arccos$.
 
-This quantity is used in realizable $k\text{–}\epsilon$ models to define $\mu_t$.
+The system-rotation term of $\Omega_{ij}$ is not included (stationary frame). In an equilibrium
+logarithmic layer ($Sk/\epsilon \approx 3.3$, plane shear) this gives $C_\mu^\text{real} \approx 0.09$.
+This quantity is used in the realizable $k\text{–}\epsilon$ models to define $\mu_t$.
+
+
+## 9b. `C1_realizable`
+
+The variable production coefficient of the realizable $\epsilon$ equation,
+\begin{equation}
+C_1 = \max\left(0.43, \frac{\eta}{\eta + 5}\right), \qquad \eta = S\frac{k}{\epsilon}, \qquad
+S = \sqrt{2 S_{ij} S_{ij}},
+\end{equation}
+used in the production term $\rho C_1 S \epsilon$ [!cite](shih1995realizable).
+
+
+## 9c. `defaultC2eps`
+
+The calibrated value of $C_{2\epsilon}$ for each variant, used as the default of `C2_eps`: 1.92 for
+the Standard variants [!cite](launder1974numerical) and 1.9 for the Realizable variants
+[!cite](shih1995realizable). $\sigma_\epsilon$ (1.3 and 1.2) is the `scaling_coeff` of the
+$\epsilon$ turbulent diffusion kernel and has no default in the k-epsilon objects.
 
 
 ## 10. `Cmu_nonlinear`
@@ -241,8 +298,8 @@ $\epsilon \le 0$, it returns 0. Otherwise:
    \frac{C_{a0}}{C_{a1} + C_{a2} \bar{S} + C_{a3} \bar{W}}.
    \end{equation}
 
-This has the same functional form as `Cmu_realizable`, but uses the invariants packaged in
-`StrainRotationInvariants` and is used with nonlinear constitutive relations.
+This is the $C_\mu$ of the nonlinear constitutive relations. It uses the invariants packaged in
+`StrainRotationInvariants` and is not used by the realizable variants (see `Cmu_realizable`).
 
 
 ## 11. `computeGk`
@@ -315,7 +372,7 @@ equation.
    \quad
    \text{tmp} = (r - 1) r^2,
    \end{equation}
-   where $\ell = \frac{k^{3/2}}{\epsilon}$ is the bulk eddy lenght scale, then take
+   where $\ell = \frac{k^{3/2}}{\epsilon}$ is the bulk eddy length scale and $\ell_\epsilon = C_l d$, then take
    \begin{equation}
    \text{val} = \max(\text{tmp}, 0).
    \end{equation}
@@ -325,7 +382,8 @@ equation.
    \gamma_Y = C_w \, \frac{\epsilon^2}{k} \, \text{val}.
    \end{equation}
 
-So $\gamma_Y$ injects extra dissipation whenever $\ell / \ell_\epsilon > 1$.
+So $\gamma_Y$ injects extra dissipation whenever $\ell / \ell_\epsilon > 1$. The TKED kernel adds
+$\rho\gamma_Y$ to the $\epsilon$ equation (StandardTwoLayer and StandardLowRe only).
 
 
 ## 15. `computeGprime`
@@ -335,19 +393,22 @@ $\epsilon$-equation.
 
 1. First build
    \begin{equation}
-   \text{term} = G_k + 2 \mu_t \frac{k}{d^2},
+   \text{term} = G_k + 2 \mu \frac{k}{d^2},
    \end{equation}
    where
 
    - $G_k$ is the shear-production term,
+   - $\mu$ is the molecular dynamic viscosity, so that $2\mu k/d^2 = \rho\epsilon_w$, the
+     wall value of $\epsilon$,
    - $d$ is wall distance.
 
 2. Then
    \begin{equation}
    G' = D \, f_2 \, \text{term} \, \exp(-E \, \mathrm{Re}_d^2),
    \end{equation}
-   where $D$ and $E$ are constants, $f_2$ is typically a low-Re damping function,
-   and $\mathrm{Re}_d$ is a Reynolds number based on wall distance.
+   where $D$ and $E$ are constants (defaults $D = 1$, $E = 0.00375$ [!cite](lien1996low)),
+   $f_2$ is `f2_SKE_LRe`, and $\mathrm{Re}_d = \sqrt{k}\,d/\nu$ is the wall-distance
+   Reynolds number.
 
 
 ## 16. `computeVelocityGradient`
@@ -377,14 +438,14 @@ This tensor is then used by the nonlinear constitutive relation and curvature co
 
 ## 17. Nonlinear constitutive relation utilities
 
-The remaining utilities implement *quadratic and cubic nonlinear eddy-viscosity models*
-and associated terms.
+The remaining utilities implement the *quadratic and cubic nonlinear constitutive relations* of
+[!cite](lien1996low) and the associated production term.
 
 There are fixed model coefficients in an anonymous namespace:
 
 - Quadratic/cubic model coefficients: `CNL1`–`CNL7`,
-- `Ca0`–`Ca3` for the nonlinear $C_\mu$ expression. These are used internally by
-  `computeTRANS_NL` and `computeGnl`.
+- `Ca0`–`Ca3` for the nonlinear $C_\mu$ expression (`Cmu_nonlinear`), used inside
+  `computeTRANS_NL` for $C_1, \dots, C_5$.
 
 
 ### 17.1 `computeTRANS_NL`
@@ -403,10 +464,10 @@ a quadratic or cubic constitutive relation.
 
 3. Use the invariants in `inv` to compute
    \begin{equation}
-   S\cdot S = \frac{1}{2} S^2, \qquad
-   W\cdot W = \frac{1}{2} W^2,
-   \quad
-   S^\star = \sqrt{\max(S\cdot S, 0)}.
+   S:S = \frac{1}{2} S^2, \qquad
+   W:W^T = \frac{1}{2} W^2,
+   \qquad
+   \bar{S} = \frac{k}{\epsilon} \sqrt{\max(S^2, 0)} = \frac{k}{\epsilon}\sqrt{2 S:S}.
    \end{equation}
 
 4. Compute the nonlinear-compatible $C_\mu$
@@ -415,7 +476,7 @@ a quadratic or cubic constitutive relation.
    \end{equation}
    and then form the denominator
    \begin{equation}
-   \text{denom} = (C_{NL6} + C_{NL7} S^\star) C_\mu.
+   \text{denom} = (C_{NL6} + C_{NL7} \bar{S}^3) C_\mu.
    \end{equation}
 
 5. From this denominator define
@@ -427,17 +488,18 @@ a quadratic or cubic constitutive relation.
 
 6. Build the *identity tensor* $I$ and the quadratic tensor products:
    \begin{equation}
-   SS = S S, \qquad WW = W W,
+   SS = S S, \qquad WW^T = W W^T,
    \qquad WS = W S, \qquad SW^T = S W^T.
    \end{equation}
 
 7. Construct the *quadratic bracket*:
    \begin{equation}
    \mathcal{Q} =
-   C_1 \left( S S - \frac{S\cdot S}{3} I \right)
+   C_1 \left( S S - \frac{S:S}{3} I \right)
  + C_2 (W S + S W^T)
- + C_3 \left( W W - \frac{W\cdot W}{3} I \right).
+ + C_3 \left( W W^T - \frac{W:W^T}{3} I \right).
    \end{equation}
+   Every term is symmetric, and the $C_1$ and $C_3$ terms are traceless.
 
 8. The *quadratic nonlinear Reynolds-stress* contribution is
    \begin{equation}
@@ -459,7 +521,7 @@ a quadratic or cubic constitutive relation.
      \end{equation}
      and
      \begin{equation}
-     \text{term}_5 = (S\cdot S - W\cdot W) (S - W^T).
+     \text{term}_5 = (S:S - W:W^T) \left(S - \tfrac{1}{3}\operatorname{tr}(S) I\right).
      \end{equation}
 
    - Let
@@ -500,48 +562,32 @@ enabled.
 
 ## 18. `computeCurvatureFactor`
 
-This function computes a *curvature/rotation correction factor* $f_c$ (of Spalart–Shur
-type) that multiplies the shear-production term.
+This function computes the curvature / rotation correction factor $f_c$ of
+[!cite](arolla2013modeling), which multiplies the shear production of the realizable variants.
+Its inputs are the invariants `inv` ($S^2 = 2S_{ij}S_{ij}$, $W^2 = 2W_{ij}W_{ij}$), $k$, $\epsilon$ and
+$\nu$. It is only called when `use_curvature_correction = true`.
 
-1. If `model == None`, it returns $f_c = 1$.
-
-2. Otherwise it starts from the invariants (clamped to non-negative):
+1. With $k$ clipped at 0 and $\epsilon$ at $10^{-20}$, it builds the time scale
    \begin{equation}
-   S^2 = \max(\text{inv.S2}, 0), \qquad
-   W^2 = \max(\text{inv.W2}, 0).
+   T = \max(T_1, T_3), \quad T_1 = \frac{k}{\epsilon}, \quad
+   T_2 = 6\sqrt{\frac{\nu}{\epsilon}}, \quad T_3 = \left(T_1^{1.625} T_2\right)^{1/2.625},
+   \end{equation}
+   which keeps the correct near-wall asymptotic behavior.
+
+2. It forms
+   \begin{equation}
+   \eta = \tfrac{1}{2}\left(S^2 - W^2\right) T^2 = \left(S_{ij}S_{ij} - W_{ij}W_{ij}\right) T^2.
    \end{equation}
 
-3. If $S^2 \le 0$, it again returns 1. Otherwise define
+3. It returns
    \begin{equation}
-   S\cdot S = \frac{1}{2} S^2, \qquad
-   W\cdot W = \frac{1}{2} W^2.
+   f_c = \min\left(C_\text{max},\;
+   \frac{1}{C_{r1}\left(|\eta| - \eta\right) + \sqrt{1 - \min(C_{r2}\,\eta, 0.99)}}\right),
    \end{equation}
+   with $C_{r1} = 0.04645$, $C_{r2} = 0.25$ and $C_\text{max} = 1.25$.
 
-4. Construct dimensionless measures of rotation vs strain:
-   \begin{equation}
-   r_* = \frac{W\cdot W}{\max(S\cdot S, 10^{-16})}, \qquad
-   \tilde{r} = \frac{W\cdot W}{\max(S\cdot S + W\cdot W, 10^{-16})}.
-   \end{equation}
-
-5. With internal constants
-   \begin{equation}
-   C_\text{rot1} = 1.0,\quad C_\text{rot2} = 2.0,\quad
-   C_\text{rot3} = 1.0,\quad C_\text{max} = 1.25,
-   \end{equation}
-   it forms a Spalart–Shur-like correction
-   \begin{equation}
-   f_\text{rot} =
-   (1 + C_\text{rot1}) \,
-   \frac{2 \tilde{r}}{1 + \tilde{r}}
-   \left( 1 - C_\text{rot2} \frac{r_*}{1 + C_\text{rot3} r_*} \right)
-   - C_\text{rot1}.
-   \end{equation}
-
-6. The function then clamps $f_\text{rot}$ to be at least $-1$ and finally defines
-   \begin{equation}
-   f_c = \min(C_\text{max}, 1 + f_\text{rot}).
-   \end{equation}
-
-The resulting $f_c$ is used to scale production in curvature/rotation-corrected
-$k\text{–}\epsilon$ models, enhancing or damping turbulence depending on the local ratio
-of rotation to strain.
+So $f_c = 1$ in simple shear ($\eta = 0$), $f_c < 1$ where rotation dominates strain ($\eta < 0$),
+and $f_c > 1$ (capped at 1.25) where strain dominates. $W_{ij}$ is the local rotation tensor only. The
+streamline-curvature contribution of [!cite](wallin2002modelling) (coefficient $C_{ct} = 2$, which
+needs the material derivative of $S_{ij}$) and frame rotation are not included, which is equivalent
+to $C_{ct} = 1$.

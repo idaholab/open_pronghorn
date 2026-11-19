@@ -13,9 +13,9 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / side_length}'
 
 ### k-epsilon Closure Parameters ###
 sigma_k = 1.0
-sigma_eps = 1.3
+sigma_eps = 1.2 # Realizable (Shih et al. 1995)
 C1_eps = 1.44
-C2_eps = 1.92
+C2_eps = 1.9 # Realizable (Shih et al. 1995)
 C_mu = 0.09
 
 ### Modeling parameters ###
@@ -28,7 +28,6 @@ k_epsilon_variant   = 'Realizable'           # Standard | StandardLowRe | Standa
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
-curvature_model     = 'standard'
 use_yap             = false
 use_low_re_Gprime   = false
 
@@ -203,7 +202,6 @@ use_low_re_Gprime   = false
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
     use_curvature_correction = true
-    curvature_model          = ${curvature_model}
   []
 
   [TKED_advection]
@@ -249,7 +247,6 @@ use_low_re_Gprime   = false
     use_compressibility = ${use_compressibility}
     nonlinear_model     = ${nonlinear_model}
     use_curvature_correction = true
-    curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms

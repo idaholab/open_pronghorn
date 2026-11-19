@@ -70,20 +70,24 @@ These invariants are used to construct:
   \begin{equation}
   G_k = \mu_t S^2 \;\; (\text{plus compressible terms if enabled}),
   \end{equation}
-- the shear-based $\epsilon$-production term $S_k = \mu_t S^2$ for realizable variants (note that $G_k$ may be limited so a disctinction is made with the non-limited $S_k$),
+  With [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_compressibility) set to `true`, the
+  $\tfrac{2}{3}$ dilatation terms are included in $G_k$ (set the same value as in the $k$ kernel).
+  The compressibility sink $\gamma_M$ acts in the $k$ equation only (see
+  [kEpsilonTKESourceSink.md]), so this kernel needs no `speed_of_sound` or `C_M`.
+- the strain magnitude $S = \sqrt{S^2}$ and $\eta = S k / \epsilon$ used by the realizable
+  production $\rho C_1 S \epsilon$,
 - the curvature correction factor $f_c$ (for realizable models when enabled),
 - the normalized strain/rotation quantities used by the nonlinear constitutive relations.
 
 
 ## $\epsilon$-production term $P_\epsilon$
 
-The $\epsilon$-production term $P_\epsilon$ is built from several contributions. Here, $P_\epsilon$ denotes the full non-destruction part of the $\epsilon$ source term (i.e., it already includes terms that are sometimes written separately as $S_\epsilon$, such as Yap or other near-wall/low-Re corrections):
+The $\epsilon$-production term $P_\epsilon$ is built from several contributions. Here, $P_\epsilon$ denotes the full non-destruction part of the $\epsilon$ source term (i.e., it already includes terms that are sometimes written separately as $S_\epsilon$, such as low-Re corrections). The Yap source $\rho\gamma_y$ is added separately (see below):
 
 - $G_k$: shear production of k,
 - $G_{\text{nl}}$: nonlinear production (optional quadratic/cubic constitutive relations),
 - $G'$: low-Re extra production (StandardLowRe only),
 - $G_b$: buoyancy production,
-- $Y_y$: Yap correction (two-layer and low-Re variants),
 - $f_c$: curvature correction factor (realizable variants).
 
 The exact combination depends on the chosen k–$\epsilon$ variant.
@@ -105,6 +109,19 @@ where
 - $G_{\text{nl}}$ is the nonlinear production term (if `nonlinear_model != none`),
 - $C_{\epsilon3}$ is the buoyancy coefficient (usually model-dependent).
 
+When `use_buoyancy = true` and the gravity vector is nonzero, $C_{\epsilon3}$ is computed in each
+cell as
+
+\begin{equation}
+C_{\epsilon3} = \tanh\left|\frac{u_\parallel}{u_\perp}\right|,
+\end{equation}
+
+where $u_\parallel$ and $u_\perp$ are the velocity components parallel and perpendicular to
+$\mathbf{g}$. The coefficient is close to 1 in vertical buoyant shear layers and close to 0 in
+horizontal ones. The user value `C3_eps` is used only where $u_\perp = 0$. The same $C_{\epsilon3} G_b$
+term is used by every variant, including the realizable ones, where it enters as
+$C_{\epsilon1} C_{\epsilon3} G_b\,\epsilon/k$.
+
 The production limiter is consistent with the one used in the k-equation kernel.
 
 ### StandardTwoLayer k–$\epsilon$
@@ -112,16 +129,11 @@ The production limiter is consistent with the one used in the k-equation kernel.
 For the *StandardTwoLayer* model, the $\epsilon$-production is
 
 \begin{equation}
-G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+G_k + G_{\text{nl}} + C_{\epsilon3} G_b,
 \end{equation}
 
-where
-
-- the shear production $G_k$ is taken without limiter,
-- the Yap correction $Y_y$ provides an additional near-wall sink/source and is multiplied by
-  $\rho C_{\epsilon1}$.
-
-The Yap term is especially important near walls and is detailed in a separate section below.
+where the shear production $G_k$ is taken without limiter. The optional Yap source is described
+below.
 
 
 ### StandardLowRe k–$\epsilon$ (low-Re model)
@@ -130,52 +142,46 @@ For the *StandardLowRe* model, low-Re corrections are included via damping funct
 extra production term $G'$. The $\epsilon$-production is
 
 \begin{equation}
-G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b,
 \end{equation}
 
 where
 
 - $G'$ is the low-Re extra production (see below),
 - $f_2$ damping appears in the destruction term,
-- Yap correction $Y_y$ is applied similarly to the two-layer model.
+- the optional Yap source is the same as in the two-layer model.
 
 ### Realizable k–$\epsilon$
 
-For the *Realizable* high-Re model, the $\epsilon$-production is written in terms of the shear-based
+For the *Realizable* high-Re model [!cite](shih1995realizable), the shear production of
+$\epsilon$ does not contain $G_k$. The $\epsilon$ source is
 
-production $S_k$:
 \begin{equation}
-f_c S_k + C_{\epsilon3} G_b,
+f_c \, \rho C_1 S \epsilon + C_{\epsilon1} \frac{\epsilon}{k} C_{\epsilon3} G_b,
+\qquad
+C_1 = \max\left(0.43, \frac{\eta}{\eta + 5}\right), \qquad \eta = S \frac{k}{\epsilon},
 \end{equation}
 
 where
 
-- $S_k = \mu_t S^2$ is the shear contribution,
-- $f_c$ is the curvature correction factor (if `curvature_model != none`),
-- $C_{\epsilon3} G_b$ is the buoyancy contribution.
+- $S = \sqrt{2 S_{ij} S_{ij}}$ is the strain magnitude,
+- $f_c$ is the curvature correction factor (if [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_curvature_correction) is `true`; see [kEpsilonTKESourceSink.md]),
+- the shear term $\rho C_1 S \epsilon$ is added directly, not through $C_{\epsilon1}/T_e$,
+- only the buoyancy term uses the fixed $C_{\epsilon1}$ = [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/C1_eps).
 
-In realizable models the nonlinear constitutive relation affects the viscosity (via realizable
-$C_\mu$) and the k-equation, but $P_\epsilon$ itself is expressed in terms of $S_k$ rather
-than $G_k$ or $G_{\text{nl}}$.
+$G_{\text{nl}}$ and $G'$ do not enter the realizable $\epsilon$ equation.
 
 ### RealizableTwoLayer k–$\epsilon$
 
-The *RealizableTwoLayer* model combines the realizable bulk behavior with a two-layer near-wall
-enhancement via Yap:
-
-\begin{equation}
-f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
-\end{equation}
-
-with the same definitions of $S_k$, $f_c$, and $G_b$ as in the realizable model and the Yap
-term as described below.
+The *RealizableTwoLayer* model uses the realizable bulk $\epsilon$ source above, blended with the
+two-layer near-wall $\epsilon$. The Yap correction is not available for this variant.
 
 
 ## nonlinear $\epsilon$-production $G_{\text{nl}}$
 
 When [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/nonlinear_model) is set to `quadratic` or
 `cubic`, `kEpsilonTKEDSourceSink` includes the contribution $G_{\text{nl}}$ in the $\epsilon$-production
-for Standard-family variants:
+for the Standard-family variants (selecting a nonlinear relation with a realizable variant is an error):
 
 - `Standard`:
   \begin{equation}
@@ -184,12 +190,12 @@ for Standard-family variants:
 
 - `StandardTwoLayer`:
   \begin{equation}
-  \text{Production} = G_k + G_{\text{nl}} + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y,
+  \text{Production} = G_k + G_{\text{nl}} + C_{\epsilon3} G_b,
   \end{equation}
 
 - `StandardLowRe`:
   \begin{equation}
-  \text{Production} = G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+  \text{Production} = G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b.
   \end{equation}
 
 The term $G_{\text{nl}}$ is based on the quadratic or cubic
@@ -198,99 +204,37 @@ nonlinear Reynolds stress models and contracted with $\nabla \mathbf{u}$.
 
 ## Curvature correction in $\epsilon$-production
 
-For realizable variants, the curvature correction factor $f_c$
-is applied multiplicatively to $S_k$ in the $\epsilon$-production:
+For the `Realizable` and `RealizableTwoLayer` variants, the curvature correction factor $f_c$
+of [!cite](arolla2013modeling) multiplies the shear production of $\epsilon$:
+\begin{equation}
+\text{source} = f_c\,\rho C_1 S \epsilon + C_{\epsilon1} C_{\epsilon3} G_b \frac{\epsilon}{k}.
+\end{equation}
 
-- `Realizable`:
-  \begin{equation}
-  \text{Production} = f_c S_k + C_{\epsilon3} G_b,
-  \end{equation}
-
-- `RealizableTwoLayer`:
-  \begin{equation}
-  \text{Production} = f_c S_k + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
-  \end{equation}
-
-The same curvature model (e.g. `curvature_model = standard`) is used in both the k-equation and
-the $\epsilon$-equation kernels for consistency.
+Set [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_curvature_correction) to the same value in
+the $k$ and $\epsilon$ kernels.
 
 
 ## Yap correction
 
-The *Yap correction* is an additional near-wall term that modifies the $\epsilon$-equation source in
-two-layer and low-Re variants. It is enabled when
-[!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_yap) is `true` and a wall-distance functor is
-available.
-
-### Yap length scales
-
-The Yap correction is built from two length scales:
-
-- a turbulence length scale $l$,
-- an $\epsilon$ length scale $l_\epsilon$.
-
-The implementation uses a *limited* turbulence time scale
-to obtain $l$. The effective time scale $T_{\text{eff}}$ is computed as
-
-\begin{equation}
-T_1 = \frac{k}{\epsilon},
-\end{equation}
-
-\begin{equation}
-T_2 = \frac{6\nu}{\epsilon},
-\end{equation}
-
-\begin{equation}
-T_3 = T_1^{1.625} T_2,
-\end{equation}
-
-\begin{equation}
-T_{\text{eff}} = T_3^{1/(1.625 + 1)},
-\end{equation}
-
-where $\nu = \mu / \rho$ is the kinematic viscosity. The Yap turbulence length scale is then
-
-\begin{equation}
-l = \sqrt{T_{\text{eff}} \epsilon}.
-\end{equation}
-
-The $\epsilon$ length scale is defined as
-
-\begin{equation}
-l_\epsilon = C_l d,
-\end{equation}
-
-where $d$ is the wall distance and
-
-\begin{equation}
-C_l = 0.42 C_\mu^{-3/4}
-\end{equation}
-
-with $C_\mu$ the model’s closure constant (or a realizable value when applicable).
-
-### Yap correction term $Y_y$
-
-The Yap correction term $\gamma_y$ is computed as
+The Yap correction [!cite](yap1987correction) is enabled with
+[!param](/LinearFVKernels/kEpsilonTKEDSourceSink/use_yap) and is only available for the
+`StandardTwoLayer` and `StandardLowRe` variants (any other variant is an error). It needs the
+wall distance $d$. The term adds the source $\rho\gamma_y$ directly to the $\epsilon$ equation
+(it does not pass through $C_{\epsilon1}/T_e$):
 
 \begin{equation}
 \gamma_y =
 C_w \frac{\epsilon^2}{k}
 \max\left[\left(\frac{l}{l_\epsilon} - 1\right)\left(\frac{l}{l_\epsilon}\right)^2, 0\right],
+\qquad l = \frac{k^{3/2}}{\epsilon}, \qquad l_\epsilon = C_l d,
 \end{equation}
 
-where $C_w$ is a model coefficient. In the $\epsilon$-equation, this is translated into a source term
-
-\begin{equation}
-\rho C_{\epsilon1} Y_y = \rho C_{\epsilon1} \gamma_y,
-\end{equation}
-
-and added to $P_\epsilon$ for the variants that include Yap.
-
-The Yap contribution appears in:
-
-- `StandardTwoLayer`,
-- `StandardLowRe`,
-- `RealizableTwoLayer`.
+with $C_w = 0.83$ ([!param](/LinearFVKernels/kEpsilonTKEDSourceSink/Cw)) and
+$C_l = 0.42 C_\mu^{-3/4} \approx 2.55$ (from the constant
+[!param](/LinearFVKernels/kEpsilonTKEDSourceSink/C_mu)). In an equilibrium log layer $l = l_\epsilon$,
+so the term is zero. It is non-negative and acts where the turbulence length exceeds its
+equilibrium value, e.g. near reattachment or impingement. In two-layer variants it is part of the
+bulk source and is blended with $\lambda$.
 
 
 ## Low-Re extra production $G'$
@@ -302,7 +246,7 @@ and a wall-distance functor is provided.
 The term $G'$ is defined as
 
 \begin{equation}
-G' = D f_2 \left(G_k + 2 \mu_t \frac{k}{d^2}\right) \exp(-E \mathrm{Re}_d^2),
+G' = D f_2 \left(G_k + 2 \mu \frac{k}{d^2}\right) \exp(-E \mathrm{Re}_d^2),
 \end{equation}
 
 where
@@ -313,13 +257,18 @@ where
   f_2 = 1 - C \exp(-\mathrm{Re}_t^2),
   \end{equation}
   with $C$ a low-Re coefficient,
+- $\mu$ is the molecular dynamic viscosity, so that $2\mu k/d^2 = \rho\epsilon_w$ is the wall
+  value of $\epsilon$,
 - $\mathrm{Re}_d = \sqrt{k} d / \nu$ is the wall-distance Reynolds number,
 - $\mathrm{Re}_t = k^2 / (\nu \epsilon)$ is the turbulence Reynolds number.
+
+Defaults: $C = 0.3$ (`C_lowRe`), $D = 1$ (`D_lowRe`), $E = 0.00375$ (`E_lowRe`)
+[!cite](lien1996low).
 
 In the $\epsilon$-production for the StandardLowRe variant the production term is
 
 \begin{equation}
-G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b + \rho C_{\epsilon1} Y_y.
+G_k + G_{\text{nl}} + G' + C_{\epsilon3} G_b.
 \end{equation}
 
 The term $G'$ vanishes as $\mathrm{Re}_d \to \infty$ due to the exponential damping and is
@@ -337,10 +286,17 @@ D_\epsilon = \rho C_{\epsilon2} f_2 \frac{\epsilon^2}{k},
 where $C_{\epsilon2}$ is the model coefficient and $f_2$ is a damping function that depends on
 the k–$\epsilon$ variant:
 
-- `Standard`, `StandardTwoLayer`, `Realizable`, `RealizableTwoLayer`:
+- `Standard`, `StandardTwoLayer`:
   \begin{equation}
   f_2 = 1,
   \end{equation}
+
+- `Realizable`, `RealizableTwoLayer` [!cite](shih1995realizable):
+  \begin{equation}
+  f_2 = \frac{k}{k + \sqrt{\nu\epsilon}},
+  \end{equation}
+  so that $D_\epsilon = \rho C_{\epsilon2} \epsilon^2 / (k + \sqrt{\nu\epsilon})$, which stays finite
+  as $k \to 0$,
 
 - `StandardLowRe`:
   \begin{equation}
@@ -350,6 +306,20 @@ the k–$\epsilon$ variant:
 
 The same function is used for both the extra production term and the destruction
 damping in the low-Re model.
+
+### Model constants
+
+The default of [!param](/LinearFVKernels/kEpsilonTKEDSourceSink/C2_eps) depends on the variant:
+1.92 for the Standard variants [!cite](launder1974numerical) and 1.9 for the Realizable variants
+[!cite](shih1995realizable). A value set in the input is always used.
+
+!alert warning title=Set $\sigma_\epsilon = 1.2$ for the realizable variants
+$\sigma_\epsilon$ is not a parameter of [kEpsilonTKEDSourceSink.md]. It is the `scaling_coeff` of
+the $\epsilon$ turbulent diffusion kernel (the one with `diffusion_coeff = mu_t`), or it is built
+into a combined coefficient such as $\mu + \mu_t/\sigma_\epsilon$. Its default is 1 and nothing
+checks it. `Realizable` and `RealizableTwoLayer` are calibrated with $\sigma_\epsilon = 1.2$ and
+$C_2 = 1.9$ [!cite](shih1995realizable); the Standard variants use $\sigma_\epsilon = 1.3$.
+`C2_eps` follows the variant automatically, but $\sigma_\epsilon$ has to be set in the input.
 
 
 !syntax parameters /LinearFVKernels/kEpsilonTKEDSourceSink

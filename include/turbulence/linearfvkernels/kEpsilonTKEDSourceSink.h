@@ -46,6 +46,9 @@ public:
   virtual Real computeRightHandSideContribution() override;
 
 protected:
+  /// Error if the transport kernels of epsilon do not apply the two-layer blending factor
+  void checkTwoLayerTransportKernels() const;
+
   /// Convenience: domain dimension
   const unsigned int _dim;
 
@@ -83,8 +86,6 @@ protected:
   const Real _C2_eps;
   /// C3_epsilon (buoyancy coefficient)
   Real _C3_eps;
-  /// C_t (used with Yap / ambient source)
-  const Real _Ct;
 
   /// Low-Re / damping constant C in f2_SKE_LRe
   const Real _C_lowRe;
@@ -103,14 +104,14 @@ protected:
   /// Selected k-epsilon variant
   const NS::KEpsilonVariant _variant;
 
+  /// Whether a two-layer variant is selected
+  const bool _two_layer;
+
   /// Switches for optional corrections
   NS::KEpsilonSwitches _switches;
 
   /// Turbulent Prandtl number for buoyancy (if used)
   const Real _Pr_t;
-
-  /// Compressibility coefficient C_M (even though gamma_M mainly acts in the k-equation)
-  const Real _C_M;
 
   /// Gravity vector (for buoyancy production)
   const libMesh::VectorValue<Real> _g;
@@ -119,22 +120,21 @@ protected:
   const Moose::Functor<Real> * _T_functor;
   /// Optional functor: thermal expansion coefficient beta(T)
   const Moose::Functor<Real> * _beta_functor;
-  /// Optional functor: speed of sound c
-  const Moose::Functor<Real> * _c_functor;
   /// Optional functor: wall distance d (used for Yap and low-Re G')
   const Moose::Functor<Real> * _wall_distance_functor;
+
+  /// Optional functor: two-layer wall-proximity blending factor lambda
+  const Moose::Functor<Real> * _two_layer_lambda;
+  /// Optional functor: two-layer algebraic (damped) epsilon
+  const Moose::Functor<Real> * _two_layer_epsilon;
 
   /// Flags for optional functors
   const bool _has_T;
   const bool _has_beta;
-  const bool _has_c;
   const bool _has_wall_distance;
 
   /// Nonlinear constitutive model
   NS::NonlinearConstitutiveRelation _nonlinear_model;
-
-  /// Curvature/rotation correction model for Realizable variants
-  NS::CurvatureCorrectionModel _curvature_model;
 
   ///@{
   /// Maps for wall treatment
@@ -144,12 +144,42 @@ protected:
   ///@}
 
   /**
+   * Bulk implicit destruction coefficient C2_eps f2 rho / T_e (per unit volume).
+   */
+  Real computeBulkDestructionCoeff(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
+
+  /**
+   * Bulk explicit production source C1_eps Pe / T_e (per unit volume).
+   */
+  Real computeBulkProductionRHS(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
+
+  /**
+   * Coefficient a_alg = rho eps_alg / k of the algebraic two-layer epsilon relation
+   * a_alg (eps - eps_alg), which has the same dimensions as the bulk destruction coefficient.
+   */
+  Real computeAlgebraicCoeff(const Moose::ElemArg & elem_arg, const Moose::StateArg & state) const;
+
+  /**
    * Compute epsilon production "P_epsilon" in the bulk, based on the chosen
    * k–epsilon variant and switches. The returned value does *not* include
    * the C1_epsilon / T_e factor; that is applied by the kernel when assembling
-   * the RHS.
+   * the RHS. For the realizable variants it excludes the shear production, which is
+   * computeRealizableShearProduction(). It also excludes the Yap source (computeYapSource()).
    */
   Real computeBulkPe(const Moose::ElemArg & elem_arg, const Moose::StateArg & state);
+
+  /**
+   * Shear production of epsilon in the realizable variants, f_c rho C1 S eps with
+   * C1 = max(0.43, eta / (eta + 5)), eta = S k / eps (per unit volume).
+   */
+  Real computeRealizableShearProduction(const Moose::ElemArg & elem_arg,
+                                        const Moose::StateArg & state) const;
+
+  /**
+   * Yap correction source rho * gamma_y (per unit volume), with the turbulence length
+   * l = k^{3/2} / eps and l_eps = C_l d (Yap 1987). Added directly to the epsilon RHS.
+   */
+  Real computeYapSource(const Moose::ElemArg & elem_arg, const Moose::StateArg & state) const;
 
   /**
    * Compute the turbulent time scale T_e used in the epsilon equation.

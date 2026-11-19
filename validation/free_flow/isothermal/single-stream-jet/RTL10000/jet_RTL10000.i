@@ -39,9 +39,9 @@ advected_interp_method = 'upwind'
 # k-epsilon Closure Parameters
 # ================================================================================================================
 sigma_k = 1.0
-sigma_eps = 1.3
+sigma_eps = 1.2 # Realizable (Shih et al. 1995)
 C1_eps = 1.44
-C2_eps = 1.92
+C2_eps = 1.9 # Realizable (Shih et al. 1995)
 C_mu = 0.09
 # The front boundary is the solid inlet-plane area outside the jet opening;
 # the remaining outer tank boundaries are pressure outlets.
@@ -52,11 +52,10 @@ eps = 1e-4
 # Modeling parameters: Turbulence-model knobs (optional)
 # ================================================================================================================
 k_epsilon_variant   = 'RealizableTwoLayer'  # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+two_layer_flavor    = 'Wolfstein' # Wolfstein | NorrisReynolds (only used for *TwoLayer variants)
 use_buoyancy        = false
 use_compressibility = false
 nonlinear_model     = 'none'
-curvature_model     = 'none'
 use_yap             = false
 use_low_re_Gprime   = false
 bulk_wall_treatment = false
@@ -283,21 +282,22 @@ outlet = 'back bottom top left right'
     use_buoyancy             = ${use_buoyancy}
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
   []
 
   [TKED_advection]
-    type = LinearFVTurbulentAdvection
+    type = LinearFVTurbulentBlendedAdvection
     variable = TKED
     advected_interp_method_name = ${advected_interp_method}
     walls = ${walls}
+    blending_factor = two_layer_lambda
   []
   [TKED_diffusion]
-    type = LinearFVTurbulentDiffusion
+    type = LinearFVTurbulentBlendedDiffusion
     variable = TKED
     diffusion_coeff = 'mu_eff_eps'
     use_nonorthogonal_correction = true
     walls = ${walls}
+    blending_factor = two_layer_lambda
   []
   [TKED_source_sink]
     type = kEpsilonTKEDSourceSink
@@ -320,10 +320,11 @@ outlet = 'back bottom top left right'
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
     nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
+    two_layer_lambda  = two_layer_lambda
+    two_layer_epsilon = two_layer_epsilon
   []
 []
 
@@ -470,14 +471,11 @@ outlet = 'back bottom top left right'
 
     # NEW (optional) – choose model and options
     k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
-    two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
+    two_layer_lambda  = two_layer_lambda
+    two_layer_mu_t    = two_layer_mu_t
     # Cd0 = 0.091      # defaults, can omit if you keep Standard
     # Cd1 = 0.0042
     # Cd2 = 0.00011
-    Ca0 = 0.667      # Realizable C_mu coefficients
-    Ca1 = 1.25
-    Ca2 = 1.0
-    Ca3 = 0.9
     wall_distance = wall_distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_y_plus]
@@ -496,6 +494,17 @@ outlet = 'back bottom top left right'
 []
 
 [FunctorMaterials]
+  [two_layer]
+    type = kEpsilonTwoLayerFunctorMaterial
+    tke = TKE
+    rho = ${rho}
+    mu = ${mu}
+    C_mu = ${C_mu}
+    wall_distance = wall_distance
+    two_layer_flavor = ${two_layer_flavor}
+    Rey_star = 60
+    DeltaRey = 10
+  []
   [compute_mu_eff]
     type = FunctorEffectiveDynamicViscosity
     property_name = mu_eff
@@ -543,21 +552,21 @@ outlet = 'back bottom top left right'
   pressure_system = 'pressure_system'
   turbulence_systems = 'TKE_system TKED_system'
 
-  momentum_l_abs_tol = 1e-6
-  pressure_l_abs_tol = 1e-6
-  turbulence_l_abs_tol = 1e-6
-  momentum_l_tol = 1e-6
-  pressure_l_tol = 1e-6
-  turbulence_l_tol = 1e-6
+  momentum_l_abs_tol = 1e-8
+  pressure_l_abs_tol = 1e-8
+  turbulence_l_abs_tol = 1e-8
+  momentum_l_tol = 1e-8
+  pressure_l_tol = 1e-8
+  turbulence_l_tol = 1e-8
 
-  momentum_equation_relaxation = 0.6
-  pressure_variable_relaxation = 0.25
+  momentum_equation_relaxation = 0.7
+  pressure_variable_relaxation = 0.3
   turbulence_equation_relaxation = '0.4 0.4'
   turbulence_field_relaxation = '0.4 0.4'
-  num_iterations = 1500
-  pressure_absolute_tolerance = 1e-7
-  momentum_absolute_tolerance = 1e-7
-  turbulence_absolute_tolerance = '1e-7 1e-7'
+  num_iterations = 3000
+  pressure_absolute_tolerance = 1e-9
+  momentum_absolute_tolerance = 1e-9
+  turbulence_absolute_tolerance = '1e-9 1e-9'
 
   momentum_petsc_options_iname = '-u_system_pc_type -u_system_pc_hypre_type -v_system_pc_type -v_system_pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg hypre boomeramg'

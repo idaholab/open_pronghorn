@@ -27,9 +27,9 @@ advected_interp_method = 'upwind'
 
 ### k-epsilon Closure Parameters ###
 sigma_k = 1.0
-sigma_eps = 1.3
+sigma_eps = 1.2 # Realizable (Shih et al. 1995)
 C1_eps = 1.44
-C2_eps = 1.92
+C2_eps = 1.9 # Realizable (Shih et al. 1995)
 C_mu = 0.09
 
 ### Initial and Boundary Conditions ###
@@ -44,11 +44,10 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 
 # Turbulence-model knobs (optional)
 k_epsilon_variant   = 'RealizableTwoLayer'    # Standard | StandardLowRe | StandardTwoLayer | Realizable | RealizableTwoLayer
-two_layer_flavor    = 'Wolfstein'             # Wolfstein | NorrisReynolds | Xu (only used for *TwoLayer variants)
+two_layer_flavor    = 'Wolfstein'             # Wolfstein | NorrisReynolds (only used for *TwoLayer variants)
 use_buoyancy        = true
 use_compressibility = true
 nonlinear_model     = 'none'
-curvature_model     = 'none'
 use_yap             = false
 use_low_re_Gprime   = false
 
@@ -61,7 +60,7 @@ use_low_re_Gprime   = false
     ymin = 0
     ymax = ${H}
     nx = 10
-    ny = 5
+    ny = 8
     bias_y = 0.7
   []
   [block_2]
@@ -72,7 +71,7 @@ use_low_re_Gprime   = false
     ymin = ${fparse -H}
     ymax = 0
     nx = 10
-    ny = 5
+    ny = 8
     bias_y = ${fparse 1/0.7}
   []
   [smg]
@@ -261,7 +260,6 @@ use_low_re_Gprime   = false
     use_buoyancy             = ${use_buoyancy}
     use_compressibility      = ${use_compressibility}
     nonlinear_model          = ${nonlinear_model}
-    curvature_model          = ${curvature_model}
     Pr_t                     = 0.9
     C_M                      = 1.0
     gravity                  = '-9.81 0 0'
@@ -275,25 +273,28 @@ use_low_re_Gprime   = false
   []
 
   [TKED_advection]
-    type = LinearFVTurbulentAdvection
+    type = LinearFVTurbulentBlendedAdvection
     variable = TKED
     advected_interp_method_name = ${advected_interp_method}
     walls = ${walls}
+    blending_factor = two_layer_lambda
   []
   [TKED_diffusion]
-    type = LinearFVTurbulentDiffusion
+    type = LinearFVTurbulentBlendedDiffusion
     variable = TKED
     diffusion_coeff = ${mu}
     use_nonorthogonal_correction = false
     walls = ${walls}
+    blending_factor = two_layer_lambda
   []
   [TKED_turb_diffusion]
-    type = LinearFVTurbulentDiffusion
+    type = LinearFVTurbulentBlendedDiffusion
     variable = TKED
     diffusion_coeff = 'mu_t'
     scaling_coeff = ${sigma_eps}
     use_nonorthogonal_correction = false
     walls = ${walls}
+    blending_factor = two_layer_lambda
   []
   [TKED_source_sink]
     type = kEpsilonTKEDSourceSink
@@ -316,21 +317,20 @@ use_low_re_Gprime   = false
     use_buoyancy        = ${use_buoyancy}
     use_compressibility = ${use_compressibility}
     nonlinear_model     = ${nonlinear_model}
-    curvature_model     = ${curvature_model}
     use_yap             = ${use_yap}
     use_low_re_Gprime   = ${use_low_re_Gprime}
 
     Pr_t = 0.9
-    C_M  = 1.0
     gravity = '-9.81 0 0'
 
     # same functors as for TKE if you use them:
     temperature       = T
     beta              = ${alpha_b}
-    speed_of_sound    = ${c}
     # nonlinear_production = Gnl
     # curvature_factor  = fc
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
+    two_layer_lambda  = two_layer_lambda
+    two_layer_epsilon = two_layer_epsilon
   []
 
   [heat_advection]
@@ -375,6 +375,16 @@ use_low_re_Gprime   = false
     boundary = 'top bottom'
     variable = vel_y
     functor = 0.0
+  []
+  [pressure-extrapolation]
+    type = LinearFVPressureFluxBC
+    boundary = 'top bottom'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
+    rho = ${rho_0}
+    u = vel_x
+    v = vel_y
   []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -487,7 +497,8 @@ use_low_re_Gprime   = false
 
     # NEW (optional) – choose model and options
     k_epsilon_variant = ${k_epsilon_variant}    # e.g. 'Standard' or 'Realizable'
-    two_layer_flavor  = ${two_layer_flavor}     # ignored unless *TwoLayer variants
+    two_layer_lambda  = two_layer_lambda
+    two_layer_mu_t    = two_layer_mu_t
     wall_distance = wall_distance   # only needed for LowRe/TwoLayer (see below)
   []
   [compute_y_plus]
@@ -505,6 +516,17 @@ use_low_re_Gprime   = false
 []
 
 [FunctorMaterials]
+  [two_layer]
+    type = kEpsilonTwoLayerFunctorMaterial
+    tke = TKE
+    rho = 'rho_functor'
+    mu = ${mu}
+    C_mu = ${C_mu}
+    wall_distance = wall_distance
+    two_layer_flavor = ${two_layer_flavor}
+    Rey_star = 60
+    DeltaRey = 10
+  []
   [rho_function]
     type = ParsedFunctorMaterial
     property_name = 'rho_functor'
@@ -533,8 +555,8 @@ use_low_re_Gprime   = false
 
   momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  turbulence_equation_relaxation = '0.2 0.2'
-  turbulence_field_relaxation = '0.2 0.2'
+  turbulence_equation_relaxation = '0.4 0.4'
+  turbulence_field_relaxation = '0.4 0.4'
   energy_equation_relaxation = 0.9
   num_iterations = 1000
   pressure_absolute_tolerance = 1e-7

@@ -10,6 +10,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_set>
 #include "Moose.h"
 #include "MooseUtils.h"
 #include "ADReal.h"
@@ -42,8 +43,7 @@ enum class KEpsilonVariant
 enum class TwoLayerFlavor
 {
   Wolfstein,
-  NorrisReynolds,
-  Xu
+  NorrisReynolds
 };
 
 /**
@@ -54,12 +54,6 @@ enum class NonlinearConstitutiveRelation
   None,
   Quadratic,
   Cubic
-};
-
-enum class CurvatureCorrectionModel
-{
-  None,
-  Standard // Spalart–Shur-style rotation/curvature correction
 };
 
 /**
@@ -109,6 +103,18 @@ StrainRotationInvariants computeStrainRotationInvariants(const Moose::Functor<Re
                                                          const Moose::ElemArg & elem_arg,
                                                          const Moose::StateArg & state);
 
+/// Transport kernels (flux kernels and time derivatives) acting on a variable
+std::vector<const MooseObject *> getTransportKernels(const FEProblemBase & problem,
+                                                     unsigned int sys_num,
+                                                     unsigned int var_num,
+                                                     THREAD_ID tid);
+
+/// Whether functor \p name is the \p output functor of a kEpsilonTwoLayerFunctorMaterial
+bool isTwoLayerOutput(const FEProblemBase & problem,
+                      const std::string & output,
+                      const std::string & name,
+                      THREAD_ID tid);
+
 /**
  * Small helper to compute the two-layer constant c_l from C_mu.
  * c_l = 0.42 * C_mu^{-3/4}
@@ -135,12 +141,38 @@ TwoLayerLengths twoLayerWolfstein(const Real Cmu, const Real d, const Real Re_d)
 TwoLayerLengths twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d);
 
 /**
- * Xu natural-convection two-layer model variant.
+ * Dispatcher for the two-layer length scales according to the selected flavour.
  *
- * yv_star is the dimensionless wall distance used in the Xu model.
- * The expressions follow the STAR-CCM+ documentation closely.
+ * @param flavor Wolfstein or NorrisReynolds
+ * @param Cmu closure constant C_mu
+ * @param d wall distance
+ * @param Re_d wall-distance Reynolds number sqrt(k) d / nu
  */
-TwoLayerLengths twoLayerXu(const Real Cmu, const Real d, const Real Re_d, const Real yv_star);
+TwoLayerLengths
+twoLayerLengths(const TwoLayerFlavor flavor, const Real Cmu, const Real d, const Real Re_d);
+
+/**
+ * Wall-proximity blending factor shared by the two-layer mu_t and epsilon blending:
+ *
+ *   lambda = 0.5 (1 + tanh((Re_d - Re_star) / A)),  A = DeltaRe / atanh(0.98)
+ *
+ * lambda -> 0 in the viscosity-affected region (Re_d << Re_star), lambda -> 1 in the fully
+ * turbulent region.
+ */
+Real twoLayerBlendingFactor(const Real Re_d, const Real Rey_star, const Real DeltaRey);
+
+/**
+ * Weight applied to the transport terms (time derivative, advection, diffusion) of a turbulence
+ * equation in a given element:
+ *   - 0 if the element is wall bounded (these rows are replaced by wall treatment)
+ *   - lambda(elem) if a blending functor is provided
+ *   - 1 otherwise
+ * With no blending functor this reproduces the binary wall-bounded skip.
+ */
+Real turbulentBlendWeight(const Moose::ElemArg & elem_arg,
+                          const std::unordered_set<const Elem *> & wall_bounded,
+                          const Moose::Functor<Real> * lambda,
+                          const Moose::StateArg & state);
 
 /**
  * Low-Re standard k-epsilon damping function f2.
@@ -164,20 +196,35 @@ Real fmu_SKE_LRe(const Real Cd0, const Real Cd1, const Real Cd2, const Real Re_d
 Real f2_RKE(const Real k, const Real nu, const Real eps);
 
 /**
- * Realizable k-epsilon C_mu expression based on invariants of S and W.
+ * Realizable k-epsilon C_mu of Shih et al. (1995):
  *
- * Cmu = Ca0 / (Ca1 + Ca2 S_bar + Ca3 W_bar)
- * where S_bar = (k/eps) sqrt(S2) and W_bar = (k/eps) sqrt(W2)
- * with S2 = 2 S_ij S_ij and W2 = 2 W_ij W_ij.
+ *   C_mu = 1 / (A0 + As k U* / eps)
+ *   U*   = sqrt(S_ij S_ij + Omega_ij Omega_ij)
+ *   As   = sqrt(6) cos(phi),  phi = 1/3 acos(sqrt(6) W)
+ *   W    = S_ij S_jk S_ki / S_tilde^3,  S_tilde = sqrt(S_ij S_ij)
+ *
+ * with S_ij and Omega_ij the mean strain-rate and rotation-rate tensors. The system-rotation
+ * term of Omega_ij is not included (stationary frame).
+ *
+ * @param grad_u velocity gradient tensor, grad_u(i, j) = du_i/dx_j
+ * @param k turbulent kinetic energy
+ * @param eps turbulent kinetic energy dissipation rate
+ * @param A0 model constant A0
  */
-Real Cmu_realizable(const Real Ca0,
-                    const Real Ca1,
-                    const Real Ca2,
-                    const Real Ca3,
-                    const Real S2,
-                    const Real W2,
-                    const Real k,
-                    const Real eps);
+Real Cmu_realizable(const RankTwoTensor & grad_u, const Real k, const Real eps, const Real A0);
+
+/**
+ * Calibrated epsilon destruction coefficient C2_eps of a k-epsilon variant:
+ * 1.92 for the Standard variants (Launder-Spalding), 1.9 for the Realizable variants (Shih et al.)
+ */
+Real defaultC2eps(const KEpsilonVariant variant);
+
+/**
+ * Variable epsilon production coefficient of the realizable k-epsilon model:
+ *
+ *   C1 = max(0.43, eta / (eta + 5)),  eta = S k / eps,  S = sqrt(2 S_ij S_ij)
+ */
+Real C1_realizable(const Real eta);
 
 /**
  * Compute the variable C_mu used with non-linear constitutive relations.
@@ -230,19 +277,24 @@ Real computeGammaM(const Real rho, const Real C_M, const Real k, const Real eps,
  * Yap correction gamma_y.
  *
  * gamma_y = C_w epsilon^2 / k * max[(l / l_eps - 1) (l / l_eps)^2, 0]
+ *
+ * with the turbulence length l = k^{3/2} / epsilon and l_eps = C_l d,
+ * C_l = 0.42 C_mu^{-3/4} ~ 2.55 (Yap 1987). The epsilon equation gets the source rho * gamma_y.
  */
 Real computeGammaY(const Real C_w, const Real eps, const Real k, const Real l, const Real l_eps);
 
 /**
  * Low-Re additional production G' for the standard k-epsilon model.
  *
- * G' = D f2 (Gk + 2 mu_t k / d^2) exp(-E Re_d^2)
+ * G' = D f2 (Gk + 2 mu k / d^2) exp(-E Re_d^2)
+ *
+ * with mu the molecular dynamic viscosity (2 mu k / d^2 = rho eps at the wall).
  */
 Real computeGprime(const Real D,
                    const Real E,
                    const Real f2,
                    const Real Gk,
-                   const Real mu_t,
+                   const Real mu,
                    const Real k,
                    const Real d,
                    const Real Re_d);
@@ -263,7 +315,7 @@ RankTwoTensor computeVelocityGradient(const Moose::Functor<Real> & u,
 
 /**
  * Build the non-linear Reynolds stress contribution T_RANS,NL for the
- * Standard k-epsilon model using either the quadratic or cubic
+ * Standard k-epsilon variants using either the quadratic or cubic
  * constitutive relation.
  *
  * S and W are built from grad_u:
@@ -291,15 +343,29 @@ Real computeGnl(const NonlinearConstitutiveRelation model,
                 const Real eps);
 
 /**
- * Curvature / rotation correction factor f_c, based on the local
- * strain- and rotation-rate invariants.
+ * Curvature / rotation correction factor f_c of Arolla & Durbin (2013), "Modeling rotation and
+ * curvature effects within scalar eddy viscosity model framework", Int. J. Heat Fluid Flow 39:
  *
- * This is used to scale the production in the Realizable k-epsilon
- * variants:
+ *   f_c = min(C_max, 1 / [C_r1 (|eta| - eta) + sqrt(1 - min(C_r2 eta, 0.99))])
+ *   eta = (S:S - W:W) T^2,  T = max(T1, T3)
+ *   T1 = k/eps,  T2 = 6 sqrt(nu/eps),  T3 = (T1^1.625 T2)^(1/2.625)
+ *
+ * with C_r1 = 0.04645, C_r2 = 0.25, C_max = 1.25. W is the local rotation tensor only: the
+ * Wallin & Johansson (2002) streamline-curvature contribution W_S (C_ct = 1) and the frame
+ * rotation are not included. f_c = 1 in simple shear.
+ *
+ * It scales the shear production in the Realizable k-epsilon variants:
  *   P_k = f_c G_k
- *   P_eps = f_c S_k
+ *   P_eps = f_c rho C1 S eps
+ *
+ * @param inv  strain / rotation invariants (S2 = 2 S:S, W2 = 2 W:W)
+ * @param k    turbulent kinetic energy
+ * @param eps  turbulent dissipation rate
+ * @param nu   kinematic viscosity
  */
-Real computeCurvatureFactor(const CurvatureCorrectionModel model,
-                            const StrainRotationInvariants & inv);
+Real computeCurvatureFactor(const StrainRotationInvariants & inv,
+                            const Real k,
+                            const Real eps,
+                            const Real nu);
 
 } // namespace NS

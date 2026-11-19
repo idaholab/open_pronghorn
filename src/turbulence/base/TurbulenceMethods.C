@@ -9,6 +9,11 @@
 
 #include "TurbulenceMethods.h"
 #include "SystemBase.h"
+#include "kEpsilonTwoLayerFunctorMaterial.h"
+#include "LinearFVFluxKernel.h"
+#include "LinearFVTimeDerivative.h"
+#include "TheWarehouse.h"
+#include "libmesh/utility.h"
 
 namespace NS
 {
@@ -53,7 +58,7 @@ twoLayerWolfstein(const Real Cmu, const Real d, const Real Re_d)
   const Real cl = cl_from_Cmu(Cmu);
   TwoLayerLengths out;
   out.l_eps = cl * d * (1.0 - std::exp(-Re_d / (2.0 * cl)));
-  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) * (1.0 - std::exp(-Re_d / 70.0));
+  out.mu_ratio = 0.42 * Re_d * std::pow(Cmu, 0.25) * (1.0 - std::exp(-Re_d / 70.0));
   return out;
 }
 
@@ -63,17 +68,41 @@ twoLayerNorrisReynolds(const Real Cmu, const Real d, const Real Re_d)
   const Real cl = cl_from_Cmu(Cmu);
   TwoLayerLengths out;
   out.l_eps = cl * d * Re_d / (Re_d + 5.3);
-  out.mu_ratio = 0.42 * std::pow(Re_d, 0.25) * (1.0 - std::exp(-Re_d / 50.5));
+  out.mu_ratio = 0.42 * Re_d * std::pow(Cmu, 0.25) * (1.0 - std::exp(-Re_d / 50.5));
   return out;
 }
 
 TwoLayerLengths
-twoLayerXu(const Real /*Cmu*/, const Real d, const Real /*Re_d*/, const Real yv_star)
+twoLayerLengths(const TwoLayerFlavor flavor, const Real Cmu, const Real d, const Real Re_d)
 {
-  TwoLayerLengths out;
-  out.l_eps = 8.8 * d / (1.0 + 10.0 / yv_star + 5.15e-2 * yv_star);
-  out.mu_ratio = 0.544 * yv_star / (1.0 + 5.025e-4 * std::pow(yv_star, 1.65));
-  return out;
+  switch (flavor)
+  {
+    case TwoLayerFlavor::Wolfstein:
+      return twoLayerWolfstein(Cmu, d, Re_d);
+    case TwoLayerFlavor::NorrisReynolds:
+      return twoLayerNorrisReynolds(Cmu, d, Re_d);
+  }
+  mooseError("Unknown two-layer flavor.");
+}
+
+Real
+twoLayerBlendingFactor(const Real Re_d, const Real Rey_star, const Real DeltaRey)
+{
+  const Real A = std::abs(DeltaRey / std::atanh(0.98));
+  return 0.5 * (1.0 + std::tanh((Re_d - Rey_star) / A));
+}
+
+// Used later in the Blended Kernels for the two layer treatment. Recovers
+// the standard wall function behavior when lambda is null.
+Real
+turbulentBlendWeight(const Moose::ElemArg & elem_arg,
+                     const std::unordered_set<const Elem *> & wall_bounded,
+                     const Moose::Functor<Real> * lambda,
+                     const Moose::StateArg & state)
+{
+  if (wall_bounded.count(elem_arg.elem))
+    return 0.0;
+  return lambda ? (*lambda)(elem_arg, state) : 1.0;
 }
 
 Real
@@ -96,19 +125,49 @@ f2_RKE(const Real k, const Real nu, const Real eps)
 }
 
 Real
-Cmu_realizable(const Real Ca0,
-               const Real Ca1,
-               const Real Ca2,
-               const Real Ca3,
-               const Real S2,
-               const Real W2,
-               const Real k,
-               const Real eps)
+Cmu_realizable(const RankTwoTensor & grad_u, const Real k, const Real eps, const Real A0)
 {
-  const Real k_over_eps = k / eps;
-  const Real S_bar = k_over_eps * std::sqrt(S2);
-  const Real W_bar = k_over_eps * std::sqrt(W2);
-  return Ca0 / (Ca1 + Ca2 * S_bar + Ca3 * W_bar);
+  // Mean strain-rate and rotation-rate tensors
+  const RankTwoTensor S = 0.5 * (grad_u + grad_u.transpose());
+  const RankTwoTensor Omega = 0.5 * (grad_u - grad_u.transpose());
+
+  const Real SS = S.doubleContraction(S);
+  const Real S_tilde = std::sqrt(std::max(SS, 0.0));
+
+  // W = S_ij S_jk S_ki / S_tilde^3 = tr(S^3) / S_tilde^3; W = 0 for vanishing strain
+  Real W = 0.0;
+  if (S_tilde > 1e-20)
+    W = (S * S * S).trace() / Utility::pow<3>(S_tilde);
+
+  // sqrt(6) W lies in [-1, 1] analytically; clamp against round-off before acos
+  const Real arg = std::max(-1.0, std::min(1.0, std::sqrt(6.0) * W));
+  const Real phi = std::acos(arg) / 3.0;
+  const Real As = std::sqrt(6.0) * std::cos(phi);
+
+  const Real U_star = std::sqrt(std::max(SS + Omega.doubleContraction(Omega), 0.0));
+
+  return 1.0 / (A0 + As * std::max(k, 0.0) * U_star / std::max(eps, 1e-20));
+}
+
+namespace
+{
+bool
+isRealizable(const KEpsilonVariant variant)
+{
+  return variant == KEpsilonVariant::Realizable || variant == KEpsilonVariant::RealizableTwoLayer;
+}
+}
+
+Real
+defaultC2eps(const KEpsilonVariant variant)
+{
+  return isRealizable(variant) ? 1.9 : 1.92;
+}
+
+Real
+C1_realizable(const Real eta)
+{
+  return std::max(0.43, eta / (eta + 5.0));
 }
 
 Real
@@ -177,12 +236,13 @@ computeGprime(const Real D,
               const Real E,
               const Real f2,
               const Real Gk,
-              const Real mu_t,
+              const Real mu,
               const Real k,
               const Real d,
               const Real Re_d)
 {
-  const Real term = Gk + 2.0 * mu_t * k / (d * d);
+  // 2 mu k / d^2 = rho eps_wall: molecular viscosity (Lien et al. 1996)
+  const Real term = Gk + 2.0 * mu * k / (d * d);
   return D * f2 * term * std::exp(-E * Re_d * Re_d);
 }
 
@@ -261,9 +321,11 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
 
   // Invariants given in StrainRotationInvariants:
   // S2 = 2 S_ij S_ij, W2 = 2 W_ij W_ij
-  const Real SdotS = 0.5 * inv.S2;
-  const Real WdotW = 0.5 * inv.W2;
-  const Real Sstar = std::sqrt(std::max(SdotS, 0.0)); // |S| = sqrt(S_ij S_ij)
+  const Real SdotS = 0.5 * inv.S2; // S_ij S_ij
+  const Real WdotW = 0.5 * inv.W2; // W_ij W_ij = tr(W W^T)
+
+  // Dimensionless strain rate S_bar = (k/eps) sqrt(2 S_ij S_ij)
+  const Real S_bar = (k / eps) * std::sqrt(std::max(inv.S2, 0.0));
 
   // Variable C_mu
   const Real Cmu = Cmu_nonlinear(Ca0, Ca1, Ca2, Ca3, inv, k, eps);
@@ -271,8 +333,8 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
   if (Cmu <= 0.0)
     return Tnl;
 
-  // Denominator used in C1, C2, C3
-  const Real denom = (CNL6 + CNL7 * Sstar) * Cmu;
+  // Denominator used in C1, C2, C3: (C_NL6 + C_NL7 S_bar^3) C_mu
+  const Real denom = (CNL6 + CNL7 * S_bar * S_bar * S_bar) * Cmu;
   if (denom <= 0.0)
     return Tnl;
 
@@ -285,14 +347,14 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
   I.zero();
   I.addIa(1.0);
 
-  // Quadratic bracket
+  // Quadratic bracket. Every term is symmetric; the C1 and C3 terms are traceless.
   const RankTwoTensor SS = S * S;
-  const RankTwoTensor WW = W * W;
+  const RankTwoTensor WWt = W * W.transpose();
   const RankTwoTensor WS = W * S;
   const RankTwoTensor SWt = S * W.transpose();
 
   const RankTwoTensor quad_bracket =
-      C1 * (SS - (SdotS / 3.0) * I) + C2 * (WS + SWt) + C3 * (WW - (WdotW / 3.0) * I);
+      C1 * (SS - (SdotS / 3.0) * I) + C2 * (WS + SWt) + C3 * (WWt - (WdotW / 3.0) * I);
 
   // T_RANS,quad
   const RankTwoTensor Tquad = -4.0 * mu_t * (k / eps) * quad_bracket;
@@ -307,11 +369,12 @@ computeTRANS_NL(const NonlinearConstitutiveRelation model,
     const Real C5 = CNL5 * Cmu * Cmu;
     const Real k2_over_eps2 = (k * k) / (eps * eps);
 
-    RankTwoTensor SSw = (S * S) * W;
-    RankTwoTensor WtSS = W.transpose() * (S * S);
-    RankTwoTensor term4 = SSw + WtSS;
+    const RankTwoTensor SSw = SS * W;
+    const RankTwoTensor WtSS = W.transpose() * SS;
+    const RankTwoTensor term4 = SSw + WtSS;
 
-    RankTwoTensor term5 = (SdotS - WdotW) * (S - W.transpose());
+    // (S:S - W:W^T) [S - 1/3 tr(S) I]; W:W^T = W_ij W_ij
+    const RankTwoTensor term5 = (SdotS - WdotW) * (S - (S.trace() / 3.0) * I);
 
     RankTwoTensor cubic_bracket = C4 * term4 + C5 * term5;
 
@@ -339,43 +402,70 @@ computeGnl(const NonlinearConstitutiveRelation model,
 }
 
 Real
-computeCurvatureFactor(const CurvatureCorrectionModel model, const StrainRotationInvariants & inv)
+computeCurvatureFactor(const StrainRotationInvariants & inv,
+                       const Real k,
+                       const Real eps,
+                       const Real nu)
 {
-  // No correction requested
-  if (model == CurvatureCorrectionModel::None)
-    return 1.0;
-
-  // Spalart–Shur-style curvature correction using S2 and W2.
-  // inv.S2 = 2 S_ij S_ij, inv.W2 = 2 W_ij W_ij.
-  const Real S2 = std::max(inv.S2, 0.0);
-  const Real W2 = std::max(inv.W2, 0.0);
-
-  if (S2 <= 0.0)
-    return 1.0;
-
-  const Real SS = 0.5 * S2;
-  const Real WW = 0.5 * W2;
-
-  // Dimensionless measures of rotation vs strain
-  const Real r_star = WW / std::max(SS, 1e-16);       // rotation/strain ratio
-  const Real r_tilde = WW / std::max(SS + WW, 1e-16); // bounded (0,1)
-
-  // Model coefficients -- better not to change
-  static constexpr Real Crot1 = 1.0;
-  static constexpr Real Crot2 = 2.0;
-  static constexpr Real Crot3 = 1.0;
+  // Arolla & Durbin (2013) model coefficients
+  static constexpr Real Cr1 = 0.04645;
+  static constexpr Real Cr2 = 0.25;
   static constexpr Real Cmax = 1.25;
 
-  // Spalart–Shur rotation/curvature function (simplified form)
-  Real f_rot = (1.0 + Crot1) * (2.0 * r_tilde) / (1.0 + r_tilde) *
-                   (1.0 - Crot2 * r_star / (1.0 + Crot3 * r_star)) -
-               Crot1;
+  const Real k_c = std::max(k, 0.0);
+  const Real eps_c = std::max(eps, 1e-20);
+  const Real nu_c = std::max(nu, 0.0);
 
-  // Bound and shift to get a positive correction factor
-  f_rot = std::max(f_rot, -1.0);
-  const Real f_c = std::min(Cmax, 1.0 + f_rot);
+  // Time scale with Durbin's Kolmogorov limit for correct near-wall asymptotics:
+  // T = max(T1, T3), T1 = k/eps, T2 = 6 sqrt(nu/eps), T3 = (T1^1.625 T2)^(1/2.625)
+  const Real T1 = k_c / eps_c;
+  const Real T2 = 6.0 * std::sqrt(nu_c / eps_c);
+  const Real T3 = std::pow(std::pow(T1, 1.625) * T2, 1.0 / 2.625);
+  const Real T = std::max(T1, T3);
 
-  return f_c;
+  // eta = (S:S - W:W) T^2; inv.S2 = 2 S:S, inv.W2 = 2 W:W.
+  // W is the local rotation tensor only (no streamline-curvature term W_S, i.e. C_ct = 1).
+  const Real eta = 0.5 * (std::max(inv.S2, 0.0) - std::max(inv.W2, 0.0)) * T * T;
+
+  const Real denom = Cr1 * (std::abs(eta) - eta) + std::sqrt(1.0 - std::min(Cr2 * eta, 0.99));
+
+  return std::min(Cmax, 1.0 / denom);
+}
+
+std::vector<const MooseObject *>
+getTransportKernels(const FEProblemBase & problem,
+                    unsigned int sys_num,
+                    unsigned int var_num,
+                    THREAD_ID tid)
+{
+  std::vector<LinearFVFluxKernel *> flux;
+  std::vector<LinearFVElementalKernel *> elemental;
+  auto query = problem.theWarehouse()
+                   .query()
+                   .condition<AttribSysNum>(sys_num)
+                   .condition<AttribVar>(static_cast<int>(var_num))
+                   .condition<AttribThread>(tid);
+  query.clone().condition<AttribSystem>("LinearFVFluxKernel").queryInto(flux);
+  query.clone().condition<AttribSystem>("LinearFVElementalKernel").queryInto(elemental);
+
+  std::vector<const MooseObject *> kernels(flux.begin(), flux.end());
+  for (const auto kernel : elemental)
+    if (dynamic_cast<const LinearFVTimeDerivative *>(kernel))
+      kernels.push_back(kernel);
+  return kernels;
+}
+
+bool
+isTwoLayerOutput(const FEProblemBase & problem,
+                 const std::string & output,
+                 const std::string & name,
+                 THREAD_ID tid)
+{
+  for (const auto & mat : problem.getMaterialWarehouse().getObjects(tid))
+    if (dynamic_cast<const kEpsilonTwoLayerFunctorMaterial *>(mat.get()) &&
+        mat->getParam<MooseFunctorName>(output) == name)
+      return true;
+  return false;
 }
 
 } // namespace NS

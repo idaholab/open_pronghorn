@@ -12,6 +12,7 @@
 #include "Assembly.h"
 #include "SubProblem.h"
 #include "NavierStokesMethods.h"
+#include "LinearFVTurbulentBlended.h"
 
 registerMooseObject("OpenPronghornApp", kEpsilonTKESourceSink);
 
@@ -54,15 +55,21 @@ kEpsilonTKESourceSink::validParams()
       "use_buoyancy", false, "Include buoyancy production Gb in the bulk k-equation.");
   params.addParam<bool>("use_compressibility",
                         false,
-                        "Include compressibility correction gamma_M in the bulk k-equation.");
+                        "Include the compressible dilatation terms in G_k and the Sarkar "
+                        "dilatation dissipation gamma_M in the bulk k-equation.");
   params.addParam<bool>("use_curvature_correction",
                         false,
-                        "Apply a curvature correction factor f_c to the shear production.");
+                        "Apply the Arolla & Durbin (2013) curvature / rotation correction factor "
+                        "f_c to the shear production (Realizable variants only).");
 
   params.addParam<Real>(
       "Pr_t", 0.9, "Turbulent Prandtl number used in the buoyancy production term.");
 
-  params.addParam<Real>("C_M", 1.0, "Coefficient used in the compressibility correction gamma_M.");
+  params.addParam<Real>("C_M",
+                        2.0,
+                        "Coefficient C_M in the Sarkar dilatation dissipation "
+                        "gamma_M = rho C_M k eps / c^2 (C_M = 2 corresponds to Sarkar et al. 1991 "
+                        "and the Fluent Y_M term).");
 
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0.0, 0.0, 0.0), "Gravity vector used for buoyancy production.");
@@ -77,13 +84,9 @@ kEpsilonTKESourceSink::validParams()
   MooseEnum nonlinear_model("none quadratic cubic", "none");
   params.addParam<MooseEnum>("nonlinear_model",
                              nonlinear_model,
-                             "Non-linear constitutive relation for standard k-epsilon.");
-
-  MooseEnum curvature_model("none standard", "none");
-  params.addParam<MooseEnum>("curvature_model",
-                             curvature_model,
-                             "Curvature / rotation correction model: "
-                             "'none' (default) or 'standard' (Spalart–Shur style).");
+                             "Non-linear constitutive relation (quadratic or cubic) adding the "
+                             "production G_nl. Only available for the Standard, StandardTwoLayer "
+                             "and StandardLowRe variants.");
 
   return params;
 }
@@ -120,8 +123,7 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
     _has_beta(params.isParamValid("beta")),
     _has_c(params.isParamValid("speed_of_sound")),
     _nonlinear_model(
-        getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>()),
-    _curvature_model(getParam<MooseEnum>("curvature_model").getEnum<NS::CurvatureCorrectionModel>())
+        getParam<MooseEnum>("nonlinear_model").getEnum<NS::NonlinearConstitutiveRelation>())
 {
   if (_dim >= 2 && !_v_var)
     paramError("v", "In two or more dimensions, the v velocity must be supplied.");
@@ -138,7 +140,6 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
 
   // Pull the enums locally (avoid name collisions + ensures they're in-scope)
   const MooseEnum nl_local = getParam<MooseEnum>("nonlinear_model");
-  const MooseEnum cm_local = getParam<MooseEnum>("curvature_model");
 
   // Basic coefficient sanity
   if (_C_mu <= 0.0)
@@ -146,30 +147,26 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
   if (_C_pl <= 0.0)
     paramError("C_pl", "C_pl must be > 0.");
 
+  // Nonlinear constitutive relations are defined for the Standard variants only
+  const bool is_realizable_variant = (_variant == NS::KEpsilonVariant::Realizable ||
+                                      _variant == NS::KEpsilonVariant::RealizableTwoLayer);
+  if (is_realizable_variant && nl_local != "none")
+    paramError("nonlinear_model",
+               "Nonlinear constitutive relations (quadratic/cubic) are only available for the "
+               "Standard, StandardTwoLayer and StandardLowRe variants. Set nonlinear_model = none "
+               "for realizable variants.");
+
   // Two-layer variants require wall information (blending / wall-distance-based behavior)
   if (is_two_layer_variant && _wall_boundary_names.empty())
     paramError("walls",
                "Two-layer k-epsilon variants require a non-empty 'walls' list so wall-bounded "
                "elements and wall distance can be computed.");
 
-  // Curvature correction: only applicable for realizable variants in this kernel
-  const bool use_curv_flag = getParam<bool>("use_curvature_correction");
-  const bool curv_model_enabled = (cm_local != "none");
-
-  // If user explicitly enables curvature correction but leaves model as none -> error
-  if (user_set("use_curvature_correction") && use_curv_flag && !curv_model_enabled)
-    paramError("curvature_model",
-               "You set use_curvature_correction = true, but curvature_model is 'none'. "
-               "Select curvature_model != 'none' (or disable use_curvature_correction).");
-
-  // If user explicitly sets both knobs, require them to agree
-  if (user_set("use_curvature_correction") && user_set("curvature_model"))
-  {
-    if (use_curv_flag != curv_model_enabled)
-      paramError("use_curvature_correction",
-                 "Inconsistent curvature correction settings: use_curvature_correction must match "
-                 "whether curvature_model is 'none' (disabled) or not 'none' (enabled).");
-  }
+  // Curvature correction (Arolla & Durbin 2013): realizable variants only
+  if (_switches.use_curvature_correction && !is_realizable_variant)
+    paramError("use_curvature_correction",
+               "The curvature correction is only available for the Realizable and "
+               "RealizableTwoLayer variants.");
 
   // Buoyancy production requirements + guard against no-op knobs
   if (_switches.use_buoyancy)
@@ -229,7 +226,6 @@ kEpsilonTKESourceSink::kEpsilonTKESourceSink(const InputParameters & params)
 
   // keep the switches struct up to date
   _switches.use_nonlinear = (_nonlinear_model != NS::NonlinearConstitutiveRelation::None);
-  _switches.use_curvature_correction = (_curvature_model != NS::CurvatureCorrectionModel::None);
 }
 
 void
@@ -242,6 +238,18 @@ kEpsilonTKESourceSink::initialSetup()
       _wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _wall_bounded);
   NS::getWallDistance(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _dist);
   NS::getElementFaceArgs(_wall_boundary_names, _fe_problem, _subproblem, blockIDs(), _face_infos);
+
+  // Blending and the wall-bounded skip only apply to the epsilon transport
+  for (const auto kernel : NS::getTransportKernels(_fe_problem, _sys_num, _var_num, _tid))
+    if (dynamic_cast<const LinearFVTurbulentBlendedInterface *>(kernel))
+      mooseError("Kernel '",
+                 kernel->name(),
+                 "' is a blended kernel acting on '",
+                 _var.name(),
+                 "'; blended kernels only apply to epsilon.");
+    else if (kernel->isParamValid("walls") &&
+             !kernel->getParam<std::vector<BoundaryName>>("walls").empty())
+      kernel->paramError("walls", "Must be empty on the transport kernels of '", _var.name(), "'.");
 }
 
 Real
@@ -366,7 +374,7 @@ kEpsilonTKESourceSink::computeRightHandSideContribution()
   if (_wall_bounded.find(_current_elem_info->elem()) != _wall_bounded.end())
     return 0.0;
 
-  // Bulk production term (with optional corrections)
+  // Bulk production term (with optional corrections, without gamma_M)
   Real production = computeBulkProduction(elem_arg, state);
 
   // Production limiter to avoid excessive TKE in stagnation zones
@@ -375,7 +383,17 @@ kEpsilonTKESourceSink::computeRightHandSideContribution()
   const Real production_limit = _C_pl * rho * eps;
   production = std::min(production, production_limit);
 
-  return production * _current_elem_volume;
+  // Compressibility correction gamma_M is a dissipation (sink), so it is applied after the
+  // production limiter and is never clipped by it.
+  Real gamma_M = 0.0;
+  if (_switches.use_compressibility && _has_c)
+  {
+    const Real k = _var.getElemValue(*_current_elem_info, state);
+    const Real c = (*_c_functor)(elem_arg, state);
+    gamma_M = NS::computeGammaM(rho, _C_M, k, eps, c);
+  }
+
+  return (production - gamma_M) * _current_elem_volume;
 }
 
 Real
@@ -407,7 +425,8 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
     Gb = NS::computeGb(beta, mu_t, _Pr_t, grad_T, _g);
   }
 
-  // Optional extra non-linear production G_nl from pre-coded turbulence methods
+  // Optional extra non-linear production G_nl (Standard variants only; realizable variants are
+  // rejected in the constructor when nonlinear_model != none)
   Real Gnl = 0.0;
   if (_nonlinear_model != NS::NonlinearConstitutiveRelation::None)
   {
@@ -415,17 +434,13 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
     Gnl = NS::computeGnl(_nonlinear_model, grad_u, inv, mu_t, k, eps);
   }
 
-  // Curvature / rotation correction factor f_c (Realizable variants)
+  // Curvature / rotation correction factor f_c (Realizable variants; others are rejected in the
+  // constructor when use_curvature_correction = true)
   Real fc = 1.0;
-  if (_curvature_model != NS::CurvatureCorrectionModel::None)
-    fc = NS::computeCurvatureFactor(_curvature_model, inv);
-
-  // Compressibility correction gamma_M (subtracted)
-  Real gamma_M = 0.0;
-  if (_switches.use_compressibility && _has_c)
+  if (_switches.use_curvature_correction)
   {
-    const Real c = (*_c_functor)(elem_arg, state);
-    gamma_M = NS::computeGammaM(rho, _C_M, k, eps, c);
+    const Real nu = _mu(elem_arg, state) / rho;
+    fc = NS::computeCurvatureFactor(inv, k, eps, nu);
   }
 
   // Variant-dependent form of the shear production (fc only affects realizable variants)
@@ -447,6 +462,6 @@ kEpsilonTKESourceSink::computeBulkProduction(const Moose::ElemArg & elem_arg,
       mooseError("kEpsilonTKESourceSink: unsupported k-epsilon variant.");
   }
 
-  // Total bulk production passed to the RHS
-  return shear_prod + Gb + Gnl - gamma_M;
+  // Total bulk production passed to the RHS (gamma_M is subtracted after the limiter)
+  return shear_prod + Gb + Gnl;
 }

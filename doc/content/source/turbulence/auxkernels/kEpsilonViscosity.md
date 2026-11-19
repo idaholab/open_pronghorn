@@ -15,7 +15,7 @@ This object implements:
 
 - Standard, Low-Re, Two-Layer, and Realizable viscosity formulations,
 - Several wall treatments (Newton, incremental, linearized, non-equilibrium),
-- Two-layer near-wall blending methods ([!cite](wolfstein1969velocity), [!cite](norris1975oneequation), [!cite](xu1998new)),
+- Two-layer near-wall blending methods ([!cite](wolfstein1969velocity), [!cite](norris1975oneequation)),
 - Low-Re damping functions for the StandardLowRe model,
 - Realizable variable $C_\mu$,
 - Optional scale limiting for the time scale,
@@ -90,23 +90,36 @@ Re_d = \frac{\sqrt{k}\,d}{\nu},
 \end{equation}
 
 and $d$ is the wall distance (supplied via a functor).
+Defaults $C_{d0} = 0.091$, $C_{d1} = 0.0042$, $C_{d2} = 0.00011$ [!cite](lien1996low).
 
 #### Realizable k–$\epsilon$
 
-The realizable model computes $C_\mu$ dynamically as a function of strain and rotation:
+The realizable model computes $C_\mu$ from the mean strain and rotation
+[!cite](shih1995realizable):
 
 \begin{equation}
-C_\mu^{\mathrm{eff}}
-= \frac{C_{a0}}
-        {C_{a1} + C_{a2} S^* + C_{a3} W^*},
+C_\mu^{\mathrm{eff}} = \frac{1}{A_0 + A_s \, k U^* / \epsilon},
 \end{equation}
 
 where:
 
-- $S^* = (k/\epsilon)\sqrt{S^2}$,
-- $W^* = (k/\epsilon)\sqrt{W^2}$.
+- $U^* = \sqrt{S_{ij}S_{ij} + \Omega_{ij}\Omega_{ij}}$, with $S_{ij}$ and $\Omega_{ij}$ the mean
+  strain-rate and rotation-rate tensors (no system-rotation term),
+- $A_s = \sqrt{6}\cos\phi$, $\phi = \tfrac{1}{3}\arccos(\sqrt{6}\,W)$,
+  $W = S_{ij}S_{jk}S_{ki}/\tilde{S}^3$, $\tilde{S} = \sqrt{S_{ij}S_{ij}}$,
+- $A_0$ is set by [!param](/AuxKernels/kEpsilonViscosity/A0) (default 4.04).
 
-This value replaces the standard constant $C_\mu$ everywhere in the model.
+In an equilibrium logarithmic layer this gives $C_\mu^{\mathrm{eff}} \approx 0.09$. This value
+replaces $C_\mu$ in the bulk $\mu_t$ only; the wall functions and the two-layer quantities keep the
+constant [!param](/AuxKernels/kEpsilonViscosity/C_mu).
+
+!alert warning title=Set $\sigma_\epsilon = 1.2$ for the realizable variants
+$\sigma_\epsilon$ is not a parameter of [kEpsilonTKEDSourceSink.md]. It is the `scaling_coeff` of
+the $\epsilon$ turbulent diffusion kernel (the one with `diffusion_coeff = mu_t`), or it is built
+into a combined coefficient such as $\mu + \mu_t/\sigma_\epsilon$. Its default is 1 and nothing
+checks it. `Realizable` and `RealizableTwoLayer` are calibrated with $\sigma_\epsilon = 1.2$ and
+$C_2 = 1.9$ [!cite](shih1995realizable); the Standard variants use $\sigma_\epsilon = 1.3$.
+`C2_eps` follows the variant automatically, but $\sigma_\epsilon$ has to be set in the input.
 
 #### Two-layer models (StandardTwoLayer and RealizableTwoLayer)
 
@@ -119,7 +132,7 @@ Let:
 
 - $\mu_{t,k\epsilon} = \rho C_\mu^{\mathrm{eff}} k T$,
 - $\mu_{2L}$ = near-wall turbulent viscosity from the chosen flavor
-  (Wolfstein, Norris–Reynolds, or Xu), see the [theory](theory/turbulenceModeling.md) section for more details.
+  (Wolfstein or Norris–Reynolds), see the [theory](theory/turbulenceModeling.md) section for more details.
 
 Using the wall-distance Reynolds number $Re_d = \sqrt{k} d / \nu$,
 the two-layer blending function is:

@@ -11,24 +11,31 @@ The turbulent kinetic energy (TKE) equation is written in conservative form as
 
 \begin{equation}
 \frac{\partial \rho k}{\partial t} + \nabla \cdot (\rho \mathbf{u} k)
-= \rho (P_k + G_b + G_{\text{nl}} - \gamma_M - \epsilon),
+= \nabla \cdot \left[ \left( \mu + \frac{\mu_t}{\sigma_k} \right) \nabla k \right]
++ P_k + G_b + G_{\text{nl}} - \gamma_M - \rho \epsilon,
 \end{equation}
 
 where:
 
 - $k$ is the turbulent kinetic energy,
 - $\mathbf{u}$ is the mean velocity,
+- $\mu$ and $\mu_t$ are the molecular and turbulent dynamic viscosities,
+- $\sigma_k$ is the turbulent Prandtl number for $k$ (set through the `scaling_coeff` of the
+  turbulent diffusion kernel, not by this kernel),
 - $P_k$ is the shear production,
 - $G_b$ is the buoyancy production,
 - $G_{\text{nl}}$ is the production due to nonlinear Reynolds stresses,
 - $\gamma_M$ is a compressibility correction, and
 - $\epsilon$ is the dissipation rate supplied by the $\epsilon$-equation.
 
-`kEpsilonTKESourceSink` forms the *right-hand side source term* for the k-equation by computing
+All source terms ($P_k$, $G_b$, $G_{\text{nl}}$, $\gamma_M$) are per unit volume
+(e.g. $P_k = \mu_t S^2$), so they already include the density.
+
+`kEpsilonTKESourceSink` forms the *source and sink terms* for the k-equation by computing
 the combination
 
 \begin{equation}
-\text{source} = P_k + G_b + G_{\text{nl}} - \gamma_M - \epsilon,
+\text{source} = P_k + G_b + G_{\text{nl}} - \gamma_M - \rho \epsilon,
 \end{equation}
 
 with expressions that depend on the chosen k–$\epsilon$ variant and options.
@@ -114,22 +121,37 @@ G_k = \mu_t S^2
 \end{equation}
 
 consistent with the constitutive relation for the Reynolds stress tensor in compressible flow.
+These terms are turned on by
+[!param](/LinearFVKernels/kEpsilonTKESourceSink/use_compressibility), the same switch that
+turns on $\gamma_M$.
 
-The shear production is then modified depending on the k–$\epsilon$ variant and curvature correction model
+The shear production is then modified depending on the k–$\epsilon$ variant and the curvature correction
 (see below).
 
 ### Curvature / rotation correction $f_c$
 
-For realizable variants, an optional curvature correction factor $f_c$ may be applied via
-[!param](/LinearFVKernels/kEpsilonTKESourceSink/curvature_model). The current implementation
-supports:
+For the realizable variants, the curvature / rotation correction of [!cite](arolla2013modeling) is
+enabled with [!param](/LinearFVKernels/kEpsilonTKESourceSink/use_curvature_correction)
+(the default is `false`, i.e. $f_c = 1$). Setting it for a non-realizable variant is an error.
+The factor is
 
-- `curvature_model = none` — no curvature correction, $f_c = 1$;
-- `curvature_model = standard` — Spalart–Shur–type rotation/curvature correction based on
-  $S^2$ and $W^2$.
+\begin{equation}
+f_c = \min\left(C_\text{max},\;
+\frac{1}{C_{r1}\left(|\eta| - \eta\right) + \sqrt{1 - \min(C_{r2}\,\eta,\, 0.99)}}\right),
+\qquad
+\eta = \left(S_{ij}S_{ij} - W_{ij}W_{ij}\right) T^2,
+\end{equation}
+\begin{equation}
+T = \max(T_1, T_3), \qquad T_1 = \frac{k}{\epsilon}, \qquad
+T_2 = 6\sqrt{\frac{\nu}{\epsilon}}, \qquad T_3 = \left(T_1^{1.625}\, T_2\right)^{1/2.625},
+\end{equation}
+with $C_{r1} = 0.04645$, $C_{r2} = 0.25$ and $C_\text{max} = 1.25$.
 
-The curvature correction builds a correction $f_c = f_c(S^2, W^2)$ that enhances production
-in stabilizing curvature and reduces it in destabilizing regions. The corrected shear production is
+$f_c = 1$ in simple shear ($S_{ij}S_{ij} = W_{ij}W_{ij}$). It reduces production where rotation
+dominates strain ($\eta < 0$) and raises it, up to $C_\text{max}$, where strain dominates.
+Only the local rotation tensor $W_{ij} = \frac{1}{2}(\partial_j u_i - \partial_i u_j)$ is used: the
+streamline-curvature contribution of [!cite](wallin2002modelling) and frame rotation are not included.
+The corrected shear production is
 
 - *Standard*, *StandardLowRe*, *StandardTwoLayer*:
   \begin{equation}
@@ -184,7 +206,9 @@ where $\mathbf{T}_{\text{RANS,NL}}$ depends on:
 - $\mu_t$, $k$, $\epsilon$,
 - fixed model coefficients $C_{\text{NL}1\ldots 7}$ and a variable $C_\mu$.
 
-In all k–$\epsilon$ variants, `kEpsilonTKESourceSink` adds $G_{\text{nl}}$ to the k-equation’s production:
+For the `Standard`, `StandardTwoLayer` and `StandardLowRe` variants, `kEpsilonTKESourceSink` adds
+$G_{\text{nl}}$ to the k-equation’s production. Nonlinear relations are not available for the
+realizable variants; selecting one with `nonlinear_model != none` is an error.
 
 \begin{equation}
 \text{source} = (P_k + G_b + G_{\text{nl}} - \gamma_M) - \epsilon.
@@ -199,9 +223,11 @@ correction is added to the sink term:
 \gamma_M = \rho C_M \frac{k \epsilon}{c^2},
 \end{equation}
 
-where $C_M$ is a model coefficient and $c$ is the speed of sound. This term is computed by
-`NS::computeGammaM` and is subtracted from total production, representing the transfer of TKE into
-acoustic modes in compressible flow.
+where $C_M$ is a model coefficient and $c$ is the speed of sound. This is the dilatation
+dissipation of [!cite](sarkar1991analysis): the default $C_M = 2$ recovers Sarkar's
+$2\rho\epsilon M_t^2$ with $M_t^2 = k/c^2$ (the $Y_M$ term in Fluent). This term is computed by
+`NS::computeGammaM` and is subtracted after the production limiter (see below). The same switch also
+adds the $\tfrac{2}{3}$ dilatation terms to $G_k$ described above.
 
 ### Production limiter
 
@@ -213,7 +239,9 @@ G_k \le C_{PL}\,\rho\,\epsilon.
 
 The limiter coefficient $C_{PL}$ is available as
 [!param](/LinearFVKernels/kEpsilonTKESourceSink/C_pl). This limiter follows the standard approach
-from [!cite](menter1994two) and is applied in the bulk region.
+from [!cite](menter1994two) and is applied in the bulk region. It acts on the production sum
+$P_k + G_b + G_{\text{nl}}$. The compressibility sink $\gamma_M$ is subtracted afterwards, so the
+limiter never removes it.
 
 ### Summary of bulk source
 
@@ -314,7 +342,7 @@ including:
 
 1. realizable production terms,
 2. nonlinear contributions,
-3. ow-Re extra production $G'$,
+3. low-Re extra production $G'$,
 4. Yap correction,
 5. buoyancy source for $\epsilon$;
 

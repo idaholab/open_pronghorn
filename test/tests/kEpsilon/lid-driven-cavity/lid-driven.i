@@ -239,7 +239,6 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     # same functors as for TKE if you use them:
     # temperature       = T
     # beta              = beta
-    # speed_of_sound    = c
     # nonlinear_production = Gnl
     # curvature_factor  = fc
     wall_distance     = wall_distance   # for low-Re / two-layer Yap / G' terms
@@ -347,6 +346,18 @@ wall_treatment = 'neq' # Options: eq_newton, eq_incremental, eq_linearized, neq
     coupled_variables = 'mu_t'
     expression = 'mu_t + ${mu}'
     execute_on = 'NONLINEAR'
+  []
+[]
+
+[FunctorMaterials]
+  # Only evaluated by the two-layer variants (see tests)
+  [two_layer]
+    type = kEpsilonTwoLayerFunctorMaterial
+    tke = TKE
+    rho = ${rho}
+    mu = ${mu}
+    C_mu = ${C_mu}
+    wall_distance = wall_distance
   []
 []
 
